@@ -117,8 +117,8 @@ export const courseQuerySchema = z.object({
     category: z.string().optional(),
     level: z.enum(['BEGINNER', 'INTERMEDIATE', 'ADVANCED']).optional(),
     search: z.string().optional(),
-    page: z.string().transform(Number).default('1'),
-    limit: z.string().transform(Number).default('20'),
+    page: z.string().optional().default('1').transform(Number),
+    limit: z.string().optional().default('20').transform(Number),
   }),
 });
 

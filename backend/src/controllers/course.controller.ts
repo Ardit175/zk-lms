@@ -11,6 +11,11 @@ import {
   UpdateLessonInput,
 } from '../validators/course.validator';
 
+const getParam = (param: string | string[] | undefined): string => {
+  if (Array.isArray(param)) return param[0];
+  return param || '';
+};
+
 // ─── PUBLIC ROUTES ───────────────────────────────────────────────────────────
 
 export const getPublicStats = async (_req: Request, res: Response): Promise<void> => {
@@ -109,7 +114,7 @@ export const getCourses = async (req: Request, res: Response): Promise<void> => 
 
 export const getCourseBySlug = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { slug } = req.params;
+    const slug = getParam(req.params.slug);
 
     const course = await prisma.course.findUnique({
       where: { slug },
@@ -186,7 +191,7 @@ export const createCourse = async (req: Request, res: Response): Promise<void> =
 
 export const updateCourse = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = getParam(req.params.id);
     const data = req.body as UpdateCourseInput;
     const userId = req.user!.id;
 
@@ -214,7 +219,7 @@ export const updateCourse = async (req: Request, res: Response): Promise<void> =
 
 export const deleteCourse = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = getParam(req.params.id);
     const userId = req.user!.id;
 
     const isOwner = await verifyOwnership(id, userId);
@@ -237,7 +242,7 @@ export const deleteCourse = async (req: Request, res: Response): Promise<void> =
 
 export const updateCourseStatus = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = getParam(req.params.id);
     const { status: newStatus } = req.body;
     const userId = req.user!.id;
     const userRole = req.user!.role;
@@ -299,7 +304,7 @@ export const getInstructorCourses = async (req: Request, res: Response): Promise
 
 export const getModules = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id: courseId } = req.params;
+    const courseId = getParam(req.params.id);
 
     const modules = await prisma.module.findMany({
       where: { courseId },
@@ -320,7 +325,7 @@ export const getModules = async (req: Request, res: Response): Promise<void> => 
 
 export const createModule = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id: courseId } = req.params;
+    const courseId = getParam(req.params.id);
     const { title, description } = req.body as CreateModuleInput;
     const userId = req.user!.id;
 
@@ -340,7 +345,7 @@ export const createModule = async (req: Request, res: Response): Promise<void> =
         title,
         description,
         courseId,
-        orderIndex: (maxOrder._max.orderIndex ?? -1) + 1,
+        orderIndex: (maxOrder._max?.orderIndex ?? -1) + 1,
       },
     });
 
@@ -353,7 +358,8 @@ export const createModule = async (req: Request, res: Response): Promise<void> =
 
 export const updateModule = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id: courseId, moduleId } = req.params;
+    const courseId = getParam(req.params.id);
+    const moduleId = getParam(req.params.moduleId);
     const data = req.body as UpdateModuleInput;
     const userId = req.user!.id;
 
@@ -377,7 +383,8 @@ export const updateModule = async (req: Request, res: Response): Promise<void> =
 
 export const deleteModule = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id: courseId, moduleId } = req.params;
+    const courseId = getParam(req.params.id);
+    const moduleId = getParam(req.params.moduleId);
     const userId = req.user!.id;
 
     const isOwner = await verifyOwnership(courseId, userId);
@@ -401,7 +408,7 @@ export const deleteModule = async (req: Request, res: Response): Promise<void> =
 
 export const reorderModules = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id: courseId } = req.params;
+    const courseId = getParam(req.params.id);
     const { modules } = req.body as { modules: { id: string; orderIndex: number }[] };
     const userId = req.user!.id;
 
@@ -431,7 +438,8 @@ export const reorderModules = async (req: Request, res: Response): Promise<void>
 
 export const createLesson = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id: courseId, moduleId } = req.params;
+    const courseId = getParam(req.params.id);
+    const moduleId = getParam(req.params.moduleId);
     const { title, content, videoUrl, duration, type, isPreview } = req.body as CreateLessonInput;
     const userId = req.user!.id;
 
@@ -455,7 +463,7 @@ export const createLesson = async (req: Request, res: Response): Promise<void> =
         type,
         isPreview,
         moduleId,
-        orderIndex: (maxOrder._max.orderIndex ?? -1) + 1,
+        orderIndex: (maxOrder._max?.orderIndex ?? -1) + 1,
       },
     });
 
@@ -470,7 +478,9 @@ export const createLesson = async (req: Request, res: Response): Promise<void> =
 
 export const updateLesson = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id: courseId, moduleId, lessonId } = req.params;
+    const courseId = getParam(req.params.id);
+    const moduleId = getParam(req.params.moduleId);
+    const lessonId = getParam(req.params.lessonId);
     const data = req.body as UpdateLessonInput;
     const userId = req.user!.id;
 
@@ -496,7 +506,9 @@ export const updateLesson = async (req: Request, res: Response): Promise<void> =
 
 export const deleteLesson = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id: courseId, moduleId, lessonId } = req.params;
+    const courseId = getParam(req.params.id);
+    const moduleId = getParam(req.params.moduleId);
+    const lessonId = getParam(req.params.lessonId);
     const userId = req.user!.id;
 
     const isOwner = await verifyOwnership(courseId, userId);
@@ -520,7 +532,8 @@ export const deleteLesson = async (req: Request, res: Response): Promise<void> =
 
 export const reorderLessons = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id: courseId, moduleId } = req.params;
+    const courseId = getParam(req.params.id);
+    const moduleId = getParam(req.params.moduleId);
     const { lessons } = req.body as { lessons: { id: string; orderIndex: number }[] };
     const userId = req.user!.id;
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
@@ -13,7 +13,7 @@ import { useAuthStore, getRedirectPath } from '@/stores/auth-store';
 import { registerSchema, RegisterInput } from '@/lib/validations/auth';
 import { Loader2, GraduationCap, BookOpen } from 'lucide-react';
 
-export default function RegisterPage() {
+function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const defaultRole = searchParams.get('role') === 'instructor' ? 'INSTRUCTOR' : 'STUDENT';
@@ -201,5 +201,13 @@ export default function RegisterPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-slate-50">Duke ngarkuar...</div>}>
+      <RegisterForm />
+    </Suspense>
   );
 }

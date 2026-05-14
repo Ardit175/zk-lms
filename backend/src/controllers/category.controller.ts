@@ -2,6 +2,11 @@ import { Request, Response } from 'express';
 import { prisma } from '../services/prisma';
 import { ApiResponse } from '../utils/ApiResponse';
 
+const getParam = (param: string | string[] | undefined): string => {
+  if (Array.isArray(param)) return param[0];
+  return param || '';
+};
+
 export const getCategories = async (_req: Request, res: Response): Promise<void> => {
   try {
     const categories = await prisma.category.findMany({
@@ -46,7 +51,7 @@ export const createCategory = async (req: Request, res: Response): Promise<void>
 
 export const updateCategory = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = getParam(req.params.id);
     const { name, iconUrl } = req.body;
 
     const data: Record<string, string> = {};
@@ -73,7 +78,7 @@ export const updateCategory = async (req: Request, res: Response): Promise<void>
 
 export const deleteCategory = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = getParam(req.params.id);
 
     await prisma.category.delete({ where: { id } });
 

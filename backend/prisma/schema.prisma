@@ -1,0 +1,429 @@
+// schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── ENUMS ───────────────────────────────────────────────────────────────────
+
+enum Role {
+  ADMIN
+  INSTRUCTOR
+  STUDENT
+}
+
+enum CourseLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum CourseStatus {
+  DRAFT
+  PENDING_REVIEW
+  PUBLISHED
+  ARCHIVED
+}
+
+enum LessonType {
+  VIDEO
+  TEXT
+  QUIZ
+  ASSIGNMENT
+}
+
+enum EnrollmentStatus {
+  ACTIVE
+  COMPLETED
+  DROPPED
+}
+
+enum QuestionType {
+  MULTIPLE_CHOICE
+  TRUE_FALSE
+  SHORT_ANSWER
+}
+
+enum SubmissionType {
+  TEXT
+  FILE
+  LINK
+}
+
+enum LiveSessionStatus {
+  SCHEDULED
+  LIVE
+  ENDED
+}
+
+enum NotificationType {
+  COURSE_APPROVED
+  COURSE_REJECTED
+  ASSIGNMENT_DUE
+  ASSIGNMENT_GRADED
+  QUIZ_GRADED
+  LIVE_STARTING
+  CERTIFICATE_READY
+  ENROLLMENT_NEW
+  SYSTEM_MESSAGE
+}
+
+// ─── CORE USER ────────────────────────────────────────────────────────────────
+
+model User {
+  id               String    @id @default(cuid())
+  email            String    @unique
+  passwordHash     String
+  firstName        String
+  lastName         String
+  role             Role      @default(STUDENT)
+  avatarUrl        String?
+  isActive         Boolean   @default(true)
+  isEmailVerified  Boolean   @default(false)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  // Relations
+  instructorProfile  InstructorProfile?
+  studentProfile     StudentProfile?
+  coursesCreated     Course[]              @relation("InstructorCourses")
+  enrollments        Enrollment[]
+  quizAttempts       QuizAttempt[]
+  submissions        AssignmentSubmission[] @relation("StudentSubmissions")
+  gradedSubmissions  AssignmentSubmission[] @relation("GradedByInstructor")
+  liveSessionsHosted LiveSession[]
+  liveQuestions      LiveQuestion[]
+  notifications      Notification[]
+  certificates       Certificate[]
+
+  @@index([email])
+  @@index([role])
+  @@index([isActive])
+}
+
+model InstructorProfile {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  bio         String?
+  expertise   String[]
+  websiteUrl  String?
+  socialLinks Json?    // { twitter, linkedin, github }
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model StudentProfile {
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  learningGoals  String?
+  completedHours Float    @default(0)
+  streakDays     Int      @default(0)
+  lastStudiedAt  DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ─── COURSE HIERARCHY ────────────────────────────────────────────────────────
+
+model Category {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  slug      String   @unique
+  iconUrl   String?
+  createdAt DateTime @default(now())
+
+  courses Course[]
+}
+
+model Course {
+  id               String       @id @default(cuid())
+  title            String
+  description      String
+  slug             String       @unique
+  thumbnailUrl     String?
+  level            CourseLevel  @default(BEGINNER)
+  status           CourseStatus @default(DRAFT)
+  price            Float        @default(0)
+  totalDuration    Int          @default(0) // minutes
+  enrollmentCount  Int          @default(0)
+  completionRate   Float        @default(0)
+  averageRating    Float        @default(0)
+  instructorId     String
+  categoryId       String?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  instructor   User      @relation("InstructorCourses", fields: [instructorId], references: [id])
+  category     Category? @relation(fields: [categoryId], references: [id])
+  modules      Module[]
+  enrollments  Enrollment[]
+  liveSessions LiveSession[]
+
+  @@index([status])
+  @@index([instructorId])
+  @@index([categoryId])
+  @@index([slug])
+}
+
+model Module {
+  id          String   @id @default(cuid())
+  courseId    String
+  title       String
+  description String?
+  orderIndex  Int
+  isPublished Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  course  Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lessons Lesson[]
+}
+
+model Lesson {
+  id          String     @id @default(cuid())
+  moduleId    String
+  title       String
+  content     String?    // Rich text (HTML/Markdown)
+  videoUrl    String?
+  duration    Int?       // seconds
+  orderIndex  Int
+  type        LessonType @default(TEXT)
+  isPreview   Boolean    @default(false)
+  isPublished Boolean    @default(false)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  module          Module           @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  quiz            Quiz?
+  assignment      Assignment?
+  lessonProgress  LessonProgress[]
+}
+
+// ─── ENROLLMENT & PROGRESS ───────────────────────────────────────────────────
+
+model Enrollment {
+  id              String           @id @default(cuid())
+  studentId       String
+  courseId        String
+  status          EnrollmentStatus @default(ACTIVE)
+  progressPercent Float            @default(0)
+  enrolledAt      DateTime         @default(now())
+  completedAt     DateTime?
+  lastAccessedAt  DateTime?
+
+  student         User             @relation(fields: [studentId], references: [id])
+  course          Course           @relation(fields: [courseId], references: [id])
+  lessonProgress  LessonProgress[]
+  certificate     Certificate?
+
+  @@unique([studentId, courseId])
+  @@index([studentId])
+  @@index([courseId])
+  @@index([status])
+}
+
+model LessonProgress {
+  id             String    @id @default(cuid())
+  enrollmentId   String
+  lessonId       String
+  isCompleted    Boolean   @default(false)
+  watchedSeconds Int       @default(0)
+  completedAt    DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  enrollment Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  lesson     Lesson     @relation(fields: [lessonId], references: [id])
+
+  @@unique([enrollmentId, lessonId])
+  @@index([enrollmentId])
+  @@index([lessonId])
+}
+
+// ─── QUIZ SYSTEM ─────────────────────────────────────────────────────────────
+
+model Quiz {
+  id            String   @id @default(cuid())
+  lessonId      String   @unique
+  title         String
+  description   String?
+  timeLimit     Int?     // seconds, null = no limit
+  passingScore  Int      @default(70) // percentage
+  maxAttempts   Int      @default(3)
+  isAiGenerated Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  lesson    Lesson        @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  questions QuizQuestion[]
+  attempts  QuizAttempt[]
+}
+
+model QuizQuestion {
+  id           String       @id @default(cuid())
+  quizId       String
+  questionText String
+  type         QuestionType @default(MULTIPLE_CHOICE)
+  orderIndex   Int
+  points       Int          @default(1)
+  explanation  String?
+  createdAt    DateTime     @default(now())
+
+  quiz    Quiz         @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  options QuizOption[]
+  answers QuizAnswer[]
+}
+
+model QuizOption {
+  id         String  @id @default(cuid())
+  questionId String
+  optionText String
+  isCorrect  Boolean @default(false)
+
+  question QuizQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  answers  QuizAnswer[]
+}
+
+model QuizAttempt {
+  id            String    @id @default(cuid())
+  quizId        String
+  studentId     String
+  score         Float?
+  isPassed      Boolean?
+  attemptNumber Int
+  startedAt     DateTime  @default(now())
+  completedAt   DateTime?
+
+  quiz    Quiz         @relation(fields: [quizId], references: [id])
+  student User         @relation(fields: [studentId], references: [id])
+  answers QuizAnswer[]
+
+  @@unique([quizId, studentId, attemptNumber])
+}
+
+model QuizAnswer {
+  id               String  @id @default(cuid())
+  attemptId        String
+  questionId       String
+  selectedOptionId String?
+  textAnswer       String?
+  isCorrect        Boolean @default(false)
+  pointsEarned     Int     @default(0)
+
+  attempt        QuizAttempt  @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  question       QuizQuestion @relation(fields: [questionId], references: [id])
+  selectedOption QuizOption?  @relation(fields: [selectedOptionId], references: [id])
+}
+
+// ─── ASSIGNMENT SYSTEM ───────────────────────────────────────────────────────
+
+model Assignment {
+  id             String         @id @default(cuid())
+  lessonId       String         @unique
+  title          String
+  description    String
+  instructions   String
+  dueDate        DateTime?
+  maxScore       Int            @default(100)
+  submissionType SubmissionType @default(TEXT)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  lesson      Lesson                 @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  submissions AssignmentSubmission[]
+}
+
+model AssignmentSubmission {
+  id           String    @id @default(cuid())
+  assignmentId String
+  studentId    String
+  content      String?
+  fileUrl      String?
+  linkUrl      String?
+  submittedAt  DateTime  @default(now())
+  score        Int?
+  feedback     String?
+  gradedAt     DateTime?
+  gradedById   String?
+
+  assignment Assignment @relation(fields: [assignmentId], references: [id])
+  student    User       @relation("StudentSubmissions", fields: [studentId], references: [id])
+  gradedBy   User?      @relation("GradedByInstructor", fields: [gradedById], references: [id])
+
+  @@unique([assignmentId, studentId])
+}
+
+// ─── LIVE SESSIONS ───────────────────────────────────────────────────────────
+
+model LiveSession {
+  id           String            @id @default(cuid())
+  courseId     String
+  instructorId String
+  title        String
+  description  String?
+  scheduledAt  DateTime
+  startedAt    DateTime?
+  endedAt      DateTime?
+  status       LiveSessionStatus @default(SCHEDULED)
+  recordingUrl String?
+  createdAt    DateTime          @default(now())
+
+  course     Course         @relation(fields: [courseId], references: [id])
+  instructor User           @relation(fields: [instructorId], references: [id])
+  questions  LiveQuestion[]
+}
+
+model LiveQuestion {
+  id           String   @id @default(cuid())
+  sessionId    String
+  studentId    String
+  questionText String
+  upvotes      Int      @default(0)
+  isAnswered   Boolean  @default(false)
+  askedAt      DateTime @default(now())
+
+  session LiveSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  student User        @relation(fields: [studentId], references: [id])
+}
+
+// ─── NOTIFICATIONS & CERTIFICATES ────────────────────────────────────────────
+
+model Notification {
+  id                String           @id @default(cuid())
+  userId            String
+  type              NotificationType
+  title             String
+  body              String
+  isRead            Boolean          @default(false)
+  relatedEntityId   String?
+  relatedEntityType String?
+  createdAt         DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, isRead])
+  @@index([createdAt])
+}
+
+model Certificate {
+  id                String   @id @default(cuid())
+  enrollmentId      String   @unique
+  studentId         String
+  courseId          String
+  certificateNumber String   @unique @default(cuid())
+  verificationCode  String   @unique @default(cuid())
+  pdfUrl            String?
+  issuedAt          DateTime @default(now())
+
+  enrollment Enrollment @relation(fields: [enrollmentId], references: [id])
+  student    User       @relation(fields: [studentId], references: [id])
+}

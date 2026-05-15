@@ -125,9 +125,11 @@ export function NotificationBell() {
         if (role === 'instructor') {
           router.push(`/instructor/courses/${id}/edit`);
         } else if (role === 'student') {
-          router.push(`/student/courses/${id}/learn`);
+          // `/student/courses/{id}/learn` requires a lesson id; the overview
+          // page resolves to the right next lesson automatically.
+          router.push(`/student/courses/${id}`);
         } else {
-          router.push(`/admin/courses/${id}`);
+          router.push(`/admin/courses/${id}/review`);
         }
         break;
       case 'enrollment':

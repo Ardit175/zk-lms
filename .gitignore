@@ -61,8 +61,7 @@ certificates/
 .vercel
 next-env.d.ts
 
-# Playwright MCP scratch + ad-hoc test artifacts
+# Playwright MCP scratch + ad-hoc screenshot/test artifacts at repo root
 .playwright-mcp/
-/landing-final.jpeg
-/lesson-*.jpeg
-/quiz-result.jpeg
+/*.jpeg
+/*.png

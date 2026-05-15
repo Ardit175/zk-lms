@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { prisma } from '../services/prisma';
 import { ApiResponse } from '../utils/ApiResponse';
 import { generateSlug, updateCourseDuration, verifyOwnership, canChangeStatus } from '../services/course.service';
+import { cacheGet, cacheSet, cacheKeys, TTL, invalidateCourseCaches } from '../lib/cache';
 import {
   CreateCourseInput,
   UpdateCourseInput,
@@ -61,6 +62,14 @@ export const getFeaturedCourses = async (_req: Request, res: Response): Promise<
 export const getCourses = async (req: Request, res: Response): Promise<void> => {
   try {
     const { category, level, search, page = '1', limit = '20' } = req.query;
+
+    const cacheKey = cacheKeys.coursesList({ category, level, search, page, limit });
+    const cached = await cacheGet(cacheKey);
+    if (cached) {
+      res.json(ApiResponse.success(cached));
+      return;
+    }
+
     const skip = (Number(page) - 1) * Number(limit);
 
     const where: Record<string, unknown> = {
@@ -97,7 +106,7 @@ export const getCourses = async (req: Request, res: Response): Promise<void> => 
       prisma.course.count({ where }),
     ]);
 
-    res.json(ApiResponse.success({
+    const payload = {
       courses,
       pagination: {
         page: Number(page),
@@ -105,7 +114,10 @@ export const getCourses = async (req: Request, res: Response): Promise<void> => 
         total,
         totalPages: Math.ceil(total / Number(limit)),
       },
-    }));
+    };
+
+    await cacheSet(cacheKey, payload, TTL.COURSES_LIST);
+    res.json(ApiResponse.success(payload));
   } catch (error) {
     console.error('GetCourses error:', error);
     res.status(500).json(ApiResponse.error('Failed to fetch courses'));
@@ -115,6 +127,13 @@ export const getCourses = async (req: Request, res: Response): Promise<void> => 
 export const getCourseBySlug = async (req: Request, res: Response): Promise<void> => {
   try {
     const slug = getParam(req.params.slug);
+
+    const cacheKey = cacheKeys.courseBySlug(slug);
+    const cached = await cacheGet(cacheKey);
+    if (cached) {
+      res.json(ApiResponse.success(cached));
+      return;
+    }
 
     const course = await prisma.course.findUnique({
       where: { slug },
@@ -148,6 +167,7 @@ export const getCourseBySlug = async (req: Request, res: Response): Promise<void
       return;
     }
 
+    await cacheSet(cacheKey, course, TTL.COURSE_DETAIL);
     res.json(ApiResponse.success(course));
   } catch (error) {
     console.error('GetCourseBySlug error:', error);
@@ -182,6 +202,7 @@ export const createCourse = async (req: Request, res: Response): Promise<void> =
       },
     });
 
+    await invalidateCourseCaches();
     res.status(201).json(ApiResponse.success(course));
   } catch (error) {
     console.error('CreateCourse error:', error);
@@ -210,6 +231,7 @@ export const updateCourse = async (req: Request, res: Response): Promise<void> =
       },
     });
 
+    await invalidateCourseCaches();
     res.json(ApiResponse.success(course));
   } catch (error) {
     console.error('UpdateCourse error:', error);
@@ -233,6 +255,7 @@ export const deleteCourse = async (req: Request, res: Response): Promise<void> =
       data: { status: 'ARCHIVED' },
     });
 
+    await invalidateCourseCaches();
     res.json(ApiResponse.success({ message: 'Course archived successfully' }));
   } catch (error) {
     console.error('DeleteCourse error:', error);
@@ -273,6 +296,7 @@ export const updateCourseStatus = async (req: Request, res: Response): Promise<v
       data: { status: newStatus },
     });
 
+    await invalidateCourseCaches();
     res.json(ApiResponse.success(updated));
   } catch (error) {
     console.error('UpdateCourseStatus error:', error);
@@ -297,6 +321,38 @@ export const getInstructorCourses = async (req: Request, res: Response): Promise
   } catch (error) {
     console.error('GetInstructorCourses error:', error);
     res.status(500).json(ApiResponse.error('Failed to fetch courses'));
+  }
+};
+
+export const getCourseById = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const id = getParam(req.params.id);
+    const userId = req.user!.id;
+    const userRole = req.user!.role;
+
+    const course = await prisma.course.findUnique({
+      where: { id },
+      include: {
+        instructor: { select: { id: true, firstName: true, lastName: true, avatarUrl: true } },
+        category: { select: { id: true, name: true, slug: true } },
+        _count: { select: { modules: true, enrollments: true } },
+      },
+    });
+
+    if (!course) {
+      res.status(404).json(ApiResponse.error('Course not found'));
+      return;
+    }
+
+    if (userRole !== 'ADMIN' && course.instructorId !== userId) {
+      res.status(403).json(ApiResponse.error('Not authorized to view this course'));
+      return;
+    }
+
+    res.json(ApiResponse.success(course));
+  } catch (error) {
+    console.error('GetCourseById error:', error);
+    res.status(500).json(ApiResponse.error('Failed to fetch course'));
   }
 };
 
@@ -440,7 +496,8 @@ export const createLesson = async (req: Request, res: Response): Promise<void> =
   try {
     const courseId = getParam(req.params.id);
     const moduleId = getParam(req.params.moduleId);
-    const { title, content, videoUrl, duration, type, isPreview } = req.body as CreateLessonInput;
+    const { title, content, videoUrl, videoType, pdfUrl, duration, type, isPreview } =
+      req.body as CreateLessonInput;
     const userId = req.user!.id;
 
     const isOwner = await verifyOwnership(courseId, userId);
@@ -459,6 +516,8 @@ export const createLesson = async (req: Request, res: Response): Promise<void> =
         title,
         content,
         videoUrl,
+        videoType,
+        pdfUrl,
         duration,
         type,
         isPreview,

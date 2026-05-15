@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { format, formatDistanceToNow } from 'date-fns';
+import dynamic from 'next/dynamic';
+import { formatDistanceToNow } from 'date-fns';
 import { sq } from 'date-fns/locale';
 import {
   Users,
@@ -18,18 +19,22 @@ import {
   UserPlus,
   CheckCircle,
 } from 'lucide-react';
-import {
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from 'recharts';
 import { Button } from '@/components/ui/button';
+
+const chartLoading = () => (
+  <div className="h-[280px] animate-pulse rounded-lg bg-slate-100" />
+);
+const EnrollmentLineChart = dynamic(
+  () => import('@/components/charts/EnrollmentLineChart').then((m) => m.EnrollmentLineChart),
+  { ssr: false, loading: chartLoading }
+);
+const ProgressDistributionChart = dynamic(
+  () =>
+    import('@/components/charts/ProgressDistributionChart').then(
+      (m) => m.ProgressDistributionChart
+    ),
+  { ssr: false, loading: chartLoading }
+);
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -253,32 +258,7 @@ export default function CourseAnalyticsPage() {
               <CardTitle className="text-base">Regjistrime me Kohen</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-[280px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={analytics.enrollmentOverTime}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                    <XAxis
-                      dataKey="date"
-                      tickFormatter={(value) => format(new Date(value), 'dd MMM', { locale: sq })}
-                      stroke="#94a3b8"
-                      fontSize={12}
-                    />
-                    <YAxis stroke="#94a3b8" fontSize={12} />
-                    <Tooltip
-                      labelFormatter={(value) => format(new Date(value as string), 'dd MMMM yyyy', { locale: sq })}
-                      formatter={(value) => [`${value} regjistrime`, 'Regjistrime']}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="count"
-                      stroke="#6366f1"
-                      strokeWidth={2}
-                      dot={{ fill: '#6366f1', r: 4 }}
-                      activeDot={{ r: 6 }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
+              <EnrollmentLineChart data={analytics.enrollmentOverTime} height={280} />
             </CardContent>
           </Card>
 
@@ -287,17 +267,7 @@ export default function CourseAnalyticsPage() {
               <CardTitle className="text-base">Shperndarja e Progresit</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-[280px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={analytics.progressDistribution}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                    <XAxis dataKey="range" stroke="#94a3b8" fontSize={12} />
-                    <YAxis stroke="#94a3b8" fontSize={12} />
-                    <Tooltip formatter={(value) => [`${value} studente`, 'Studente']} />
-                    <Bar dataKey="count" fill="#6366f1" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
+              <ProgressDistributionChart data={analytics.progressDistribution} height={280} />
             </CardContent>
           </Card>
         </div>

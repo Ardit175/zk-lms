@@ -11,7 +11,8 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuthStore, getRedirectPath } from '@/stores/auth-store';
 import { loginSchema, LoginInput } from '@/lib/validations/auth';
-import { Loader2 } from 'lucide-react';
+import { al } from '@/lib/i18n/al';
+import { Loader2, GraduationCap } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -44,12 +45,17 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
-      <Card className="w-full max-w-md">
+    <div className="relative flex min-h-screen items-center justify-center bg-slate-50 px-4 py-12">
+      {/* subtle dot pattern */}
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,theme(colors.slate.200)_1px,transparent_0)] [background-size:24px_24px]" />
+      <Card className="relative w-full max-w-md shadow-lg">
         <CardHeader className="text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-600 text-white text-xl font-bold">
-            Z
-          </div>
+          <Link
+            href="/"
+            className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-sm shadow-indigo-200"
+          >
+            <GraduationCap className="h-6 w-6" />
+          </Link>
           <CardTitle className="text-2xl">Miresevini perseri</CardTitle>
           <CardDescription>Vendosni kredencialet tuaja per te hyre</CardDescription>
         </CardHeader>
@@ -61,7 +67,7 @@ export default function LoginPage() {
               </div>
             )}
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{al.auth.email}</Label>
               <Input
                 id="email"
                 type="email"
@@ -74,7 +80,7 @@ export default function LoginPage() {
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Fjalekalimi</Label>
+              <Label htmlFor="password">{al.auth.password}</Label>
               <Input
                 id="password"
                 type="password"
@@ -93,14 +99,14 @@ export default function LoginPage() {
                   Duke hyre...
                 </>
               ) : (
-                'Hyr'
+                al.auth.login
               )}
             </Button>
           </form>
           <p className="mt-6 text-center text-sm text-slate-600">
-            Nuk keni llogari?{' '}
+            {al.auth.noAccount}{' '}
             <Link href="/register" className="text-indigo-600 hover:underline font-medium">
-              Regjistrohuni
+              {al.auth.register}
             </Link>
           </p>
         </CardContent>

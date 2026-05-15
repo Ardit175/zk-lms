@@ -4,7 +4,26 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { ArrowLeft, X, ChevronRight, PanelRightOpen, PanelRightClose, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { CourseNavigation, VideoPlayer, TextContent, QuizPlayer, AssignmentPlayer } from '@/components/course-player';
+import dynamic from 'next/dynamic';
+import {
+  CourseNavigation,
+  VideoPlayer,
+  TextContent,
+  QuizPlayer,
+  AssignmentPlayer,
+} from '@/components/course-player';
+
+// react-pdf can't be evaluated during SSR (pdfjs-dist hits
+// `Object.defineProperty called on non-object`), so load it client-side only.
+const PdfViewer = dynamic(
+  () => import('@/components/course-player/PdfViewer').then((m) => m.PdfViewer),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="aspect-video w-full animate-pulse rounded-xl bg-slate-200" />
+    ),
+  }
+);
 import { enrollmentsApi, type CourseProgress, type ModuleProgress } from '@/lib/api/enrollments';
 import { cn } from '@/lib/utils';
 
@@ -14,6 +33,8 @@ interface LessonData {
   type: 'VIDEO' | 'TEXT' | 'QUIZ' | 'ASSIGNMENT';
   content?: string;
   videoUrl?: string;
+  videoType?: 'YOUTUBE' | 'VIMEO' | 'UPLOAD' | null;
+  pdfUrl?: string | null;
   quizId?: string | null;
   duration: number | null;
   isCompleted: boolean;
@@ -60,6 +81,8 @@ export default function CoursePlayerPage() {
           type: lesson.type,
           content: lesson.content,
           videoUrl: lesson.videoUrl,
+          videoType: lesson.videoType,
+          pdfUrl: lesson.pdfUrl,
           quizId: lesson.quizId,
           duration: lesson.duration,
           isCompleted: lesson.isCompleted,
@@ -254,12 +277,21 @@ export default function CoursePlayerPage() {
             {currentLesson.type === 'VIDEO' && currentLesson.videoUrl && (
               <VideoPlayer
                 videoUrl={currentLesson.videoUrl}
+                videoType={currentLesson.videoType}
                 lessonId={currentLesson.id}
                 onComplete={handleLessonComplete}
               />
             )}
 
-            {currentLesson.type === 'TEXT' && (
+            {currentLesson.type === 'TEXT' && currentLesson.pdfUrl && (
+              <PdfViewer
+                pdfUrl={currentLesson.pdfUrl}
+                isCompleted={currentLesson.isCompleted}
+                onComplete={handleLessonComplete}
+              />
+            )}
+
+            {currentLesson.type === 'TEXT' && !currentLesson.pdfUrl && (
               <TextContent
                 content={currentLesson.content || '<p>Permbajtja nuk eshte e disponueshme.</p>'}
                 isCompleted={currentLesson.isCompleted}

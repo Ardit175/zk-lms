@@ -14,8 +14,10 @@ import {
   Video,
   FileText,
   LogOut,
+  GraduationCap,
 } from 'lucide-react';
 import { useAuthStore, type Role } from '@/stores/auth-store';
+import { al } from '@/lib/i18n/al';
 import Cookies from 'js-cookie';
 
 interface NavItem {
@@ -26,25 +28,31 @@ interface NavItem {
 
 const navItemsByRole: Record<Role, NavItem[]> = {
   ADMIN: [
-    { label: 'Dashboard', href: '/admin/dashboard', icon: <LayoutDashboard className="h-5 w-5" /> },
+    { label: al.nav.dashboard, href: '/admin/dashboard', icon: <LayoutDashboard className="h-5 w-5" /> },
     { label: 'Perdoruesit', href: '/admin/users', icon: <Users className="h-5 w-5" /> },
-    { label: 'Kurset', href: '/admin/courses', icon: <BookOpen className="h-5 w-5" /> },
-    { label: 'Analitika', href: '/admin/analytics', icon: <BarChart3 className="h-5 w-5" /> },
-    { label: 'Konfigurime', href: '/admin/settings', icon: <Settings className="h-5 w-5" /> },
+    { label: al.nav.courses, href: '/admin/courses', icon: <BookOpen className="h-5 w-5" /> },
+    { label: al.nav.analytics, href: '/admin/analytics', icon: <BarChart3 className="h-5 w-5" /> },
+    { label: al.nav.settings, href: '/admin/settings', icon: <Settings className="h-5 w-5" /> },
   ],
   INSTRUCTOR: [
-    { label: 'Dashboard', href: '/instructor/dashboard', icon: <LayoutDashboard className="h-5 w-5" /> },
+    { label: al.nav.dashboard, href: '/instructor/dashboard', icon: <LayoutDashboard className="h-5 w-5" /> },
     { label: 'Kurset e Mia', href: '/instructor/courses', icon: <BookOpen className="h-5 w-5" /> },
     { label: 'Sesione Live', href: '/instructor/live', icon: <Video className="h-5 w-5" /> },
     { label: 'Detyrat', href: '/instructor/assignments', icon: <FileText className="h-5 w-5" /> },
-    { label: 'Analitika', href: '/instructor/analytics', icon: <BarChart3 className="h-5 w-5" /> },
+    { label: al.nav.analytics, href: '/instructor/analytics', icon: <BarChart3 className="h-5 w-5" /> },
   ],
   STUDENT: [
-    { label: 'Dashboard', href: '/student/dashboard', icon: <LayoutDashboard className="h-5 w-5" /> },
+    { label: al.nav.dashboard, href: '/student/dashboard', icon: <LayoutDashboard className="h-5 w-5" /> },
     { label: 'Kurset e Mia', href: '/student/courses', icon: <BookOpen className="h-5 w-5" /> },
     { label: 'Kalendari', href: '/student/calendar', icon: <Calendar className="h-5 w-5" /> },
     { label: 'Certifikatat', href: '/student/certificates', icon: <Award className="h-5 w-5" /> },
   ],
+};
+
+const ROLE_LABELS: Record<Role, string> = {
+  ADMIN: 'Administrator',
+  INSTRUCTOR: 'Instruktor',
+  STUDENT: 'Student',
 };
 
 interface SidebarProps {
@@ -67,27 +75,30 @@ export function Sidebar({ role }: SidebarProps) {
   return (
     <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r border-slate-200 bg-white">
       <div className="flex h-full flex-col">
-        <div className="flex h-16 items-center border-b border-slate-200 px-6">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-white font-bold">
-              Z
+        {/* Logo */}
+        <div className="flex h-16 items-center border-b border-slate-100 px-6">
+          <Link href="/" className="flex items-center gap-2.5">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 to-indigo-700 text-white font-bold shadow-sm shadow-indigo-200">
+              <GraduationCap className="h-5 w-5" />
             </div>
-            <span className="text-lg font-semibold text-slate-900">ZK-LMS</span>
+            <span className="text-lg font-bold text-slate-900">ZK-LMS</span>
           </Link>
         </div>
 
+        {/* Nav */}
         <nav className="flex-1 space-y-1 px-3 py-4">
           {navItems.map((item) => {
-            const isActive = pathname === item.href;
+            const isActive =
+              pathname === item.href || pathname.startsWith(item.href + '/');
             return (
               <Link
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                  'flex items-center gap-3 rounded-lg border-l-[3px] px-3 py-2.5 text-sm font-medium transition-all',
                   isActive
-                    ? 'bg-indigo-50 text-indigo-600'
-                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                    ? 'border-indigo-600 bg-indigo-100 text-indigo-700'
+                    : 'border-transparent text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                 )}
               >
                 {item.icon}
@@ -97,25 +108,26 @@ export function Sidebar({ role }: SidebarProps) {
           })}
         </nav>
 
-        <div className="border-t border-slate-200 p-4">
+        {/* User */}
+        <div className="border-t border-slate-100 p-3">
           <div className="flex items-center gap-3 rounded-lg px-3 py-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-200 text-sm font-medium text-slate-600">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-100 text-sm font-semibold text-indigo-700">
               {user?.firstName?.[0]}
               {user?.lastName?.[0]}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-slate-900 truncate">
+              <p className="text-sm font-semibold text-slate-900 truncate">
                 {user?.firstName} {user?.lastName}
               </p>
-              <p className="text-xs text-slate-500 truncate">{user?.email}</p>
+              <p className="text-xs text-slate-500 truncate">{ROLE_LABELS[role]}</p>
             </div>
           </div>
           <button
             onClick={handleLogout}
-            className="mt-2 flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors"
+            className="mt-1 flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 transition-colors hover:bg-red-50 hover:text-red-600"
           >
             <LogOut className="h-5 w-5" />
-            Dilni
+            {al.nav.logout}
           </button>
         </div>
       </div>

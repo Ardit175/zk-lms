@@ -15,22 +15,24 @@ import {
   HelpCircle,
   ClipboardList,
   Trash2,
-  Save,
   ArrowLeft,
   Loader2,
   Sparkles,
-  Eye,
+  Upload,
+  Link2,
+  X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { coursesApi, categoriesApi, type Course, type Module, type Lesson, type Category } from '@/lib/api/courses';
 import { quizzesApi, type QuizWithQuestions } from '@/lib/api/quizzes';
+import { uploadsApi, VIDEO_MAX_BYTES, PDF_MAX_BYTES } from '@/lib/api/uploads';
 import { useDebounce } from '@/lib/hooks/useDebounce';
 import { AIQuizGenerator } from '@/components/instructor/AIQuizGenerator';
+import { VideoPlayer } from '@/components/course-player/VideoPlayer';
 import dynamic from 'next/dynamic';
 
 const RichTextEditor = dynamic(
@@ -223,26 +225,15 @@ export default function CourseBuilderPage() {
 
   const loadData = async () => {
     try {
-      const [modulesRes, categoriesRes] = await Promise.all([
+      const [courseRes, modulesRes, categoriesRes] = await Promise.all([
+        coursesApi.getCourseById(courseId),
         coursesApi.getModules(courseId),
         categoriesApi.getAll(),
       ]);
 
-      // Set a default course structure - will be loaded properly when we have the endpoint
-      setCourse({
-        id: courseId,
-        title: 'Kurs',
-        description: '',
-        slug: '',
-        level: 'BEGINNER',
-        status: 'DRAFT',
-        price: 0,
-        totalDuration: 0,
-        enrollmentCount: 0,
-        instructorId: '',
-        createdAt: '',
-        updatedAt: '',
-      });
+      if (courseRes.data) {
+        setCourse(courseRes.data);
+      }
 
       if (modulesRes.data) {
         setModules(modulesRes.data);
@@ -417,6 +408,17 @@ export default function CourseBuilderPage() {
     );
   }
 
+  if (!course) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="text-center">
+          <p className="text-slate-600 mb-4">Kursi nuk u gjet ose nuk keni akses</p>
+          <Button onClick={() => router.push('/instructor/courses')}>Kthehu te Kurset</Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
@@ -502,6 +504,7 @@ export default function CourseBuilderPage() {
             <LessonEditor
               lesson={selectedLesson}
               onUpdate={saveLesson}
+              onUpdateNow={saveLessonFn}
               onDelete={handleDeleteLesson}
               onClose={() => setSelectedLesson(null)}
             />
@@ -520,22 +523,83 @@ export default function CourseBuilderPage() {
 
 interface LessonEditorProps {
   lesson: Lesson;
+  /** debounced — for free-text inputs (title, content, url) */
   onUpdate: (data: Partial<Lesson>) => void;
+  /** immediate — for discrete actions (type change, uploads, toggles) */
+  onUpdateNow: (data: Partial<Lesson>) => void;
   onDelete: () => void;
   onClose: () => void;
 }
 
-function LessonEditor({ lesson, onUpdate, onDelete, onClose }: LessonEditorProps) {
+function detectVideoType(url: string): 'YOUTUBE' | 'VIMEO' | null {
+  if (/(?:youtube\.com|youtu\.be)/i.test(url)) return 'YOUTUBE';
+  if (/vimeo\.com/i.test(url)) return 'VIMEO';
+  return null;
+}
+
+function LessonEditor({ lesson, onUpdate, onUpdateNow, onDelete, onClose }: LessonEditorProps) {
   const [isQuizGeneratorOpen, setIsQuizGeneratorOpen] = useState(false);
   const [existingQuiz, setExistingQuiz] = useState<QuizWithQuestions | null>(null);
   const [isLoadingQuiz, setIsLoadingQuiz] = useState(false);
   const [isDeletingQuiz, setIsDeletingQuiz] = useState(false);
 
+  // Video source: link (YouTube/Vimeo) vs uploaded file
+  const [videoMode, setVideoMode] = useState<'link' | 'upload'>(
+    lesson.videoType === 'UPLOAD' ? 'upload' : 'link'
+  );
+  // Text lesson: written content vs uploaded PDF
+  const [textMode, setTextMode] = useState<'text' | 'pdf'>(lesson.pdfUrl ? 'pdf' : 'text');
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState('');
+
   useEffect(() => {
     if (lesson.type === 'QUIZ') {
       loadExistingQuiz();
     }
-  }, [lesson.id, lesson.type]);
+    // reset upload modes when a different lesson is selected
+    setVideoMode(lesson.videoType === 'UPLOAD' ? 'upload' : 'link');
+    setTextMode(lesson.pdfUrl ? 'pdf' : 'text');
+    setUploadError('');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lesson.id]);
+
+  const handleVideoUpload = async (file: File) => {
+    setUploadError('');
+    if (file.size > VIDEO_MAX_BYTES) {
+      setUploadError('Skedari kalon limitin prej 50MB');
+      return;
+    }
+    setIsUploading(true);
+    try {
+      const res = await uploadsApi.upload(file);
+      if (res.data) {
+        onUpdateNow({ videoUrl: res.data.url, videoType: 'UPLOAD' });
+      }
+    } catch {
+      setUploadError('Ngarkimi i videos deshtoi');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handlePdfUpload = async (file: File) => {
+    setUploadError('');
+    if (file.size > PDF_MAX_BYTES) {
+      setUploadError('Skedari kalon limitin prej 10MB');
+      return;
+    }
+    setIsUploading(true);
+    try {
+      const res = await uploadsApi.upload(file);
+      if (res.data) {
+        onUpdateNow({ pdfUrl: res.data.url });
+      }
+    } catch {
+      setUploadError('Ngarkimi i PDF-se deshtoi');
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   const loadExistingQuiz = async () => {
     setIsLoadingQuiz(true);
@@ -589,37 +653,122 @@ function LessonEditor({ lesson, onUpdate, onDelete, onClose }: LessonEditorProps
         <div className="space-y-2">
           <Label>Tipi i Mesimit</Label>
           <div className="grid grid-cols-2 gap-2">
-            {(['TEXT', 'VIDEO', 'QUIZ', 'ASSIGNMENT'] as const).map((type) => {
-              const Icon = LESSON_ICONS[type];
-              return (
-                <button
-                  key={type}
-                  onClick={() => onUpdate({ type })}
-                  className={cn(
-                    'flex items-center gap-2 p-3 rounded-lg border transition-colors',
-                    lesson.type === type
-                      ? 'border-indigo-600 bg-indigo-50 text-indigo-600'
-                      : 'border-slate-200 hover:border-slate-300'
-                  )}
-                >
-                  <Icon className="h-4 w-4" />
-                  <span className="text-sm">{type}</span>
-                </button>
-              );
-            })}
+            {([
+              { value: 'VIDEO', label: 'Video', icon: Video },
+              { value: 'TEXT', label: 'Tekst / PDF', icon: FileText },
+              { value: 'QUIZ', label: 'Kuiz', icon: HelpCircle },
+              { value: 'ASSIGNMENT', label: 'Detyre', icon: ClipboardList },
+            ] as const).map(({ value, label, icon: Icon }) => (
+              <button
+                key={value}
+                onClick={() => onUpdateNow({ type: value })}
+                className={cn(
+                  'flex items-center gap-2 rounded-lg border p-3 transition-colors',
+                  lesson.type === value
+                    ? 'border-indigo-600 bg-indigo-50 text-indigo-600'
+                    : 'border-slate-200 text-slate-600 hover:border-slate-300'
+                )}
+              >
+                <Icon className="h-4 w-4" />
+                <span className="text-sm font-medium">{label}</span>
+              </button>
+            ))}
           </div>
         </div>
 
         {lesson.type === 'VIDEO' && (
-          <>
-            <div className="space-y-2">
-              <Label>URL e Videos</Label>
-              <Input
-                value={lesson.videoUrl || ''}
-                onChange={(e) => onUpdate({ videoUrl: e.target.value })}
-                placeholder="https://..."
-              />
+          <div className="space-y-4">
+            <div className="flex gap-2">
+              <button
+                onClick={() => setVideoMode('link')}
+                className={cn(
+                  'flex flex-1 items-center justify-center gap-2 rounded-lg border p-2.5 text-sm font-medium transition-colors',
+                  videoMode === 'link'
+                    ? 'border-indigo-600 bg-indigo-50 text-indigo-600'
+                    : 'border-slate-200 text-slate-600 hover:border-slate-300'
+                )}
+              >
+                <Link2 className="h-4 w-4" />
+                Lidhje
+              </button>
+              <button
+                onClick={() => setVideoMode('upload')}
+                className={cn(
+                  'flex flex-1 items-center justify-center gap-2 rounded-lg border p-2.5 text-sm font-medium transition-colors',
+                  videoMode === 'upload'
+                    ? 'border-indigo-600 bg-indigo-50 text-indigo-600'
+                    : 'border-slate-200 text-slate-600 hover:border-slate-300'
+                )}
+              >
+                <Upload className="h-4 w-4" />
+                Ngarko skedar
+              </button>
             </div>
+
+            {videoMode === 'link' ? (
+              <div className="space-y-2">
+                <Label>URL e Videos (YouTube ose Vimeo)</Label>
+                <Input
+                  value={lesson.videoType === 'UPLOAD' ? '' : lesson.videoUrl || ''}
+                  onChange={(e) =>
+                    onUpdate({
+                      videoUrl: e.target.value,
+                      videoType: detectVideoType(e.target.value),
+                    })
+                  }
+                  placeholder="https://www.youtube.com/watch?v=..."
+                />
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <Label>Ngarko skedar video</Label>
+                <label className="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-slate-200 p-6 transition-colors hover:border-indigo-300">
+                  {isUploading ? (
+                    <>
+                      <Loader2 className="h-6 w-6 animate-spin text-indigo-600" />
+                      <span className="mt-2 text-sm text-slate-500">Duke ngarkuar...</span>
+                    </>
+                  ) : lesson.videoType === 'UPLOAD' && lesson.videoUrl ? (
+                    <>
+                      <Video className="h-6 w-6 text-green-600" />
+                      <span className="mt-2 text-sm font-medium text-slate-700">Video u ngarkua</span>
+                      <span className="text-xs text-slate-400">Kliko per ta zevendesuar</span>
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="h-6 w-6 text-slate-400" />
+                      <span className="mt-2 text-sm text-slate-600">Kliko per te ngarkuar video</span>
+                    </>
+                  )}
+                  <input
+                    type="file"
+                    accept="video/*"
+                    className="hidden"
+                    disabled={isUploading}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleVideoUpload(file);
+                    }}
+                  />
+                </label>
+                <p className="text-xs text-slate-400">Madhesia maksimale: 50MB</p>
+              </div>
+            )}
+
+            {uploadError && <p className="text-sm text-red-500">{uploadError}</p>}
+
+            {lesson.videoUrl && (
+              <div className="space-y-2">
+                <Label>Parapamje</Label>
+                <VideoPlayer
+                  videoUrl={lesson.videoUrl}
+                  videoType={lesson.videoType}
+                  lessonId={lesson.id}
+                  onComplete={() => {}}
+                />
+              </div>
+            )}
+
             <div className="space-y-2">
               <Label>Kohezgjatja (sekonda)</Label>
               <Input
@@ -628,16 +777,92 @@ function LessonEditor({ lesson, onUpdate, onDelete, onClose }: LessonEditorProps
                 onChange={(e) => onUpdate({ duration: parseInt(e.target.value) || 0 })}
               />
             </div>
-          </>
+          </div>
         )}
 
         {lesson.type === 'TEXT' && (
-          <div className="space-y-2">
-            <Label>Permbajtja</Label>
-            <RichTextEditor
-              content={lesson.content || ''}
-              onChange={(content) => onUpdate({ content })}
-            />
+          <div className="space-y-4">
+            <div className="flex gap-2">
+              <button
+                onClick={() => setTextMode('text')}
+                className={cn(
+                  'flex flex-1 items-center justify-center gap-2 rounded-lg border p-2.5 text-sm font-medium transition-colors',
+                  textMode === 'text'
+                    ? 'border-indigo-600 bg-indigo-50 text-indigo-600'
+                    : 'border-slate-200 text-slate-600 hover:border-slate-300'
+                )}
+              >
+                <FileText className="h-4 w-4" />
+                Shkruaj tekst
+              </button>
+              <button
+                onClick={() => setTextMode('pdf')}
+                className={cn(
+                  'flex flex-1 items-center justify-center gap-2 rounded-lg border p-2.5 text-sm font-medium transition-colors',
+                  textMode === 'pdf'
+                    ? 'border-indigo-600 bg-indigo-50 text-indigo-600'
+                    : 'border-slate-200 text-slate-600 hover:border-slate-300'
+                )}
+              >
+                <Upload className="h-4 w-4" />
+                Ngarko PDF
+              </button>
+            </div>
+
+            {textMode === 'text' ? (
+              <div className="space-y-2">
+                <Label>Permbajtja</Label>
+                <RichTextEditor
+                  content={lesson.content || ''}
+                  onChange={(content) => onUpdate({ content })}
+                />
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <Label>Skedar PDF</Label>
+                {lesson.pdfUrl ? (
+                  <div className="flex items-center justify-between rounded-lg border border-slate-200 p-3">
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-5 w-5 text-indigo-600" />
+                      <span className="text-sm text-slate-700">PDF i ngarkuar</span>
+                    </div>
+                    <button
+                      onClick={() => onUpdateNow({ pdfUrl: null })}
+                      className="text-slate-400 transition-colors hover:text-red-600"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <label className="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-slate-200 p-6 transition-colors hover:border-indigo-300">
+                    {isUploading ? (
+                      <>
+                        <Loader2 className="h-6 w-6 animate-spin text-indigo-600" />
+                        <span className="mt-2 text-sm text-slate-500">Duke ngarkuar...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="h-6 w-6 text-slate-400" />
+                        <span className="mt-2 text-sm text-slate-600">Kliko per te ngarkuar PDF</span>
+                      </>
+                    )}
+                    <input
+                      type="file"
+                      accept="application/pdf"
+                      className="hidden"
+                      disabled={isUploading}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handlePdfUpload(file);
+                      }}
+                    />
+                  </label>
+                )}
+                <p className="text-xs text-slate-400">Madhesia maksimale: 10MB</p>
+              </div>
+            )}
+
+            {uploadError && <p className="text-sm text-red-500">{uploadError}</p>}
           </div>
         )}
 

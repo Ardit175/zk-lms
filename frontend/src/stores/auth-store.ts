@@ -4,6 +4,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import Cookies from 'js-cookie';
 import { authApi, User } from '@/lib/api';
+import { al } from '@/lib/i18n/al';
 
 export type Role = 'ADMIN' | 'INSTRUCTOR' | 'STUDENT';
 
@@ -55,12 +56,12 @@ export const useAuthStore = create<AuthState>()(
           } else {
             set({
               isLoading: false,
-              error: response.error || 'Login failed',
+              error: response.error || al.errors.serverError,
             });
-            throw new Error(response.error || 'Login failed');
+            throw new Error(response.error || al.errors.serverError);
           }
         } catch (error) {
-          const message = error instanceof Error ? error.message : 'Login failed';
+          const message = error instanceof Error ? error.message : al.errors.serverError;
           set({ isLoading: false, error: message });
           throw error;
         }
@@ -85,12 +86,12 @@ export const useAuthStore = create<AuthState>()(
           } else {
             set({
               isLoading: false,
-              error: response.error || 'Registration failed',
+              error: response.error || al.errors.serverError,
             });
-            throw new Error(response.error || 'Registration failed');
+            throw new Error(response.error || al.errors.serverError);
           }
         } catch (error) {
-          const message = error instanceof Error ? error.message : 'Registration failed';
+          const message = error instanceof Error ? error.message : al.errors.serverError;
           set({ isLoading: false, error: message });
           throw error;
         }

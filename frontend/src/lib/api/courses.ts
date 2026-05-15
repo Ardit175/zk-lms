@@ -5,7 +5,12 @@ export interface Category {
   name: string;
   slug: string;
   iconUrl?: string;
+  _count?: {
+    courses: number;
+  };
 }
+
+export type VideoType = 'YOUTUBE' | 'VIMEO' | 'UPLOAD';
 
 export interface Lesson {
   id: string;
@@ -13,6 +18,8 @@ export interface Lesson {
   title: string;
   content?: string;
   videoUrl?: string;
+  videoType?: VideoType | null;
+  pdfUrl?: string | null;
   duration?: number;
   orderIndex: number;
   type: 'VIDEO' | 'TEXT' | 'QUIZ' | 'ASSIGNMENT';
@@ -49,6 +56,10 @@ export interface Course {
   modules?: Module[];
   createdAt: string;
   updatedAt: string;
+  _count?: {
+    modules: number;
+    enrollments: number;
+  };
 }
 
 export const coursesApi = {
@@ -67,15 +78,9 @@ export const coursesApi = {
     return response.data;
   },
 
-  getCourseForEdit: async (id: string) => {
-    const [courseRes, modulesRes] = await Promise.all([
-      api.get<ApiResponse<Course>>(`/api/courses/slug/${id}`),
-      api.get<ApiResponse<Module[]>>(`/api/courses/${id}/modules`),
-    ]);
-    return {
-      course: courseRes.data.data,
-      modules: modulesRes.data.data,
-    };
+  getCourseBySlug: async (slug: string) => {
+    const response = await api.get<ApiResponse<Course>>(`/api/courses/slug/${slug}`);
+    return response.data;
   },
 
   createCourse: async (data: { title: string; description: string; categoryId?: string; level?: string }) => {
@@ -144,6 +149,21 @@ export const coursesApi = {
 export const categoriesApi = {
   getAll: async () => {
     const response = await api.get<ApiResponse<Category[]>>('/api/categories');
+    return response.data;
+  },
+
+  create: async (data: { name: string; iconUrl?: string }) => {
+    const response = await api.post<ApiResponse<Category>>('/api/categories', data);
+    return response.data;
+  },
+
+  update: async (id: string, data: { name?: string; iconUrl?: string }) => {
+    const response = await api.put<ApiResponse<Category>>(`/api/categories/${id}`, data);
+    return response.data;
+  },
+
+  remove: async (id: string) => {
+    const response = await api.delete<ApiResponse<{ message: string }>>(`/api/categories/${id}`);
     return response.data;
   },
 };

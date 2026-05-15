@@ -22,8 +22,18 @@ app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Servimi i skedarëve statik për uploads
-app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+// Servimi i skedarëve statik për uploads.
+// helmet() defaults Cross-Origin-Resource-Policy to "same-origin", which blocks
+// the frontend (localhost:3000) from loading <video>/<img>/PDF resources from
+// this origin (localhost:4000). Relax CORP to "cross-origin" for /uploads only.
+app.use(
+  '/uploads',
+  (_req: Request, res: Response, next: NextFunction) => {
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    next();
+  },
+  express.static(path.join(process.cwd(), 'uploads'))
+);
 
 app.get('/health', (_req: Request, res: Response) => {
   res.json(ApiResponse.success({ status: 'ok', timestamp: new Date().toISOString() }));

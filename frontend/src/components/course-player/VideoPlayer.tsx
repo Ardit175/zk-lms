@@ -1,213 +1,105 @@
 'use client';
 
-import { useRef, useEffect, useState } from 'react';
-import { Play, Pause, Volume2, VolumeX, Maximize, SkipForward } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { useRef, useState } from 'react';
+import dynamic from 'next/dynamic';
+import { CheckCircle2 } from 'lucide-react';
+
+// react-player is browser-only — load it with SSR disabled
+const ReactPlayer = dynamic(() => import('react-player'), {
+  ssr: false,
+  loading: () => <div className="aspect-video w-full animate-pulse rounded-xl bg-slate-200" />,
+});
+
+export type VideoType = 'YOUTUBE' | 'VIMEO' | 'UPLOAD';
+
+export function detectVideoType(url: string): VideoType {
+  if (/(?:youtube\.com|youtu\.be)/i.test(url)) return 'YOUTUBE';
+  if (/vimeo\.com/i.test(url)) return 'VIMEO';
+  return 'UPLOAD';
+}
+
+const TYPE_LABELS: Record<VideoType, string> = {
+  YOUTUBE: 'YouTube',
+  VIMEO: 'Vimeo',
+  UPLOAD: 'Video i ngarkuar',
+};
 
 interface VideoPlayerProps {
   videoUrl: string;
   lessonId: string;
+  videoType?: VideoType | null;
   onComplete: () => void;
+  /** fraction of the video that counts as "watched" (default 0.9 = 90%) */
   completionThreshold?: number;
 }
 
 export function VideoPlayer({
   videoUrl,
   lessonId,
+  videoType,
   onComplete,
   completionThreshold = 0.9,
 }: VideoPlayerProps) {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [duration, setDuration] = useState(0);
+  const completedRef = useRef(false);
   const [hasCompleted, setHasCompleted] = useState(false);
-  const [showControls, setShowControls] = useState(true);
-
   const storageKey = `video-progress-${lessonId}`;
+  const resolvedType = videoType ?? detectVideoType(videoUrl);
 
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
+  // Uploaded files are stored as relative paths on the backend
+  const src =
+    resolvedType === 'UPLOAD' && videoUrl.startsWith('/')
+      ? `${process.env.NEXT_PUBLIC_API_URL || ''}${videoUrl}`
+      : videoUrl;
 
-    const savedTime = localStorage.getItem(storageKey);
-    if (savedTime) {
-      video.currentTime = parseFloat(savedTime);
-    }
-
-    const handleLoadedMetadata = () => {
-      setDuration(video.duration);
-    };
-
-    const handleTimeUpdate = () => {
-      setProgress(video.currentTime);
-      localStorage.setItem(storageKey, String(video.currentTime));
-
-      if (!hasCompleted && video.currentTime / video.duration >= completionThreshold) {
-        setHasCompleted(true);
-        onComplete();
-      }
-    };
-
-    const handleEnded = () => {
-      setIsPlaying(false);
-      if (!hasCompleted) {
-        setHasCompleted(true);
-        onComplete();
-      }
-    };
-
-    video.addEventListener('loadedmetadata', handleLoadedMetadata);
-    video.addEventListener('timeupdate', handleTimeUpdate);
-    video.addEventListener('ended', handleEnded);
-
-    return () => {
-      video.removeEventListener('loadedmetadata', handleLoadedMetadata);
-      video.removeEventListener('timeupdate', handleTimeUpdate);
-      video.removeEventListener('ended', handleEnded);
-    };
-  }, [lessonId, hasCompleted, onComplete, completionThreshold, storageKey]);
-
-  const togglePlay = () => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    if (isPlaying) {
-      video.pause();
-    } else {
-      video.play();
-    }
-    setIsPlaying(!isPlaying);
+  const markComplete = () => {
+    if (completedRef.current) return;
+    completedRef.current = true;
+    setHasCompleted(true);
+    onComplete();
   };
 
-  const toggleMute = () => {
-    const video = videoRef.current;
-    if (!video) return;
-    video.muted = !isMuted;
-    setIsMuted(!isMuted);
-  };
-
-  const toggleFullscreen = () => {
-    const video = videoRef.current;
-    if (!video) return;
-    if (document.fullscreenElement) {
-      document.exitFullscreen();
-    } else {
-      video.requestFullscreen();
+  const handleLoadedMetadata = (e: React.SyntheticEvent<HTMLVideoElement>) => {
+    const el = e.currentTarget;
+    const saved = localStorage.getItem(storageKey);
+    if (saved && el.duration && Number(saved) < el.duration - 1) {
+      el.currentTime = Number(saved);
     }
   };
 
-  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const video = videoRef.current;
-    if (!video) return;
-    const newTime = parseFloat(e.target.value);
-    video.currentTime = newTime;
-    setProgress(newTime);
-  };
-
-  const skip = (seconds: number) => {
-    const video = videoRef.current;
-    if (!video) return;
-    video.currentTime = Math.min(video.duration, Math.max(0, video.currentTime + seconds));
-  };
-
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  const handleTimeUpdate = (e: React.SyntheticEvent<HTMLVideoElement>) => {
+    const el = e.currentTarget;
+    if (!el.duration) return;
+    localStorage.setItem(storageKey, String(el.currentTime));
+    if (el.currentTime / el.duration >= completionThreshold) {
+      markComplete();
+    }
   };
 
   return (
-    <div
-      className="relative bg-black rounded-lg overflow-hidden group"
-      onMouseEnter={() => setShowControls(true)}
-      onMouseLeave={() => setShowControls(false)}
-    >
-      <video
-        ref={videoRef}
-        src={videoUrl}
-        className="w-full aspect-video"
-        onClick={togglePlay}
-      />
-
-      <div
-        className={cn(
-          'absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 transition-opacity',
-          showControls || !isPlaying ? 'opacity-100' : 'opacity-0'
-        )}
-      >
-        <input
-          type="range"
-          min={0}
-          max={duration || 100}
-          value={progress}
-          onChange={handleSeek}
-          className="w-full h-1 mb-3 cursor-pointer accent-indigo-500"
+    <div className="space-y-3">
+      <div className="relative overflow-hidden rounded-xl bg-black">
+        <ReactPlayer
+          src={src}
+          controls
+          width="100%"
+          height="100%"
+          style={{ aspectRatio: '16 / 9' }}
+          onLoadedMetadata={handleLoadedMetadata}
+          onTimeUpdate={handleTimeUpdate}
+          onEnded={markComplete}
         />
-
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <button
-              onClick={togglePlay}
-              className="p-2 rounded-full bg-white/20 hover:bg-white/30 text-white transition-colors"
-            >
-              {isPlaying ? (
-                <Pause className="h-5 w-5" />
-              ) : (
-                <Play className="h-5 w-5" />
-              )}
-            </button>
-
-            <button
-              onClick={() => skip(10)}
-              className="p-2 rounded-full bg-white/20 hover:bg-white/30 text-white transition-colors"
-            >
-              <SkipForward className="h-4 w-4" />
-            </button>
-
-            <button
-              onClick={toggleMute}
-              className="p-2 rounded-full bg-white/20 hover:bg-white/30 text-white transition-colors"
-            >
-              {isMuted ? (
-                <VolumeX className="h-4 w-4" />
-              ) : (
-                <Volume2 className="h-4 w-4" />
-              )}
-            </button>
-
-            <span className="text-white text-sm ml-2">
-              {formatTime(progress)} / {formatTime(duration)}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            {hasCompleted && (
-              <span className="text-green-400 text-sm font-medium">
-                ✓ Perfunduar
-              </span>
-            )}
-            <button
-              onClick={toggleFullscreen}
-              className="p-2 rounded-full bg-white/20 hover:bg-white/30 text-white transition-colors"
-            >
-              <Maximize className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
       </div>
-
-      {!isPlaying && (
-        <button
-          onClick={togglePlay}
-          className="absolute inset-0 flex items-center justify-center bg-black/30"
-        >
-          <div className="h-16 w-16 rounded-full bg-white/90 flex items-center justify-center shadow-lg">
-            <Play className="h-8 w-8 text-indigo-600 ml-1" />
-          </div>
-        </button>
-      )}
+      <div className="flex items-center justify-between text-sm">
+        <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
+          {TYPE_LABELS[resolvedType]}
+        </span>
+        {hasCompleted && (
+          <span className="flex items-center gap-1.5 font-medium text-green-600">
+            <CheckCircle2 className="h-4 w-4" />
+            Mesimi u shenua si i perfunduar
+          </span>
+        )}
+      </div>
     </div>
   );
 }

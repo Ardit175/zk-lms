@@ -4,18 +4,20 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import {
-  BookOpen,
-  Users,
   Video,
   ArrowRight,
   Brain,
   BarChart3,
   GraduationCap,
   Mail,
+  Award,
+  Users,
+  Star,
+  Quote,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { CourseCard } from '@/components/course/CourseCard';
 import { api } from '@/lib/api';
 
 interface PublicStats {
@@ -33,52 +35,63 @@ interface FeaturedCourse {
   level: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
   enrollmentCount: number;
   averageRating: number;
-  instructor: {
-    firstName: string;
-    lastName: string;
-    avatarUrl: string | null;
-  };
-  category: {
-    name: string;
-  } | null;
+  instructor: { firstName: string; lastName: string; avatarUrl: string | null };
+  category: { name: string } | null;
 }
 
 const features = [
   {
     icon: Brain,
     title: 'Kuize me AI',
-    description: 'Gjenerimi automatik i kuizeve nga permbajtja e mesimeve me inteligjence artificiale',
+    description:
+      'Gjenerimi automatik i kuizeve nga permbajtja e mesimeve me inteligjence artificiale.',
   },
   {
     icon: Video,
     title: 'Sesione Live',
-    description: 'Sesione ne kohe reale me Q&A dhe chat per nderveprim direkt me instruktorin',
+    description:
+      'Sesione ne kohe reale me Q&A dhe chat per nderveprim direkt me instruktorin.',
   },
   {
     icon: BarChart3,
     title: 'Gjurmo Progresin',
-    description: 'Statistika te detajuara per progresin tend ne cdo kurs dhe modul',
+    description: 'Statistika te detajuara per progresin tend ne cdo kurs dhe modul.',
+  },
+  {
+    icon: Award,
+    title: 'Certifikata',
+    description: 'Merr certifikata te verifikueshme publikisht per cdo kurs te perfunduar.',
   },
 ];
 
 const steps = [
-  { number: '01', title: 'Krijo Llogarine', description: 'Regjistrohu falas si student ose instruktor' },
-  { number: '02', title: 'Regjistrohu ne Kurse', description: 'Shfleto dhe zgjidh kurset qe te interesojne' },
-  { number: '03', title: 'Meso & Certifikohu', description: 'Perfundo kurset dhe merr certifikata te verifikueshme' },
+  { number: '01', title: 'Krijo Llogarine', description: 'Regjistrohu falas si student ose instruktor.' },
+  { number: '02', title: 'Regjistrohu ne Kurse', description: 'Shfleto dhe zgjidh kurset qe te interesojne.' },
+  { number: '03', title: 'Meso & Certifikohu', description: 'Perfundo kurset dhe merr certifikata te verifikueshme.' },
+];
+
+const testimonials = [
+  {
+    name: 'Elsa Hoxha',
+    role: 'Studente, Inxhinieri Software',
+    text: 'Kuizet e gjeneruara nga AI me ndihmuan te kuptoja konceptet me te veshtira. Platforma me e mire qe kam perdorur.',
+  },
+  {
+    name: 'Andi Krasniqi',
+    role: 'Instruktor, Web Development',
+    text: 'Course Builder-i eshte intuitiv dhe sesionet live funksionojne pa probleme. E rekomandoj per cdo instruktor.',
+  },
+  {
+    name: 'Marsida Berisha',
+    role: 'Studente, Data Science',
+    text: 'Gjurmimi i progresit dhe kalendari me mbajten te organizuar gjate gjithe semestrit. Certifikatat jane bonus i shkelqyer.',
+  },
 ];
 
 const fadeInUp = {
-  initial: { opacity: 0, y: 20 },
+  initial: { opacity: 0, y: 24 },
   animate: { opacity: 1, y: 0 },
   transition: { duration: 0.5 },
-};
-
-const staggerContainer = {
-  animate: {
-    transition: {
-      staggerChildren: 0.1,
-    },
-  },
 };
 
 export default function HomePage() {
@@ -101,23 +114,14 @@ export default function HomePage() {
     loadData();
   }, []);
 
-  const getLevelLabel = (level: string) => {
-    switch (level) {
-      case 'BEGINNER': return 'Fillestar';
-      case 'INTERMEDIATE': return 'Mesatar';
-      case 'ADVANCED': return 'Avancuar';
-      default: return level;
-    }
-  };
-
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 to-indigo-700 text-white font-bold shadow-lg shadow-indigo-200">
-              Z
+      <header className="fixed left-0 right-0 top-0 z-50 border-b border-slate-200 bg-white/90 backdrop-blur-md">
+        <div className="container mx-auto flex h-16 items-center justify-between px-4">
+          <Link href="/" className="flex items-center gap-2.5">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-sm shadow-indigo-200">
+              <GraduationCap className="h-5 w-5" />
             </div>
             <span className="text-xl font-bold text-slate-900">ZK-LMS</span>
           </Link>
@@ -133,45 +137,49 @@ export default function HomePage() {
       </header>
 
       <main className="pt-16">
-        {/* Hero Section */}
-        <section className="relative py-24 lg:py-32 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-indigo-50 via-white to-slate-50" />
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-indigo-100/50 rounded-full blur-3xl" />
+        {/* Hero */}
+        <section className="relative overflow-hidden bg-gradient-to-br from-indigo-600 to-purple-600 py-24 lg:py-32">
+          {/* decorative blobs */}
+          <div className="absolute -left-20 -top-20 h-96 w-96 rounded-full bg-white/10 blur-3xl" />
+          <div className="absolute -bottom-32 -right-20 h-96 w-96 rounded-full bg-purple-400/20 blur-3xl" />
 
-          <div className="container mx-auto px-4 relative">
+          <div className="container relative mx-auto px-4">
             <motion.div
-              className="max-w-4xl mx-auto text-center"
+              className="mx-auto max-w-4xl text-center"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
             >
-              <Badge className="mb-6 bg-indigo-100 text-indigo-700 hover:bg-indigo-100 text-sm px-4 py-1">
+              <span className="mb-6 inline-block rounded-full bg-white/15 px-4 py-1.5 text-sm font-medium text-white backdrop-blur-sm">
                 Platforma e te Mesuarit te Ardhmes
-              </Badge>
-              <h1 className="text-5xl lg:text-6xl font-bold text-slate-900 leading-tight">
+              </span>
+              <h1 className="text-4xl font-bold leading-tight text-white sm:text-5xl lg:text-6xl">
                 Meso Pa Kufij me{' '}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600">
+                <span className="bg-gradient-to-r from-amber-200 to-amber-400 bg-clip-text text-transparent">
                   Fuqine e AI
                 </span>
               </h1>
-              <p className="mt-6 text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed">
+              <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-indigo-100">
                 Platforma moderne e menaxhimit te mesimit me bashkepunim ne kohe reale,
                 kuize te gjeneruara nga AI, dhe gjurmim te plote te progresit.
               </p>
               <motion.div
-                className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4"
+                className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
               >
                 <Link href="/register">
-                  <Button size="lg" className="text-lg px-8 h-12 shadow-lg shadow-indigo-200">
+                  <Button size="lg" className="bg-white text-indigo-700 shadow-lg hover:bg-indigo-50">
                     Fillo te Mesosh
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
                 <Link href="/register?role=instructor">
-                  <Button size="lg" variant="outline" className="text-lg px-8 h-12">
+                  <Button
+                    size="lg"
+                    className="border border-white/30 bg-white/10 text-white backdrop-blur-sm hover:bg-white/20"
+                  >
                     Behu Instruktor
                   </Button>
                 </Link>
@@ -180,156 +188,94 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Stats Bar */}
+        {/* Stats bar */}
         {stats && (
-          <section className="py-8 bg-slate-900">
+          <section className="border-b border-slate-100 bg-white py-10">
             <div className="container mx-auto px-4">
-              <motion.div
-                className="flex flex-wrap items-center justify-center gap-8 lg:gap-16"
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                viewport={{ once: true }}
-              >
-                <div className="text-center">
-                  <p className="text-3xl lg:text-4xl font-bold text-white">{stats.courses}+</p>
-                  <p className="text-slate-400 mt-1">Kurse</p>
-                </div>
-                <div className="h-12 w-px bg-slate-700 hidden lg:block" />
-                <div className="text-center">
-                  <p className="text-3xl lg:text-4xl font-bold text-white">{stats.students}+</p>
-                  <p className="text-slate-400 mt-1">Studente</p>
-                </div>
-                <div className="h-12 w-px bg-slate-700 hidden lg:block" />
-                <div className="text-center">
-                  <p className="text-3xl lg:text-4xl font-bold text-white">{stats.instructors}+</p>
-                  <p className="text-slate-400 mt-1">Instruktore</p>
-                </div>
-              </motion.div>
+              <div className="grid grid-cols-3 gap-8">
+                {[
+                  { value: stats.courses, label: 'Kurse', icon: GraduationCap },
+                  { value: stats.students, label: 'Studente', icon: Users },
+                  { value: stats.instructors, label: 'Instruktore', icon: Brain },
+                ].map((s) => (
+                  <div key={s.label} className="flex flex-col items-center text-center">
+                    <div className="mb-2 flex h-11 w-11 items-center justify-center rounded-lg bg-indigo-100">
+                      <s.icon className="h-5 w-5 text-indigo-600" />
+                    </div>
+                    <p className="text-3xl font-bold text-slate-900">{s.value}+</p>
+                    <p className="mt-1 text-sm text-slate-500">{s.label}</p>
+                  </div>
+                ))}
+              </div>
             </div>
           </section>
         )}
 
-        {/* Features Section */}
+        {/* Features */}
         <section className="py-24">
           <div className="container mx-auto px-4">
-            <motion.div
-              className="text-center mb-16"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-            >
-              <h2 className="text-3xl lg:text-4xl font-bold text-slate-900">
+            <div className="mx-auto mb-14 max-w-2xl text-center">
+              <h2 className="text-3xl font-bold text-slate-900 lg:text-4xl">
                 Funksionalitete te Fuqishme
               </h2>
-              <p className="mt-4 text-lg text-slate-600 max-w-2xl mx-auto">
-                E gjitha cfare nevojitet per nje eksperience mesimi efektive
+              <p className="mt-3 text-lg text-slate-600">
+                E gjitha cfare nevojitet per nje eksperience mesimi efektive.
               </p>
-            </motion.div>
-
-            <motion.div
-              className="grid md:grid-cols-3 gap-8"
-              variants={staggerContainer}
-              initial="initial"
-              whileInView="animate"
-              viewport={{ once: true }}
-            >
-              {features.map((feature, index) => (
+            </div>
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {features.map((feature, i) => (
                 <motion.div
                   key={feature.title}
-                  variants={fadeInUp}
-                  className="group"
+                  initial={fadeInUp.initial}
+                  whileInView={fadeInUp.animate}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.4, delay: i * 0.08 }}
                 >
-                  <Card className="h-full border-2 border-transparent hover:border-indigo-200 transition-all duration-300 hover:shadow-xl">
-                    <CardContent className="p-8">
-                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                        <feature.icon className="h-7 w-7 text-white" />
+                  <Card className="h-full transition-all duration-200 hover:-translate-y-1 hover:shadow-md">
+                    <CardContent className="p-6">
+                      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-100">
+                        <feature.icon className="h-6 w-6 text-indigo-600" />
                       </div>
-                      <h3 className="text-xl font-semibold text-slate-900 mb-3">
-                        {feature.title}
-                      </h3>
-                      <p className="text-slate-600 leading-relaxed">
+                      <h3 className="mb-2 font-semibold text-slate-900">{feature.title}</h3>
+                      <p className="text-sm leading-relaxed text-slate-600">
                         {feature.description}
                       </p>
                     </CardContent>
                   </Card>
                 </motion.div>
               ))}
-            </motion.div>
+            </div>
           </div>
         </section>
 
-        {/* Featured Courses */}
+        {/* Featured courses */}
         {featuredCourses.length > 0 && (
-          <section className="py-24 bg-slate-50">
+          <section className="bg-slate-50 py-24">
             <div className="container mx-auto px-4">
-              <motion.div
-                className="text-center mb-16"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-              >
-                <h2 className="text-3xl lg:text-4xl font-bold text-slate-900">
+              <div className="mx-auto mb-14 max-w-2xl text-center">
+                <h2 className="text-3xl font-bold text-slate-900 lg:text-4xl">
                   Kurset me Popullarizuara
                 </h2>
-                <p className="mt-4 text-lg text-slate-600">
-                  Fillo udhetimin tend me kurset tona me te mira
+                <p className="mt-3 text-lg text-slate-600">
+                  Fillo udhetimin tend me kurset tona me te mira.
                 </p>
-              </motion.div>
-
-              <motion.div
-                className="grid md:grid-cols-3 gap-8"
-                variants={staggerContainer}
-                initial="initial"
-                whileInView="animate"
-                viewport={{ once: true }}
-              >
+              </div>
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {featuredCourses.map((course) => (
-                  <motion.div key={course.id} variants={fadeInUp}>
-                    <Link href={`/courses/${course.slug}`}>
-                      <Card className="h-full overflow-hidden hover:shadow-xl transition-all duration-300 group">
-                        <div className="aspect-video bg-slate-200 relative overflow-hidden">
-                          {course.thumbnailUrl ? (
-                            <img
-                              src={course.thumbnailUrl}
-                              alt={course.title}
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center">
-                              <BookOpen className="h-12 w-12 text-slate-400" />
-                            </div>
-                          )}
-                          <Badge className="absolute top-3 left-3 bg-white/90">
-                            {getLevelLabel(course.level)}
-                          </Badge>
-                        </div>
-                        <CardContent className="p-5">
-                          {course.category && (
-                            <p className="text-sm text-indigo-600 font-medium mb-2">
-                              {course.category.name}
-                            </p>
-                          )}
-                          <h3 className="font-semibold text-slate-900 text-lg mb-2 line-clamp-2">
-                            {course.title}
-                          </h3>
-                          <div className="flex items-center gap-2 text-sm text-slate-500 mb-3">
-                            <span>{course.instructor.firstName} {course.instructor.lastName}</span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-1 text-sm text-slate-500">
-                              <Users className="h-4 w-4" />
-                              <span>{course.enrollmentCount} studente</span>
-                            </div>
-                            <Button size="sm">Regjistrohu</Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </Link>
-                  </motion.div>
+                  <CourseCard
+                    key={course.id}
+                    href={`/courses/${course.slug}`}
+                    title={course.title}
+                    thumbnailUrl={course.thumbnailUrl}
+                    category={course.category?.name}
+                    level={course.level}
+                    instructor={course.instructor}
+                    enrollmentCount={course.enrollmentCount}
+                    rating={course.averageRating}
+                  />
                 ))}
-              </motion.div>
-
-              <div className="text-center mt-12">
+              </div>
+              <div className="mt-12 text-center">
                 <Link href="/courses">
                   <Button variant="outline" size="lg">
                     Shiko te Gjitha Kurset
@@ -341,106 +287,129 @@ export default function HomePage() {
           </section>
         )}
 
-        {/* How It Works */}
+        {/* How it works */}
         <section className="py-24">
           <div className="container mx-auto px-4">
-            <motion.div
-              className="text-center mb-16"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-            >
-              <h2 className="text-3xl lg:text-4xl font-bold text-slate-900">
-                Si Funksionon?
-              </h2>
-              <p className="mt-4 text-lg text-slate-600">
-                Tre hapa te thjeshte per te filluar
-              </p>
-            </motion.div>
-
-            <motion.div
-              className="grid md:grid-cols-3 gap-8 lg:gap-12"
-              variants={staggerContainer}
-              initial="initial"
-              whileInView="animate"
-              viewport={{ once: true }}
-            >
+            <div className="mx-auto mb-14 max-w-2xl text-center">
+              <h2 className="text-3xl font-bold text-slate-900 lg:text-4xl">Si Funksionon?</h2>
+              <p className="mt-3 text-lg text-slate-600">Tre hapa te thjeshte per te filluar.</p>
+            </div>
+            <div className="grid gap-8 md:grid-cols-3 lg:gap-12">
               {steps.map((step, index) => (
-                <motion.div
-                  key={step.number}
-                  variants={fadeInUp}
-                  className="text-center relative"
-                >
-                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-indigo-500 to-indigo-600 text-white text-2xl font-bold flex items-center justify-center mx-auto mb-6 shadow-lg shadow-indigo-200">
+                <div key={step.number} className="relative text-center">
+                  <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 text-xl font-bold text-white shadow-lg shadow-indigo-200">
                     {step.number}
                   </div>
                   {index < steps.length - 1 && (
-                    <div className="hidden md:block absolute top-10 left-[60%] w-[80%] h-0.5 bg-gradient-to-r from-indigo-200 to-transparent" />
+                    <div className="absolute left-[60%] top-8 hidden h-0.5 w-[80%] bg-gradient-to-r from-indigo-200 to-transparent md:block" />
                   )}
-                  <h3 className="text-xl font-semibold text-slate-900 mb-3">
-                    {step.title}
-                  </h3>
-                  <p className="text-slate-600">{step.description}</p>
-                </motion.div>
+                  <h3 className="mb-2 font-semibold text-slate-900">{step.title}</h3>
+                  <p className="text-sm text-slate-600">{step.description}</p>
+                </div>
               ))}
-            </motion.div>
+            </div>
           </div>
         </section>
 
-        {/* CTA Section */}
-        <section className="py-24 bg-gradient-to-br from-indigo-600 to-indigo-700">
+        {/* Testimonials */}
+        <section className="bg-slate-50 py-24">
           <div className="container mx-auto px-4">
-            <motion.div
-              className="max-w-3xl mx-auto text-center"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-            >
-              <h2 className="text-3xl lg:text-4xl font-bold text-white mb-6">
+            <div className="mx-auto mb-14 max-w-2xl text-center">
+              <h2 className="text-3xl font-bold text-slate-900 lg:text-4xl">
+                Cfare Thone Perdoruesit
+              </h2>
+              <p className="mt-3 text-lg text-slate-600">
+                Mijera studente dhe instruktore na besojne.
+              </p>
+            </div>
+            <div className="grid gap-6 md:grid-cols-3">
+              {testimonials.map((t, i) => (
+                <motion.div
+                  key={t.name}
+                  initial={fadeInUp.initial}
+                  whileInView={fadeInUp.animate}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.4, delay: i * 0.1 }}
+                >
+                  <Card className="h-full">
+                    <CardContent className="flex h-full flex-col p-6">
+                      <Quote className="mb-4 h-8 w-8 text-indigo-200" />
+                      <p className="flex-1 text-sm leading-relaxed text-slate-700">
+                        &ldquo;{t.text}&rdquo;
+                      </p>
+                      <div className="mt-5 flex items-center gap-3">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-100 text-sm font-semibold text-indigo-700">
+                          {t.name
+                            .split(' ')
+                            .map((n) => n[0])
+                            .join('')}
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-slate-900">{t.name}</p>
+                          <p className="text-xs text-slate-500">{t.role}</p>
+                        </div>
+                      </div>
+                      <div className="mt-3 flex gap-0.5">
+                        {[1, 2, 3, 4, 5].map((s) => (
+                          <Star key={s} className="h-4 w-4 fill-amber-400 text-amber-400" />
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* CTA */}
+        <section className="bg-gradient-to-br from-indigo-600 to-purple-600 py-24">
+          <div className="container mx-auto px-4">
+            <div className="mx-auto max-w-3xl text-center">
+              <h2 className="mb-4 text-3xl font-bold text-white lg:text-4xl">
                 Gati per te Filluar Udhetimin Tend?
               </h2>
-              <p className="text-xl text-indigo-100 mb-10">
-                Bashkohu me mijera studente dhe instruktore ne platformen tone
+              <p className="mb-10 text-lg text-indigo-100">
+                Bashkohu me mijera studente dhe instruktore ne platformen tone.
               </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Link href="/register">
-                  <Button size="lg" className="bg-white text-indigo-600 hover:bg-indigo-50 text-lg px-8 h-12">
-                    Krijo Llogari Falas
-                  </Button>
-                </Link>
-              </div>
-            </motion.div>
+              <Link href="/register">
+                <Button size="lg" className="bg-white text-indigo-700 shadow-lg hover:bg-indigo-50">
+                  Krijo Llogari Falas
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              </Link>
+            </div>
           </div>
         </section>
       </main>
 
       {/* Footer */}
-      <footer className="bg-slate-900 text-slate-400 py-16">
+      <footer className="bg-slate-900 py-16 text-slate-400">
         <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-4 gap-12">
+          <div className="grid gap-12 md:grid-cols-4">
             <div className="md:col-span-2">
-              <Link href="/" className="flex items-center gap-2 mb-4">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white font-bold">
-                  Z
+              <Link href="/" className="mb-4 flex items-center gap-2.5">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white">
+                  <GraduationCap className="h-5 w-5" />
                 </div>
                 <span className="text-xl font-bold text-white">ZK-LMS</span>
               </Link>
-              <p className="text-slate-400 max-w-md">
+              <p className="max-w-md text-sm leading-relaxed">
                 Platforma moderne e menaxhimit te mesimit me inteligjence artificiale,
                 e ndertuar per te ardhmen e edukimit.
               </p>
             </div>
             <div>
-              <h4 className="font-semibold text-white mb-4">Linqe</h4>
-              <ul className="space-y-2">
-                <li><Link href="/courses" className="hover:text-white transition-colors">Kurset</Link></li>
-                <li><Link href="/register" className="hover:text-white transition-colors">Regjistrohu</Link></li>
-                <li><Link href="/login" className="hover:text-white transition-colors">Hyr</Link></li>
+              <h4 className="mb-4 font-semibold text-white">Linqe</h4>
+              <ul className="space-y-2 text-sm">
+                <li><Link href="/courses" className="transition-colors hover:text-white">Kurset</Link></li>
+                <li><Link href="/register" className="transition-colors hover:text-white">Regjistrohu</Link></li>
+                <li><Link href="/login" className="transition-colors hover:text-white">Hyr</Link></li>
               </ul>
             </div>
             <div>
-              <h4 className="font-semibold text-white mb-4">Kontakt</h4>
-              <ul className="space-y-2">
+              <h4 className="mb-4 font-semibold text-white">Kontakt</h4>
+              <ul className="space-y-2 text-sm">
                 <li className="flex items-center gap-2">
                   <Mail className="h-4 w-4" />
                   <span>info@zk-lms.com</span>
@@ -452,9 +421,10 @@ export default function HomePage() {
               </ul>
             </div>
           </div>
-          <div className="border-t border-slate-800 mt-12 pt-8 text-center">
+          <div className="mt-12 border-t border-slate-800 pt-8 text-center text-sm">
             <p>
-              &copy; 2026 ZK-LMS. Projekt Diplome - Fakulteti i Shkencave te Natyres, Departamenti i Informatikes.
+              &copy; 2026 ZK-LMS. Projekt Diplome — Fakulteti i Shkencave te Natyres,
+              Departamenti i Informatikes.
             </p>
           </div>
         </div>

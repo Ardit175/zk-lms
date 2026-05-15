@@ -64,6 +64,8 @@ export interface ModuleProgress {
     watchedSeconds: number;
     content?: string;
     videoUrl?: string;
+    videoType?: 'YOUTUBE' | 'VIMEO' | 'UPLOAD' | null;
+    pdfUrl?: string | null;
     quizId?: string | null;
   }>;
 }

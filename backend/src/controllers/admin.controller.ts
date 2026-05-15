@@ -2,9 +2,16 @@ import { Request, Response } from 'express';
 import { prisma } from '../services/prisma';
 import { ApiResponse } from '../utils/ApiResponse';
 import { notificationService } from '../services/notification.service';
+import { cacheGet, cacheSet, cacheKeys, TTL } from '../lib/cache';
 
 export const getStats = async (req: Request, res: Response): Promise<void> => {
   try {
+    const cached = await cacheGet(cacheKeys.adminStats);
+    if (cached) {
+      res.json(ApiResponse.success(cached));
+      return;
+    }
+
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
@@ -69,7 +76,7 @@ export const getStats = async (req: Request, res: Response): Promise<void> => {
       ? Math.round(((enrollmentsThisMonth - enrollmentsLastMonth) / enrollmentsLastMonth) * 100)
       : 100;
 
-    res.json(ApiResponse.success({
+    const payload = {
       users,
       courses,
       enrollments: {
@@ -78,7 +85,10 @@ export const getStats = async (req: Request, res: Response): Promise<void> => {
         changePercent: enrollmentChange,
       },
       pendingReviewCourses,
-    }));
+    };
+
+    await cacheSet(cacheKeys.adminStats, payload, TTL.ADMIN_STATS);
+    res.json(ApiResponse.success(payload));
   } catch (error) {
     console.error('GetStats error:', error);
     res.status(500).json(ApiResponse.error('Deshtoi te merrte statistikat'));

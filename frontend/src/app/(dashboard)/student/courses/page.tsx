@@ -4,11 +4,9 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   BookOpen,
-  Clock,
   PlayCircle,
   CheckCircle,
   Award,
-  Loader2,
   Search,
 } from 'lucide-react';
 import { DashboardLayout } from '@/components/layouts/DashboardLayout';
@@ -16,19 +14,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { CourseCard } from '@/components/course/CourseCard';
+import { CardGridSkeleton } from '@/components/ui/skeletons';
 import { enrollmentsApi, type Enrollment } from '@/lib/api/enrollments';
-import { cn } from '@/lib/utils';
 
 const STATUS_CONFIG = {
-  ACTIVE: { label: 'Aktiv', variant: 'default' as const, color: 'bg-indigo-500' },
-  COMPLETED: { label: 'Perfunduar', variant: 'success' as const, color: 'bg-green-500' },
-  DROPPED: { label: 'Braktisur', variant: 'destructive' as const, color: 'bg-red-500' },
-};
-
-const LEVEL_LABELS = {
-  BEGINNER: 'Fillestar',
-  INTERMEDIATE: 'Mesatar',
-  ADVANCED: 'Avancuar',
+  ACTIVE: { label: 'Aktiv', variant: 'default' as const },
+  COMPLETED: { label: 'Perfunduar', variant: 'success' as const },
+  DROPPED: { label: 'Braktisur', variant: 'destructive' as const },
 };
 
 export default function StudentCoursesPage() {
@@ -161,119 +154,59 @@ export default function StudentCoursesPage() {
 
         {/* Course Grid */}
         {isLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
-          </div>
+          <CardGridSkeleton count={6} />
         ) : filteredEnrollments.length === 0 ? (
           <EmptyState hasFilters={searchQuery !== '' || statusFilter !== 'ALL'} />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredEnrollments.map((enrollment) => (
-              <EnrollmentCard
+              <CourseCard
                 key={enrollment.id}
-                enrollment={enrollment}
-                onContinue={() => handleContinueCourse(enrollment)}
+                title={enrollment.course.title}
+                thumbnailUrl={enrollment.course.thumbnailUrl}
+                level={enrollment.course.level}
+                instructor={enrollment.course.instructor}
+                duration={enrollment.course.totalDuration}
+                progress={enrollment.progressPercent}
+                badge={
+                  <Badge variant={STATUS_CONFIG[enrollment.status].variant}>
+                    {STATUS_CONFIG[enrollment.status].label}
+                  </Badge>
+                }
+                footer={
+                  enrollment.status === 'COMPLETED' ? (
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        className="flex-1"
+                        onClick={() => handleContinueCourse(enrollment)}
+                      >
+                        Rishiko
+                      </Button>
+                      {enrollment.certificate && (
+                        <Button
+                          variant="outline"
+                          className="flex-1"
+                          onClick={() => router.push('/student/certificates')}
+                        >
+                          <Award className="h-4 w-4 mr-2" />
+                          Certifikata
+                        </Button>
+                      )}
+                    </div>
+                  ) : (
+                    <Button className="w-full" onClick={() => handleContinueCourse(enrollment)}>
+                      <PlayCircle className="h-4 w-4 mr-2" />
+                      Vazhdo Mesimin
+                    </Button>
+                  )
+                }
               />
             ))}
           </div>
         )}
       </div>
     </DashboardLayout>
-  );
-}
-
-interface EnrollmentCardProps {
-  enrollment: Enrollment;
-  onContinue: () => void;
-}
-
-function EnrollmentCard({ enrollment, onContinue }: EnrollmentCardProps) {
-  const status = STATUS_CONFIG[enrollment.status];
-  const course = enrollment.course;
-
-  return (
-    <Card className="overflow-hidden hover:shadow-lg transition-shadow">
-      <div className="aspect-video bg-slate-100 relative">
-        {course.thumbnailUrl ? (
-          <img
-            src={course.thumbnailUrl}
-            alt={course.title}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <BookOpen className="h-12 w-12 text-slate-300" />
-          </div>
-        )}
-        <div className="absolute top-2 right-2">
-          <Badge variant={status.variant}>{status.label}</Badge>
-        </div>
-        {enrollment.certificate && (
-          <div className="absolute top-2 left-2">
-            <Badge variant="warning" className="bg-amber-500">
-              <Award className="h-3 w-3 mr-1" />
-              Certifikuar
-            </Badge>
-          </div>
-        )}
-      </div>
-
-      <CardContent className="p-4">
-        <h3 className="font-semibold text-slate-900 truncate mb-1">
-          {course.title}
-        </h3>
-        <p className="text-sm text-slate-500 mb-3">
-          {course.instructor.firstName} {course.instructor.lastName}
-        </p>
-
-        {/* Progress Bar */}
-        <div className="mb-4">
-          <div className="flex justify-between text-sm mb-1">
-            <span className="text-slate-500">Progresi</span>
-            <span className="font-medium text-slate-900">
-              {enrollment.progressPercent}%
-            </span>
-          </div>
-          <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
-            <div
-              className={cn('h-full transition-all', status.color)}
-              style={{ width: `${enrollment.progressPercent}%` }}
-            />
-          </div>
-        </div>
-
-        {/* Meta Info */}
-        <div className="flex items-center gap-4 text-sm text-slate-500 mb-4">
-          <div className="flex items-center gap-1">
-            <Clock className="h-4 w-4" />
-            <span>{course.totalDuration} min</span>
-          </div>
-          <span className="px-2 py-0.5 rounded-full bg-slate-100 text-xs">
-            {LEVEL_LABELS[course.level]}
-          </span>
-        </div>
-
-        {/* Action Button */}
-        {enrollment.status === 'ACTIVE' ? (
-          <Button className="w-full" onClick={onContinue}>
-            <PlayCircle className="h-4 w-4 mr-2" />
-            Vazhdo Mesimin
-          </Button>
-        ) : enrollment.status === 'COMPLETED' ? (
-          <div className="flex gap-2">
-            <Button variant="outline" className="flex-1" onClick={onContinue}>
-              Rishiko
-            </Button>
-            {enrollment.certificate && (
-              <Button variant="outline" className="flex-1">
-                <Award className="h-4 w-4 mr-2" />
-                Certifikata
-              </Button>
-            )}
-          </div>
-        ) : null}
-      </CardContent>
-    </Card>
   );
 }
 

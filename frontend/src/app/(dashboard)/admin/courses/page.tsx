@@ -6,7 +6,6 @@ import {
   Search,
   Star,
   Users,
-  Loader2,
   ChevronLeft,
   ChevronRight,
   Eye,
@@ -16,6 +15,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import { adminApi, type AdminCourse } from '@/lib/api/admin';
 import { cn } from '@/lib/utils';
 
@@ -147,17 +147,28 @@ export default function AdminCoursesPage() {
         <Card>
           <CardContent className="p-0">
             {isLoading ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+              <div className="divide-y divide-slate-100">
+                {Array.from({ length: 8 }).map((_, i) => (
+                  <div key={i} className="flex items-center gap-4 px-6 py-4">
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="h-4 w-48" />
+                      <Skeleton className="h-3 w-32" />
+                    </div>
+                    <Skeleton className="h-4 w-28" />
+                    <Skeleton className="h-6 w-20 rounded-full" />
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-8 w-20 rounded-lg" />
+                  </div>
+                ))}
               </div>
             ) : courses.length === 0 ? (
-              <div className="text-center py-12 text-slate-500">
+              <div className="text-center py-16 text-slate-500">
                 Nuk u gjeten kurse
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-slate-50 border-b border-slate-200">
+                  <thead className="sticky top-0 z-10 bg-slate-50 border-b border-slate-200">
                     <tr>
                       <th className="text-left px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
                         Kursi
@@ -179,11 +190,14 @@ export default function AdminCoursesPage() {
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-200">
+                  <tbody className="divide-y divide-slate-100">
                     {courses.map((course) => {
                       const status = STATUS_CONFIG[course.status];
                       return (
-                        <tr key={course.id} className="hover:bg-slate-50">
+                        <tr
+                          key={course.id}
+                          className="odd:bg-slate-50/50 transition-colors hover:bg-indigo-50/60"
+                        >
                           <td className="px-6 py-4">
                             <div>
                               <p className="font-medium text-slate-900">{course.title}</p>

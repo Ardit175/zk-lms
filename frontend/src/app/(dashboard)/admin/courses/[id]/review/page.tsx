@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { useRouter, useParams } from 'next/navigation';
 import {
   ArrowLeft,
@@ -178,11 +179,15 @@ export default function CourseReviewPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 {course.thumbnailUrl && (
-                  <img
-                    src={course.thumbnailUrl}
-                    alt={course.title}
-                    className="w-full aspect-video object-cover rounded-lg"
-                  />
+                  <div className="relative aspect-video w-full overflow-hidden rounded-lg">
+                    <Image
+                      src={course.thumbnailUrl}
+                      alt={course.title}
+                      fill
+                      sizes="(max-width: 1024px) 100vw, 66vw"
+                      className="object-cover"
+                    />
+                  </div>
                 )}
                 <div>
                   <h3 className="text-sm font-medium text-slate-500 mb-1">Pershkrimi</h3>
@@ -277,9 +282,11 @@ export default function CourseReviewPage() {
               <CardContent>
                 <div className="flex items-center gap-4 mb-4">
                   {course.instructor.avatarUrl ? (
-                    <img
+                    <Image
                       src={course.instructor.avatarUrl}
-                      alt=""
+                      alt={`${course.instructor.firstName} ${course.instructor.lastName}`}
+                      width={64}
+                      height={64}
                       className="h-16 w-16 rounded-full object-cover"
                     />
                   ) : (

@@ -13,19 +13,17 @@ import {
   BarChart3,
   ExternalLink,
   Archive,
-  Users,
-  Star,
-  Clock,
   BookOpen,
-  Loader2,
   FileText,
+  Loader2,
 } from 'lucide-react';
 import { DashboardLayout } from '@/components/layouts/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
+import { CourseCard } from '@/components/course/CourseCard';
+import { CardGridSkeleton } from '@/components/ui/skeletons';
 import {
   Dialog,
   DialogContent,
@@ -58,12 +56,6 @@ const STATUS_CONFIG: Record<Course['status'], { label: string; variant: 'draft' 
   PENDING_REVIEW: { label: 'Ne Pritje', variant: 'warning' },
   PUBLISHED: { label: 'Publikuar', variant: 'success' },
   ARCHIVED: { label: 'Arkivuar', variant: 'destructive' },
-};
-
-const LEVEL_LABELS: Record<Course['level'], string> = {
-  BEGINNER: 'Fillestar',
-  INTERMEDIATE: 'Mesatar',
-  ADVANCED: 'Avancuar',
 };
 
 export default function InstructorCoursesPage() {
@@ -289,9 +281,7 @@ export default function InstructorCoursesPage() {
 
         {/* Content */}
         {isLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
-          </div>
+          <CardGridSkeleton count={6} />
         ) : filteredCourses.length === 0 ? (
           <EmptyState
             hasFilters={searchQuery !== '' || statusFilter !== 'ALL' || categoryFilter !== 'ALL'}
@@ -302,118 +292,72 @@ export default function InstructorCoursesPage() {
             {filteredCourses.map((course) => (
               <CourseCard
                 key={course.id}
-                course={course}
-                onEdit={() => router.push(`/instructor/courses/${course.id}/edit`)}
-                onAnalytics={() => router.push(`/instructor/courses/${course.id}/analytics`)}
-                onAssignments={() => router.push(`/instructor/courses/${course.id}/assignments`)}
-                onViewAsStudent={() => window.open(`/courses/${course.slug}`, '_blank')}
-                onArchive={() => handleArchive(course.id)}
+                title={course.title}
+                thumbnailUrl={course.thumbnailUrl}
+                category={course.category?.name}
+                level={course.level}
+                enrollmentCount={course.enrollmentCount}
+                rating={course.averageRating}
+                duration={course.totalDuration}
+                badge={
+                  <Badge variant={STATUS_CONFIG[course.status].variant}>
+                    {STATUS_CONFIG[course.status].label}
+                  </Badge>
+                }
+                menu={
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 bg-white/90 backdrop-blur-sm hover:bg-white"
+                      >
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem
+                        onClick={() => router.push(`/instructor/courses/${course.id}/edit`)}
+                      >
+                        <Pencil className="h-4 w-4 mr-2" />
+                        Edito
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => router.push(`/instructor/courses/${course.id}/analytics`)}
+                      >
+                        <BarChart3 className="h-4 w-4 mr-2" />
+                        Analitika
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => router.push(`/instructor/courses/${course.id}/assignments`)}
+                      >
+                        <FileText className="h-4 w-4 mr-2" />
+                        Detyrat
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => window.open(`/courses/${course.slug}`, '_blank')}
+                      >
+                        <ExternalLink className="h-4 w-4 mr-2" />
+                        Shiko si Student
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={() => handleArchive(course.id)}
+                        className="text-red-600"
+                      >
+                        <Archive className="h-4 w-4 mr-2" />
+                        Arkivo
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                }
+                onClick={() => router.push(`/instructor/courses/${course.id}/edit`)}
               />
             ))}
           </div>
         )}
       </div>
     </DashboardLayout>
-  );
-}
-
-interface CourseCardProps {
-  course: Course;
-  onEdit: () => void;
-  onAnalytics: () => void;
-  onAssignments: () => void;
-  onViewAsStudent: () => void;
-  onArchive: () => void;
-}
-
-function CourseCard({ course, onEdit, onAnalytics, onAssignments, onViewAsStudent, onArchive }: CourseCardProps) {
-  const status = STATUS_CONFIG[course.status];
-
-  return (
-    <Card className="overflow-hidden hover:shadow-lg transition-shadow">
-      {/* Thumbnail */}
-      <div className="aspect-video bg-slate-100 relative">
-        {course.thumbnailUrl ? (
-          <img
-            src={course.thumbnailUrl}
-            alt={course.title}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <BookOpen className="h-12 w-12 text-slate-300" />
-          </div>
-        )}
-        <div className="absolute top-2 right-2">
-          <Badge variant={status.variant}>{status.label}</Badge>
-        </div>
-      </div>
-
-      <CardContent className="p-4">
-        {/* Title & Category */}
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-slate-900 truncate">{course.title}</h3>
-            {course.category && (
-              <p className="text-sm text-slate-500">{course.category.name}</p>
-            )}
-          </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={onEdit}>
-                <Pencil className="h-4 w-4 mr-2" />
-                Edito
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={onAnalytics}>
-                <BarChart3 className="h-4 w-4 mr-2" />
-                Analitika
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={onAssignments}>
-                <FileText className="h-4 w-4 mr-2" />
-                Detyrat
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={onViewAsStudent}>
-                <ExternalLink className="h-4 w-4 mr-2" />
-                Shiko si Student
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={onArchive} className="text-red-600">
-                <Archive className="h-4 w-4 mr-2" />
-                Arkivo
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-
-        {/* Stats */}
-        <div className="flex items-center gap-4 mt-4 text-sm text-slate-500">
-          <div className="flex items-center gap-1">
-            <Users className="h-4 w-4" />
-            <span>{course.enrollmentCount}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Star className="h-4 w-4 text-amber-500" />
-            <span>{course.averageRating?.toFixed(1) || '-'}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Clock className="h-4 w-4" />
-            <span>{course.totalDuration}min</span>
-          </div>
-        </div>
-
-        {/* Level Badge */}
-        <div className="mt-3">
-          <span className="text-xs px-2 py-1 rounded-full bg-slate-100 text-slate-600">
-            {LEVEL_LABELS[course.level]}
-          </span>
-        </div>
-      </CardContent>
-    </Card>
   );
 }
 

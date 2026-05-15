@@ -36,6 +36,12 @@ enum LessonType {
   ASSIGNMENT
 }
 
+enum VideoType {
+  YOUTUBE
+  VIMEO
+  UPLOAD
+}
+
 enum EnrollmentStatus {
   ACTIVE
   COMPLETED
@@ -193,6 +199,8 @@ model Lesson {
   title       String
   content     String?    // Rich text (HTML/Markdown)
   videoUrl    String?
+  videoType   VideoType? // YOUTUBE | VIMEO | UPLOAD
+  pdfUrl      String?    // uploaded PDF for TEXT lessons
   duration    Int?       // seconds
   orderIndex  Int
   type        LessonType @default(TEXT)

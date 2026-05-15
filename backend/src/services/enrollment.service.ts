@@ -1,14 +1,24 @@
 import { prisma } from './prisma';
 
-export async function calculateProgress(enrollmentId: string): Promise<number> {
-  const lessonProgress = await prisma.lessonProgress.findMany({
-    where: { enrollmentId },
-  });
+export async function calculateProgress(
+  enrollmentId: string,
+  courseId: string
+): Promise<number> {
+  // Progress = completed lessons / TOTAL lessons in the course.
+  // The previous version divided by `lessonProgress.length`, which only counts
+  // lessons the student has interacted with — meaning the first completion
+  // always yielded 100% and prematurely marked the course as completed.
+  const [totalLessons, completedLessons] = await Promise.all([
+    prisma.lesson.count({
+      where: { module: { courseId } },
+    }),
+    prisma.lessonProgress.count({
+      where: { enrollmentId, isCompleted: true },
+    }),
+  ]);
 
-  if (lessonProgress.length === 0) return 0;
-
-  const completed = lessonProgress.filter((lp) => lp.isCompleted).length;
-  return Math.round((completed / lessonProgress.length) * 100);
+  if (totalLessons === 0) return 0;
+  return Math.round((completedLessons / totalLessons) * 100);
 }
 
 export async function checkAndCompleteEnrollment(
@@ -16,7 +26,7 @@ export async function checkAndCompleteEnrollment(
   studentId: string,
   courseId: string
 ): Promise<boolean> {
-  const progress = await calculateProgress(enrollmentId);
+  const progress = await calculateProgress(enrollmentId, courseId);
 
   if (progress === 100) {
     await prisma.enrollment.update({
@@ -58,6 +68,8 @@ export async function getDetailedProgress(enrollmentId: string, courseId: string
           orderIndex: true,
           content: true,
           videoUrl: true,
+          videoType: true,
+          pdfUrl: true,
           quiz: {
             select: { id: true },
           },

@@ -5,14 +5,12 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { format, formatDistanceToNow, differenceInHours } from 'date-fns';
 import { sq } from 'date-fns/locale';
-import {
-  Radar,
-  RadarChart,
-  PolarGrid,
-  PolarAngleAxis,
-  PolarRadiusAxis,
-  ResponsiveContainer,
-} from 'recharts';
+import dynamic from 'next/dynamic';
+
+const CompetencyRadarChart = dynamic(
+  () => import('@/components/charts/CompetencyRadarChart').then((m) => m.CompetencyRadarChart),
+  { ssr: false, loading: () => <div className="h-80 animate-pulse rounded-lg bg-slate-100" /> }
+);
 import {
   Clock,
   BookOpen,
@@ -34,6 +32,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { StatCard } from '@/components/ui/stat-card';
+import { StatGridSkeleton, ListSkeleton } from '@/components/ui/skeletons';
+import { CourseCard } from '@/components/course/CourseCard';
 import { studentApi, StudentStats, UpcomingDeadline, Competency, ContinueLearning } from '@/lib/api/student';
 import { enrollmentsApi, Enrollment } from '@/lib/api/enrollments';
 import { liveSessionsApi, LiveSession } from '@/lib/api/live-sessions';
@@ -105,8 +106,20 @@ export default function StudentDashboard() {
   if (isLoading) {
     return (
       <DashboardLayout role="STUDENT">
-        <div className="flex items-center justify-center min-h-[400px]">
-          <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+        <div className="space-y-8">
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900">Miresevjen!</h1>
+            <p className="mt-1 text-slate-600">Vazhdo udhetimin tend te mesimit</p>
+          </div>
+          <StatGridSkeleton count={4} />
+          <Card>
+            <CardHeader>
+              <CardTitle>Kurset e Mia</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ListSkeleton rows={3} />
+            </CardContent>
+          </Card>
         </div>
       </DashboardLayout>
     );
@@ -200,62 +213,21 @@ export default function StudentDashboard() {
 
         {/* Stats Cards */}
         {stats && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-indigo-100">
-                    <Clock className="h-5 w-5 text-indigo-600" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-slate-900">{stats.studyHours}</p>
-                    <p className="text-xs text-slate-500">Ore Studimi</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-green-100">
-                    <Target className="h-5 w-5 text-green-600" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-slate-900">{stats.quizzesCompleted}</p>
-                    <p className="text-xs text-slate-500">Kuize te Kryera</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-amber-100">
-                    <Award className="h-5 w-5 text-amber-600" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-slate-900">{stats.averageQuizScore}%</p>
-                    <p className="text-xs text-slate-500">Mesatarja</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-red-100">
-                    <Flame className="h-5 w-5 text-red-600" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-slate-900">{stats.streakDays}</p>
-                    <p className="text-xs text-slate-500">Dite Streak</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <StatCard label="Ore Studimi" value={stats.studyHours} icon={Clock} color="indigo" />
+            <StatCard
+              label="Kuize te Kryera"
+              value={stats.quizzesCompleted}
+              icon={Target}
+              color="green"
+            />
+            <StatCard
+              label="Rezultati Mesatar"
+              value={`${stats.averageQuizScore}%`}
+              icon={Award}
+              color="amber"
+            />
+            <StatCard label="Dite Streak" value={stats.streakDays} icon={Flame} color="red" />
           </div>
         )}
 
@@ -294,52 +266,21 @@ export default function StudentDashboard() {
                   Asnje kurs ne kete kategori
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                   {filteredEnrollments.map((enrollment) => (
-                    <Link
+                    <CourseCard
                       key={enrollment.id}
                       href={`/student/courses/${enrollment.courseId}`}
-                      className="block"
-                    >
-                      <div className="p-4 rounded-lg border border-slate-200 hover:border-indigo-300 hover:shadow-sm transition-all">
-                        <div className="aspect-video bg-slate-100 rounded-lg mb-3 flex items-center justify-center overflow-hidden">
-                          {enrollment.course.thumbnailUrl ? (
-                            <img
-                              src={enrollment.course.thumbnailUrl}
-                              alt={enrollment.course.title}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <BookOpen className="h-8 w-8 text-slate-400" />
-                          )}
-                        </div>
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-medium text-slate-900 truncate">{enrollment.course.title}</h3>
-                            <p className="text-sm text-slate-500 mt-0.5">
-                              Nga {enrollment.course.instructor.firstName} {enrollment.course.instructor.lastName}
-                            </p>
-                          </div>
-                          {enrollment.status === 'COMPLETED' && (
-                            <Badge className="bg-green-100 text-green-700 hover:bg-green-100">
-                              Perfunduar
-                            </Badge>
-                          )}
-                        </div>
-                        <div className="mt-3">
-                          <div className="flex items-center justify-between text-sm mb-1">
-                            <span className="text-slate-600">Progresi</span>
-                            <span className="text-slate-900 font-medium">{Math.round(enrollment.progressPercent)}%</span>
-                          </div>
-                          <Progress value={enrollment.progressPercent} className="h-2" />
-                        </div>
-                        {enrollment.lastAccessedAt && (
-                          <p className="text-xs text-slate-400 mt-2">
-                            Aksesuar {formatDistanceToNow(new Date(enrollment.lastAccessedAt), { locale: sq, addSuffix: true })}
-                          </p>
-                        )}
-                      </div>
-                    </Link>
+                      title={enrollment.course.title}
+                      thumbnailUrl={enrollment.course.thumbnailUrl}
+                      instructor={enrollment.course.instructor}
+                      progress={enrollment.progressPercent}
+                      badge={
+                        enrollment.status === 'COMPLETED' ? (
+                          <Badge variant="success">Perfunduar</Badge>
+                        ) : undefined
+                      }
+                    />
                   ))}
                 </div>
               )}
@@ -448,30 +389,7 @@ export default function StudentDashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <RadarChart data={competencies}>
-                    <PolarGrid stroke="#e2e8f0" />
-                    <PolarAngleAxis
-                      dataKey="category"
-                      tick={{ fill: '#64748b', fontSize: 12 }}
-                    />
-                    <PolarRadiusAxis
-                      angle={30}
-                      domain={[0, 100]}
-                      tick={{ fill: '#94a3b8', fontSize: 10 }}
-                    />
-                    <Radar
-                      name="Rezultati"
-                      dataKey="score"
-                      stroke="#6366f1"
-                      fill="#6366f1"
-                      fillOpacity={0.3}
-                      strokeWidth={2}
-                    />
-                  </RadarChart>
-                </ResponsiveContainer>
-              </div>
+              <CompetencyRadarChart data={competencies} />
               <div className="flex justify-center gap-6 mt-4 text-sm text-slate-500">
                 {competencies.map((comp) => (
                   <div key={comp.category} className="text-center">

@@ -71,7 +71,9 @@ export const createLessonSchema = z.object({
   body: z.object({
     title: z.string().min(3, 'Title must be at least 3 characters'),
     content: z.string().optional(),
-    videoUrl: z.string().url().optional(),
+    videoUrl: z.string().optional(),
+    videoType: z.enum(['YOUTUBE', 'VIMEO', 'UPLOAD']).optional(),
+    pdfUrl: z.string().optional(),
     duration: z.number().int().min(0).optional(),
     type: z.enum(['VIDEO', 'TEXT', 'QUIZ', 'ASSIGNMENT']).default('TEXT'),
     isPreview: z.boolean().default(false),
@@ -86,7 +88,9 @@ export const updateLessonSchema = z.object({
   body: z.object({
     title: z.string().min(3).optional(),
     content: z.string().nullable().optional(),
-    videoUrl: z.string().url().nullable().optional(),
+    videoUrl: z.string().nullable().optional(),
+    videoType: z.enum(['YOUTUBE', 'VIMEO', 'UPLOAD']).nullable().optional(),
+    pdfUrl: z.string().nullable().optional(),
     duration: z.number().int().min(0).nullable().optional(),
     type: z.enum(['VIDEO', 'TEXT', 'QUIZ', 'ASSIGNMENT']).optional(),
     isPreview: z.boolean().optional(),

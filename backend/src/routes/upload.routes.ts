@@ -34,7 +34,8 @@ const fileFilter = (_req: Express.Request, file: Express.Multer.File, cb: multer
     'image/webp',
   ];
 
-  if (allowedTypes.includes(file.mimetype)) {
+  // Accept the explicit list above plus any video/* type (mp4, webm, ogg, ...)
+  if (allowedTypes.includes(file.mimetype) || file.mimetype.startsWith('video/')) {
     cb(null, true);
   } else {
     cb(new Error('Tipi i skedarit nuk lejohet'));
@@ -45,7 +46,7 @@ const upload = multer({
   storage,
   fileFilter,
   limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB
+    fileSize: 50 * 1024 * 1024, // 50MB (video); PDF/image limits enforced client-side
   },
 });
 

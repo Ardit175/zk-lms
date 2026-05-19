@@ -16,7 +16,23 @@ const httpServer = createServer(app);
 const io = initializeSocket(httpServer);
 
 app.use(helmet());
-app.use(cors({ origin: config.corsOrigin, credentials: true }));
+
+const allowedOrigins = config.corsOrigin
+  .split(',')
+  .map((o) => o.trim())
+  .filter(Boolean);
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      if (/^https:\/\/[a-z0-9-]+\.vercel\.app$/i.test(origin)) return callback(null, true);
+      return callback(new Error(`CORS blocked: ${origin}`));
+    },
+    credentials: true,
+  })
+);
 app.use(compression());
 app.use(morgan('dev'));
 app.use(express.json());

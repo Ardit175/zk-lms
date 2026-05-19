@@ -119,14 +119,13 @@ export default function PublicCoursesPage() {
   }, [debouncedSearch, categorySlug, level, pagination.page, pagination.limit]);
 
   const handleCourseClick = (course: PublicCourse) => {
-    if (isAuthenticated && user?.role === 'STUDENT') {
-      router.push(`/student/courses/${course.id}`);
-    } else if (isAuthenticated && user?.role === 'INSTRUCTOR') {
+    if (isAuthenticated && user?.role === 'INSTRUCTOR') {
       router.push('/instructor/courses');
     } else if (isAuthenticated && user?.role === 'ADMIN') {
       router.push(`/admin/courses/${course.id}/review`);
     } else {
-      router.push(`/login?redirect=/student/courses/${course.id}`);
+      // STUDENT or guest — show public detail page where they can enroll
+      router.push(`/courses/${course.slug}`);
     }
   };
 

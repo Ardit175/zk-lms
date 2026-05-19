@@ -19,6 +19,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { CourseCard } from '@/components/course/CourseCard';
 import { api } from '@/lib/api';
+import { useAuthStore } from '@/stores/auth-store';
 
 interface PublicStats {
   courses: number;
@@ -95,8 +96,16 @@ const fadeInUp = {
 };
 
 export default function HomePage() {
+  const { user, isAuthenticated } = useAuthStore();
   const [stats, setStats] = useState<PublicStats | null>(null);
   const [featuredCourses, setFeaturedCourses] = useState<FeaturedCourse[]>([]);
+
+  const dashboardPath =
+    user?.role === 'ADMIN'
+      ? '/admin/dashboard'
+      : user?.role === 'INSTRUCTOR'
+        ? '/instructor/dashboard'
+        : '/student/dashboard';
 
   useEffect(() => {
     const loadData = async () => {
@@ -126,12 +135,23 @@ export default function HomePage() {
             <span className="text-xl font-bold text-slate-900">ZK-LMS</span>
           </Link>
           <nav className="flex items-center gap-3">
-            <Link href="/login">
-              <Button variant="ghost">Hyr</Button>
+            <Link href="/courses">
+              <Button variant="ghost">Kurset</Button>
             </Link>
-            <Link href="/register">
-              <Button>Fillo Tani</Button>
-            </Link>
+            {isAuthenticated ? (
+              <Link href={dashboardPath}>
+                <Button>Paneli Kryesor</Button>
+              </Link>
+            ) : (
+              <>
+                <Link href="/login">
+                  <Button variant="ghost">Hyr</Button>
+                </Link>
+                <Link href="/register">
+                  <Button>Fillo Tani</Button>
+                </Link>
+              </>
+            )}
           </nav>
         </div>
       </header>
@@ -169,20 +189,41 @@ export default function HomePage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
               >
-                <Link href="/register">
-                  <Button size="lg" className="bg-white text-indigo-700 shadow-lg hover:bg-indigo-50">
-                    Fillo te Mesosh
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
-                </Link>
-                <Link href="/register?role=instructor">
-                  <Button
-                    size="lg"
-                    className="border border-white/30 bg-white/10 text-white backdrop-blur-sm hover:bg-white/20"
-                  >
-                    Behu Instruktor
-                  </Button>
-                </Link>
+                {isAuthenticated ? (
+                  <>
+                    <Link href={dashboardPath}>
+                      <Button size="lg" className="bg-white text-indigo-700 shadow-lg hover:bg-indigo-50">
+                        Paneli Kryesor
+                        <ArrowRight className="ml-2 h-5 w-5" />
+                      </Button>
+                    </Link>
+                    <Link href="/courses">
+                      <Button
+                        size="lg"
+                        className="border border-white/30 bg-white/10 text-white backdrop-blur-sm hover:bg-white/20"
+                      >
+                        Shfleto Kurset
+                      </Button>
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    <Link href="/register">
+                      <Button size="lg" className="bg-white text-indigo-700 shadow-lg hover:bg-indigo-50">
+                        Fillo te Mesosh
+                        <ArrowRight className="ml-2 h-5 w-5" />
+                      </Button>
+                    </Link>
+                    <Link href="/register?role=instructor">
+                      <Button
+                        size="lg"
+                        className="border border-white/30 bg-white/10 text-white backdrop-blur-sm hover:bg-white/20"
+                      >
+                        Behu Instruktor
+                      </Button>
+                    </Link>
+                  </>
+                )}
               </motion.div>
             </motion.div>
           </div>
@@ -367,14 +408,18 @@ export default function HomePage() {
           <div className="container mx-auto px-4">
             <div className="mx-auto max-w-3xl text-center">
               <h2 className="mb-4 text-3xl font-bold text-white lg:text-4xl">
-                Gati per te Filluar Udhetimin Tend?
+                {isAuthenticated
+                  ? 'Vazhdo Udhetimin Tend te Mesimit'
+                  : 'Gati per te Filluar Udhetimin Tend?'}
               </h2>
               <p className="mb-10 text-lg text-indigo-100">
-                Bashkohu me mijera studente dhe instruktore ne platformen tone.
+                {isAuthenticated
+                  ? 'Shko ne panelin tend ose shfleto kurse te reja.'
+                  : 'Bashkohu me mijera studente dhe instruktore ne platformen tone.'}
               </p>
-              <Link href="/register">
+              <Link href={isAuthenticated ? dashboardPath : '/register'}>
                 <Button size="lg" className="bg-white text-indigo-700 shadow-lg hover:bg-indigo-50">
-                  Krijo Llogari Falas
+                  {isAuthenticated ? 'Paneli Kryesor' : 'Krijo Llogari Falas'}
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>

@@ -210,7 +210,7 @@ export const markLessonComplete = async (req: Request, res: Response): Promise<v
   try {
     const courseId = req.params.courseId as string;
     const lessonId = req.params.lessonId as string;
-    const { watchedSeconds } = req.body;
+    const { watchedSeconds } = req.body ?? {};
     const studentId = req.user!.id;
 
     const enrollment = await prisma.enrollment.findUnique({

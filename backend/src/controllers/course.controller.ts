@@ -66,7 +66,8 @@ export const getCourses = async (req: Request, res: Response): Promise<void> => 
     const cacheKey = cacheKeys.coursesList({ category, level, search, page, limit });
     const cached = await cacheGet(cacheKey);
     if (cached) {
-      res.json(ApiResponse.success(cached));
+      const cachedCourses = cached as { courses: Array<Record<string, unknown>> };
+      res.json(ApiResponse.success(cachedCourses.courses));
       return;
     }
 
@@ -117,7 +118,7 @@ export const getCourses = async (req: Request, res: Response): Promise<void> => 
     };
 
     await cacheSet(cacheKey, payload, TTL.COURSES_LIST);
-    res.json(ApiResponse.success(payload));
+    res.json(ApiResponse.success(courses));
   } catch (error) {
     console.error('GetCourses error:', error);
     res.status(500).json(ApiResponse.error('Failed to fetch courses'));
@@ -250,13 +251,13 @@ export const deleteCourse = async (req: Request, res: Response): Promise<void> =
       return;
     }
 
-    await prisma.course.update({
+    const archivedCourse = await prisma.course.update({
       where: { id },
       data: { status: 'ARCHIVED' },
     });
 
     await invalidateCourseCaches();
-    res.json(ApiResponse.success({ message: 'Course archived successfully' }));
+    res.json(ApiResponse.success(archivedCourse));
   } catch (error) {
     console.error('DeleteCourse error:', error);
     res.status(500).json(ApiResponse.error('Failed to archive course'));
@@ -269,6 +270,11 @@ export const updateCourseStatus = async (req: Request, res: Response): Promise<v
     const { status: newStatus } = req.body;
     const userId = req.user!.id;
     const userRole = req.user!.role;
+
+    if (userRole === 'INSTRUCTOR' && newStatus === 'PUBLISHED') {
+      res.status(403).json(ApiResponse.error('Not authorized'));
+      return;
+    }
 
     const course = await prisma.course.findUnique({
       where: { id },

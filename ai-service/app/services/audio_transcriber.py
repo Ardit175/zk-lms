@@ -1,21 +1,20 @@
 import io
 import logging
+import os
 from typing import Tuple
 
-from openai import AsyncOpenAI
-
-from app.config import get_settings
+from app.core.azure_client import get_async_azure_openai_client, get_whisper_deployment
 
 logger = logging.getLogger(__name__)
 
 MAX_CHARS = 30000
-WHISPER_MAX_BYTES = 25 * 1024 * 1024  # OpenAI Whisper API hard limit
+WHISPER_MAX_BYTES = 25 * 1024 * 1024  # Azure / OpenAI Whisper hard limit
 
 
 class AudioTranscriberService:
     def __init__(self) -> None:
-        settings = get_settings()
-        self._client = AsyncOpenAI(api_key=settings.openai_api_key)
+        self._client = get_async_azure_openai_client()
+        self._deployment = get_whisper_deployment()
 
     async def transcribe(
         self,
@@ -24,7 +23,7 @@ class AudioTranscriberService:
         content_type: str,
     ) -> Tuple[str, dict, bool]:
         """
-        Send audio/video to OpenAI Whisper. Returns (text, metadata, truncated).
+        Send audio/video to Azure OpenAI Whisper. Returns (text, metadata, truncated).
         """
         if len(file_bytes) > WHISPER_MAX_BYTES:
             raise ValueError(
@@ -32,20 +31,22 @@ class AudioTranscriberService:
             )
 
         buffer = io.BytesIO(file_bytes)
-        buffer.name = filename  # OpenAI SDK uses .name to infer format
+        buffer.name = filename  # SDK uses .name to infer format
 
         logger.info(
-            "Transcribing %s (%.1f KB, %s)",
+            "Transcribing %s (%.1f KB, %s) via Azure deployment '%s'",
             filename,
             len(file_bytes) / 1024,
             content_type,
+            self._deployment,
         )
 
         try:
             response = await self._client.audio.transcriptions.create(
-                model="whisper-1",
+                model=self._deployment,
                 file=buffer,
                 response_format="text",
+                language="sq",
             )
         except Exception as exc:
             logger.exception("Whisper transcription failed")
@@ -66,6 +67,7 @@ class AudioTranscriberService:
             "filename": filename,
             "content_type": content_type,
             "size_bytes": len(file_bytes),
-            "model": "whisper-1",
+            "model": self._deployment,
+            "language": "sq",
         }
         return text, metadata, truncated

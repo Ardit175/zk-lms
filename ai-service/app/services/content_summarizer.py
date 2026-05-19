@@ -1,11 +1,11 @@
 import json
 import logging
+import os
 from typing import List
 
-from langchain_openai import ChatOpenAI
+from langchain_openai import AzureChatOpenAI
 
 from app.schemas.quiz import ContentSummaryRequest, ContentSummaryResponse
-from app.config import get_settings
 
 logger = logging.getLogger(__name__)
 
@@ -56,11 +56,12 @@ def _parse_response(raw: str) -> dict:
 
 class ContentSummarizerService:
     def __init__(self) -> None:
-        settings = get_settings()
-        self._llm = ChatOpenAI(
-            model="gpt-4o",
+        self._llm = AzureChatOpenAI(
+            azure_deployment=os.getenv("AZURE_OPENAI_DEPLOYMENT_GPT"),
+            azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
+            api_key=os.getenv("AZURE_OPENAI_API_KEY"),
+            openai_api_version=os.getenv("AZURE_OPENAI_API_VERSION"),
             temperature=0.3,
-            openai_api_key=settings.openai_api_key,
         )
 
     async def summarize(self, request: ContentSummaryRequest, retry: bool = True) -> ContentSummaryResponse:

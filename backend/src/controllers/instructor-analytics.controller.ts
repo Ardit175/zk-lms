@@ -37,8 +37,9 @@ export const getCourseAnalytics = async (req: Request, res: Response): Promise<v
       },
     });
 
+    type EnrollmentRow = { id: string; progressPercent: number; status: string; enrolledAt: Date };
     const totalStudents = enrollments.length;
-    const completedStudents = enrollments.filter((e) => e.status === 'COMPLETED').length;
+    const completedStudents = enrollments.filter((e: EnrollmentRow) => e.status === 'COMPLETED').length;
     const completionRate = totalStudents > 0 ? Math.round((completedStudents / totalStudents) * 100) : 0;
 
     // Average quiz score
@@ -55,7 +56,7 @@ export const getCourseAnalytics = async (req: Request, res: Response): Promise<v
     });
 
     const averageScore = quizAttempts.length > 0
-      ? Math.round(quizAttempts.reduce((sum, a) => sum + (a.score || 0), 0) / quizAttempts.length)
+      ? Math.round(quizAttempts.reduce((sum: number, a: { score: number | null }) => sum + (a.score || 0), 0) / quizAttempts.length)
       : 0;
 
     // Average rating (placeholder - would come from a reviews table)
@@ -71,8 +72,8 @@ export const getCourseAnalytics = async (req: Request, res: Response): Promise<v
     }
 
     enrollments
-      .filter((e) => new Date(e.enrolledAt) >= startDate)
-      .forEach((e) => {
+      .filter((e: EnrollmentRow) => new Date(e.enrolledAt) >= startDate)
+      .forEach((e: EnrollmentRow) => {
         const dateStr = new Date(e.enrolledAt).toISOString().split('T')[0];
         if (enrollmentsByDate.has(dateStr)) {
           enrollmentsByDate.set(dateStr, (enrollmentsByDate.get(dateStr) || 0) + 1);
@@ -80,8 +81,8 @@ export const getCourseAnalytics = async (req: Request, res: Response): Promise<v
       });
 
     const enrollmentOverTime = Array.from(enrollmentsByDate.entries())
-      .map(([date, count]) => ({ date, count }))
-      .sort((a, b) => a.date.localeCompare(b.date));
+      .map(([date, count]: [string, number]) => ({ date, count }))
+      .sort((a: { date: string; count: number }, b: { date: string; count: number }) => a.date.localeCompare(b.date));
 
     // Progress distribution
     const progressBuckets = [
@@ -91,13 +92,14 @@ export const getCourseAnalytics = async (req: Request, res: Response): Promise<v
       { range: '76-100%', min: 76, max: 100, count: 0 },
     ];
 
-    enrollments.forEach((e) => {
+    type Bucket = { range: string; min: number; max: number; count: number };
+    enrollments.forEach((e: EnrollmentRow) => {
       const progress = e.progressPercent;
-      const bucket = progressBuckets.find((b) => progress >= b.min && progress <= b.max);
+      const bucket = progressBuckets.find((b: Bucket) => progress >= b.min && progress <= b.max);
       if (bucket) bucket.count++;
     });
 
-    const progressDistribution = progressBuckets.map(({ range, count }) => ({ range, count }));
+    const progressDistribution = progressBuckets.map(({ range, count }: Bucket) => ({ range, count }));
 
     // Module completion
     const modules = await prisma.module.findMany({
@@ -116,17 +118,23 @@ export const getCourseAnalytics = async (req: Request, res: Response): Promise<v
       },
     });
 
-    const moduleCompletion = modules.map((module) => {
+    type LessonRow = {
+      id: string;
+      duration: number | null;
+      lessonProgress: { isCompleted: boolean }[];
+    };
+    type ModuleRow = { title: string; lessons: LessonRow[] };
+    const moduleCompletion = modules.map((module: ModuleRow) => {
       const totalLessons = module.lessons.length;
-      const totalProgress = module.lessons.reduce((sum, lesson) => {
-        const completed = lesson.lessonProgress.filter((lp) => lp.isCompleted).length;
+      const totalProgress = module.lessons.reduce((sum: number, lesson: LessonRow) => {
+        const completed = lesson.lessonProgress.filter((lp: { isCompleted: boolean }) => lp.isCompleted).length;
         const total = lesson.lessonProgress.length;
         return sum + (total > 0 ? completed / total : 0);
       }, 0);
 
       const completionRate = totalLessons > 0 ? Math.round((totalProgress / totalLessons) * 100) : 0;
       const avgTimeMinutes = Math.round(
-        module.lessons.reduce((sum, l) => sum + (l.duration || 0), 0) / 60
+        module.lessons.reduce((sum: number, l: LessonRow) => sum + (l.duration || 0), 0) / 60
       );
 
       return {
@@ -152,10 +160,21 @@ export const getCourseAnalytics = async (req: Request, res: Response): Promise<v
       },
     });
 
+    type QuestionRow = {
+      questionText: string;
+      quiz: { title: string };
+      answers: { isCorrect: boolean }[];
+    };
+    type QuestionStat = {
+      questionText: string;
+      quizTitle: string;
+      wrongAnswerRate: number;
+      totalAnswers: number;
+    };
     const hardestQuestions = questions
-      .map((q) => {
+      .map((q: QuestionRow): QuestionStat => {
         const totalAnswers = q.answers.length;
-        const wrongAnswers = q.answers.filter((a) => !a.isCorrect).length;
+        const wrongAnswers = q.answers.filter((a: { isCorrect: boolean }) => !a.isCorrect).length;
         const wrongAnswerRate = totalAnswers > 0 ? Math.round((wrongAnswers / totalAnswers) * 100) : 0;
 
         return {
@@ -165,8 +184,8 @@ export const getCourseAnalytics = async (req: Request, res: Response): Promise<v
           totalAnswers,
         };
       })
-      .filter((q) => q.totalAnswers >= 3)
-      .sort((a, b) => b.wrongAnswerRate - a.wrongAnswerRate)
+      .filter((q: QuestionStat) => q.totalAnswers >= 3)
+      .sort((a: QuestionStat, b: QuestionStat) => b.wrongAnswerRate - a.wrongAnswerRate)
       .slice(0, 5);
 
     // Recent activity
@@ -202,21 +221,36 @@ export const getCourseAnalytics = async (req: Request, res: Response): Promise<v
       },
     });
 
-    const recentActivity = [
-      ...recentLessonProgress.map((lp) => ({
+    type LessonProgressRow = {
+      completedAt: Date | null;
+      lesson: { title: string };
+      enrollment: { student: { firstName: string; lastName: string } };
+    };
+    type EnrollmentWithStudent = {
+      enrolledAt: Date;
+      student: { firstName: string; lastName: string };
+    };
+    type ActivityItem = {
+      studentName: string;
+      action: string;
+      timestamp: string;
+      type: 'lesson_completed' | 'enrollment';
+    };
+    const recentActivity: ActivityItem[] = [
+      ...recentLessonProgress.map((lp: LessonProgressRow): ActivityItem => ({
         studentName: `${lp.enrollment.student.firstName} ${lp.enrollment.student.lastName}`,
         action: `perfundoi mesimin "${lp.lesson.title}"`,
         timestamp: lp.completedAt!.toISOString(),
         type: 'lesson_completed' as const,
       })),
-      ...recentEnrollments.map((e) => ({
+      ...recentEnrollments.map((e: EnrollmentWithStudent): ActivityItem => ({
         studentName: `${e.student.firstName} ${e.student.lastName}`,
         action: 'u regjistrua ne kurs',
         timestamp: e.enrolledAt.toISOString(),
         type: 'enrollment' as const,
       })),
     ]
-      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+      .sort((a: ActivityItem, b: ActivityItem) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
       .slice(0, 20);
 
     res.json(ApiResponse.success({

@@ -82,10 +82,36 @@ export async function getDetailedProgress(enrollmentId: string, courseId: string
     where: { enrollmentId },
   });
 
-  const progressMap = new Map(lessonProgress.map((lp) => [lp.lessonId, lp]));
+  type LessonProgressRow = {
+    lessonId: string;
+    isCompleted: boolean;
+    completedAt: Date | null;
+    watchedSeconds: number;
+  };
+  type LessonRow = {
+    id: string;
+    title: string;
+    type: string;
+    duration: number | null;
+    orderIndex: number;
+    content: string | null;
+    videoUrl: string | null;
+    videoType: string | null;
+    pdfUrl: string | null;
+    quiz: { id: string } | null;
+  };
+  type ModuleRow = {
+    id: string;
+    title: string;
+    orderIndex: number;
+    lessons: LessonRow[];
+  };
+  const progressMap = new Map(
+    lessonProgress.map((lp: LessonProgressRow) => [lp.lessonId, lp] as const)
+  );
 
-  const modulesWithProgress = modules.map((module) => {
-    const lessonsWithProgress = module.lessons.map((lesson) => {
+  const modulesWithProgress = modules.map((module: ModuleRow) => {
+    const lessonsWithProgress = module.lessons.map((lesson: LessonRow) => {
       const progress = progressMap.get(lesson.id);
       return {
         ...lesson,
@@ -96,7 +122,7 @@ export async function getDetailedProgress(enrollmentId: string, courseId: string
       };
     });
 
-    const completedLessons = lessonsWithProgress.filter((l) => l.isCompleted).length;
+    const completedLessons = lessonsWithProgress.filter((l: { isCompleted: boolean }) => l.isCompleted).length;
     const moduleProgress = module.lessons.length > 0
       ? Math.round((completedLessons / module.lessons.length) * 100)
       : 0;
@@ -112,8 +138,8 @@ export async function getDetailedProgress(enrollmentId: string, courseId: string
     };
   });
 
-  const totalLessons = modules.reduce((sum, m) => sum + m.lessons.length, 0);
-  const completedLessons = lessonProgress.filter((lp) => lp.isCompleted).length;
+  const totalLessons = modules.reduce((sum: number, m: ModuleRow) => sum + m.lessons.length, 0);
+  const completedLessons = lessonProgress.filter((lp: LessonProgressRow) => lp.isCompleted).length;
   const overallProgress = totalLessons > 0
     ? Math.round((completedLessons / totalLessons) * 100)
     : 0;

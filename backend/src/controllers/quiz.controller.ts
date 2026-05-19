@@ -134,7 +134,15 @@ export const startAttempt = async (req: Request, res: Response): Promise<void> =
       },
     });
 
-    const questions = quiz.questions.map((q) => ({
+    type QuizOptionRow = { id: string; optionText: string };
+    type QuizQuestionRow = {
+      id: string;
+      questionText: string;
+      type: string;
+      points: number;
+      options: QuizOptionRow[];
+    };
+    const questions = quiz.questions.map((q: QuizQuestionRow) => ({
       id: q.id,
       questionText: q.questionText,
       type: q.type,
@@ -206,7 +214,7 @@ export const submitAttempt = async (req: Request, res: Response): Promise<void> 
 
     for (const question of attempt.quiz.questions) {
       totalPoints += question.points;
-      const answer = answers.find((a) => a.questionId === question.id);
+      const answer = answers.find((a: { questionId: string; selectedOptionId?: string; textAnswer?: string }) => a.questionId === question.id);
 
       let isCorrect = false;
       let pointsEarned = 0;
@@ -219,9 +227,9 @@ export const submitAttempt = async (req: Request, res: Response): Promise<void> 
         isCorrect = false;
       } else {
         const selectedOption = question.options.find(
-          (o) => o.id === answer?.selectedOptionId
+          (o: { id: string; isCorrect: boolean; optionText: string }) => o.id === answer?.selectedOptionId
         );
-        const correctOption = question.options.find((o) => o.isCorrect);
+        const correctOption = question.options.find((o: { id: string; isCorrect: boolean; optionText: string }) => o.isCorrect);
 
         studentAnswer = selectedOption?.optionText || null;
         correctAnswer = correctOption?.optionText || null;
@@ -352,14 +360,14 @@ export const createQuiz = async (req: Request, res: Response): Promise<void> => 
         maxAttempts: data.maxAttempts,
         isAiGenerated: data.isAiGenerated,
         questions: {
-          create: data.questions.map((q, index) => ({
+          create: data.questions.map((q: CreateQuizInput['questions'][number], index: number) => ({
             questionText: q.questionText,
             type: q.type,
             orderIndex: q.orderIndex ?? index,
             points: q.points,
             explanation: q.explanation,
             options: {
-              create: q.options.map((opt) => ({
+              create: q.options.map((opt: { optionText: string; isCorrect: boolean }) => ({
                 optionText: opt.optionText,
                 isCorrect: opt.isCorrect,
               })),

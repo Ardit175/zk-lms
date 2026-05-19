@@ -17,7 +17,10 @@ export async function updateCourseDuration(courseId: string): Promise<void> {
     select: { duration: true },
   });
 
-  const totalDuration = lessons.reduce((sum, lesson) => sum + (lesson.duration || 0), 0);
+  const totalDuration = lessons.reduce(
+    (sum: number, lesson: { duration: number | null }) => sum + (lesson.duration || 0),
+    0
+  );
 
   await prisma.course.update({
     where: { id: courseId },

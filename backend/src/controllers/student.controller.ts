@@ -36,20 +36,23 @@ export const getStudentStats = async (req: Request, res: Response): Promise<void
       }),
     ]);
 
-    const totalWatchedSeconds = lessonProgress.reduce((sum, lp) => sum + lp.watchedSeconds, 0);
+    type LpRow = { watchedSeconds: number };
+    type QaRow = { score: number | null; isPassed: boolean | null };
+    type EnrRow = { id: string; status: string };
+    const totalWatchedSeconds = lessonProgress.reduce((sum: number, lp: LpRow) => sum + lp.watchedSeconds, 0);
     const studyHours = Math.round((totalWatchedSeconds / 3600) * 10) / 10;
 
-    const completedQuizzes = quizAttempts.filter((q) => q.isPassed).length;
+    const completedQuizzes = quizAttempts.filter((q: QaRow) => q.isPassed).length;
     const averageQuizScore =
       quizAttempts.length > 0
-        ? Math.round(quizAttempts.reduce((sum, q) => sum + (q.score || 0), 0) / quizAttempts.length)
+        ? Math.round(quizAttempts.reduce((sum: number, q: QaRow) => sum + (q.score || 0), 0) / quizAttempts.length)
         : 0;
 
     res.json(
       ApiResponse.success({
         studyHours,
         coursesEnrolled: enrollments.length,
-        coursesCompleted: enrollments.filter((e) => e.status === 'COMPLETED').length,
+        coursesCompleted: enrollments.filter((e: EnrRow) => e.status === 'COMPLETED').length,
         quizzesCompleted: completedQuizzes,
         averageQuizScore,
         certificates,
@@ -74,7 +77,7 @@ export const getUpcomingDeadlines = async (req: Request, res: Response): Promise
       select: { courseId: true },
     });
 
-    const courseIds = enrolledCourseIds.map((e) => e.courseId);
+    const courseIds = enrolledCourseIds.map((e: { courseId: string }) => e.courseId);
 
     const assignments = await prisma.assignment.findMany({
       where: {
@@ -105,7 +108,14 @@ export const getUpcomingDeadlines = async (req: Request, res: Response): Promise
       orderBy: { dueDate: 'asc' },
     });
 
-    const deadlines = assignments.map((a) => ({
+    type AssignmentWithCourse = {
+      id: string;
+      title: string;
+      lessonId: string;
+      dueDate: Date | null;
+      lesson: { module: { course: { id: string; title: string } } };
+    };
+    const deadlines = assignments.map((a: AssignmentWithCourse) => ({
       id: a.id,
       type: 'assignment' as const,
       title: a.title,
@@ -166,11 +176,13 @@ export const getCompetencyData = async (req: Request, res: Response): Promise<vo
       }
     }
 
-    const competencies = Object.entries(categoryScores).map(([category, data]) => ({
-      category,
-      score: Math.round(data.total / data.count),
-      quizzesTaken: data.count,
-    }));
+    const competencies = Object.entries(categoryScores).map(
+      ([category, data]: [string, { total: number; count: number }]) => ({
+        category,
+        score: Math.round(data.total / data.count),
+        quizzesTaken: data.count,
+      })
+    );
 
     res.json(ApiResponse.success(competencies));
   } catch (error) {

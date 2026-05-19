@@ -105,7 +105,22 @@ export const getMyCertificates = async (req: Request, res: Response): Promise<vo
       },
     });
 
-    const result = certificates.map((cert) => ({
+    type CertWithCourse = {
+      id: string;
+      certificateNumber: string;
+      verificationCode: string;
+      issuedAt: Date;
+      pdfUrl: string | null;
+      enrollment: {
+        course: {
+          id: string;
+          title: string;
+          thumbnailUrl: string | null;
+          instructor: { firstName: string; lastName: string };
+        };
+      };
+    };
+    const result = certificates.map((cert: CertWithCourse) => ({
       id: cert.id,
       certificateNumber: cert.certificateNumber,
       verificationCode: cert.verificationCode,

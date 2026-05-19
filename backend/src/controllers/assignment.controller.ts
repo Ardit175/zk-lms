@@ -135,17 +135,18 @@ export const getAssignmentSubmissions = async (req: Request, res: Response): Pro
       },
     });
 
+    type SubmissionStat = { gradedAt: Date | null; score: number | null };
     const stats = {
       total: submissions.length,
-      graded: submissions.filter((s) => s.gradedAt !== null).length,
-      ungraded: submissions.filter((s) => s.gradedAt === null).length,
+      graded: submissions.filter((s: SubmissionStat) => s.gradedAt !== null).length,
+      ungraded: submissions.filter((s: SubmissionStat) => s.gradedAt === null).length,
       averageScore:
-        submissions.filter((s) => s.score !== null).length > 0
+        submissions.filter((s: SubmissionStat) => s.score !== null).length > 0
           ? Math.round(
               submissions
-                .filter((s) => s.score !== null)
-                .reduce((sum, s) => sum + (s.score || 0), 0) /
-                submissions.filter((s) => s.score !== null).length
+                .filter((s: SubmissionStat) => s.score !== null)
+                .reduce((sum: number, s: SubmissionStat) => sum + (s.score || 0), 0) /
+                submissions.filter((s: SubmissionStat) => s.score !== null).length
             )
           : null,
     };
@@ -320,7 +321,18 @@ export const getCourseAssignments = async (req: Request, res: Response): Promise
       },
     });
 
-    const result = assignments.map((a) => ({
+    type AssignmentSub = { score: number | null; gradedAt: Date | null };
+    type AssignmentWithSubs = {
+      id: string;
+      title: string;
+      lesson: { title: string };
+      dueDate: Date | null;
+      maxScore: number;
+      submissionType: string;
+      _count: { submissions: number };
+      submissions: AssignmentSub[];
+    };
+    const result = assignments.map((a: AssignmentWithSubs) => ({
       id: a.id,
       title: a.title,
       lessonTitle: a.lesson.title,
@@ -328,13 +340,13 @@ export const getCourseAssignments = async (req: Request, res: Response): Promise
       maxScore: a.maxScore,
       submissionType: a.submissionType,
       totalSubmissions: a._count.submissions,
-      gradedCount: a.submissions.filter((s) => s.gradedAt !== null).length,
-      ungradedCount: a.submissions.filter((s) => s.gradedAt === null).length,
+      gradedCount: a.submissions.filter((s: AssignmentSub) => s.gradedAt !== null).length,
+      ungradedCount: a.submissions.filter((s: AssignmentSub) => s.gradedAt === null).length,
       averageScore:
-        a.submissions.filter((s) => s.score !== null).length > 0
+        a.submissions.filter((s: AssignmentSub) => s.score !== null).length > 0
           ? Math.round(
-              a.submissions.filter((s) => s.score !== null).reduce((sum, s) => sum + (s.score || 0), 0) /
-                a.submissions.filter((s) => s.score !== null).length
+              a.submissions.filter((s: AssignmentSub) => s.score !== null).reduce((sum: number, s: AssignmentSub) => sum + (s.score || 0), 0) /
+                a.submissions.filter((s: AssignmentSub) => s.score !== null).length
             )
           : null,
     }));

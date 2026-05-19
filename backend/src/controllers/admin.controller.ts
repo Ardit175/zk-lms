@@ -58,18 +58,18 @@ export const getStats = async (req: Request, res: Response): Promise<void> => {
     ]);
 
     const users = {
-      total: userCounts.reduce((sum, u) => sum + u._count, 0),
-      admins: userCounts.find((u) => u.role === 'ADMIN')?._count || 0,
-      instructors: userCounts.find((u) => u.role === 'INSTRUCTOR')?._count || 0,
-      students: userCounts.find((u) => u.role === 'STUDENT')?._count || 0,
+      total: userCounts.reduce((sum: number, u: { role: string; _count: number }) => sum + u._count, 0),
+      admins: userCounts.find((u: { role: string; _count: number }) => u.role === 'ADMIN')?._count || 0,
+      instructors: userCounts.find((u: { role: string; _count: number }) => u.role === 'INSTRUCTOR')?._count || 0,
+      students: userCounts.find((u: { role: string; _count: number }) => u.role === 'STUDENT')?._count || 0,
     };
 
     const courses = {
-      total: courseCounts.reduce((sum, c) => sum + c._count, 0),
-      draft: courseCounts.find((c) => c.status === 'DRAFT')?._count || 0,
-      pendingReview: courseCounts.find((c) => c.status === 'PENDING_REVIEW')?._count || 0,
-      published: courseCounts.find((c) => c.status === 'PUBLISHED')?._count || 0,
-      archived: courseCounts.find((c) => c.status === 'ARCHIVED')?._count || 0,
+      total: courseCounts.reduce((sum: number, c: { status: string; _count: number }) => sum + c._count, 0),
+      draft: courseCounts.find((c: { status: string; _count: number }) => c.status === 'DRAFT')?._count || 0,
+      pendingReview: courseCounts.find((c: { status: string; _count: number }) => c.status === 'PENDING_REVIEW')?._count || 0,
+      published: courseCounts.find((c: { status: string; _count: number }) => c.status === 'PUBLISHED')?._count || 0,
+      archived: courseCounts.find((c: { status: string; _count: number }) => c.status === 'ARCHIVED')?._count || 0,
     };
 
     const enrollmentChange = enrollmentsLastMonth > 0
@@ -114,7 +114,7 @@ export const getEnrollmentChart = async (req: Request, res: Response): Promise<v
       dailyCounts[key] = 0;
     }
 
-    enrollments.forEach((e) => {
+    enrollments.forEach((e: { enrolledAt: Date }) => {
       const key = e.enrolledAt.toISOString().split('T')[0];
       if (dailyCounts[key] !== undefined) {
         dailyCounts[key]++;
@@ -122,8 +122,8 @@ export const getEnrollmentChart = async (req: Request, res: Response): Promise<v
     });
 
     const chartData = Object.entries(dailyCounts)
-      .map(([date, count]) => ({ date, count }))
-      .sort((a, b) => a.date.localeCompare(b.date));
+      .map(([date, count]: [string, number]) => ({ date, count }))
+      .sort((a: { date: string; count: number }, b: { date: string; count: number }) => a.date.localeCompare(b.date));
 
     res.json(ApiResponse.success(chartData));
   } catch (error) {

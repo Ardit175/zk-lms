@@ -74,7 +74,7 @@ export const getUpcomingSessions = async (req: Request, res: Response): Promise<
       select: { courseId: true },
     });
 
-    const courseIds = enrollments.map((e) => e.courseId);
+    const courseIds = enrollments.map((e: { courseId: string }) => e.courseId);
 
     const sessions = await prisma.liveSession.findMany({
       where: {

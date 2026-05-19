@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers import quiz
+from app.routers import extraction, quiz
 
 logging.basicConfig(
     level=logging.INFO,
@@ -41,6 +41,7 @@ app.add_middleware(
 
 # ── Routers ───────────────────────────────────────────────────────────────────
 app.include_router(quiz.router)
+app.include_router(extraction.router)
 
 
 # ── Health check ──────────────────────────────────────────────────────────────

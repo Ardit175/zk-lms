@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Sparkles,
   Loader2,
@@ -12,6 +12,11 @@ import {
   RotateCcw,
   Save,
   ChevronLeft,
+  FileText,
+  PlaySquare,
+  Upload,
+  Mic,
+  AlertTriangle,
 } from 'lucide-react';
 import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
@@ -28,7 +33,13 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { aiApi, type GeneratedQuestion, type QuestionType, type Difficulty } from '@/lib/api/ai';
+import {
+  aiApi,
+  type GeneratedQuestion,
+  type QuestionType,
+  type Difficulty,
+  type ExtractionResult,
+} from '@/lib/api/ai';
 import { quizzesApi } from '@/lib/api/quizzes';
 import { cn } from '@/lib/utils';
 
@@ -42,12 +53,19 @@ interface AIQuizGeneratorProps {
 }
 
 type Step = 'input' | 'review';
+type SourceType = 'lesson' | 'custom' | 'pdf' | 'youtube' | 'audio';
 
 const LOADING_MESSAGES = [
   'Duke analizuar permbajtjen...',
   'Duke gjeneruar pyetjet...',
   'Duke perfunduar...',
 ];
+
+const EXTRACT_MESSAGES: Record<Exclude<SourceType, 'lesson' | 'custom'>, string[]> = {
+  pdf: ['Duke lexuar PDF-ne...', 'Duke ekstraktuar tekstin...', 'Duke pastruar permbajtjen...'],
+  youtube: ['Duke u lidhur me YouTube...', 'Duke marre transcript-in...', 'Duke perfunduar...'],
+  audio: ['Duke ngarkuar ne Whisper...', 'Duke transkriptuar audion...', 'Mund te zgjase deri ne 1 minute...'],
+};
 
 export function AIQuizGenerator({
   lessonId,
@@ -59,12 +77,29 @@ export function AIQuizGenerator({
 }: AIQuizGeneratorProps) {
   const [step, setStep] = useState<Step>('input');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isExtracting, setIsExtracting] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
 
   // Input state
-  const [sourceType, setSourceType] = useState<'lesson' | 'custom'>('lesson');
+  const [sourceType, setSourceType] = useState<SourceType>('lesson');
   const [customContent, setCustomContent] = useState('');
+
+  // PDF / Audio source state
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
+  const [audioFile, setAudioFile] = useState<File | null>(null);
+  const pdfInputRef = useRef<HTMLInputElement>(null);
+  const audioInputRef = useRef<HTMLInputElement>(null);
+
+  // YouTube source state
+  const [youtubeUrl, setYoutubeUrl] = useState('');
+  const [youtubeLanguage, setYoutubeLanguage] = useState('');
+
+  // Extracted preview (PDF / YouTube / Audio after extraction)
+  const [extracted, setExtracted] = useState<ExtractionResult | null>(null);
+  const [extractError, setExtractError] = useState<string | null>(null);
+
+  // Quiz options
   const [numQuestions, setNumQuestions] = useState(5);
   const [questionTypes, setQuestionTypes] = useState<QuestionType[]>(['MULTIPLE_CHOICE', 'TRUE_FALSE']);
   const [difficulty, setDifficulty] = useState<Difficulty>('INTERMEDIATE');
@@ -74,16 +109,66 @@ export function AIQuizGenerator({
   const [questions, setQuestions] = useState<GeneratedQuestion[]>([]);
 
   useEffect(() => {
-    if (isGenerating) {
+    if (isGenerating || isExtracting) {
       const interval = setInterval(() => {
         setLoadingMessageIndex((i) => (i + 1) % LOADING_MESSAGES.length);
       }, 2000);
       return () => clearInterval(interval);
     }
-  }, [isGenerating]);
+  }, [isGenerating, isExtracting]);
+
+  useEffect(() => {
+    // Reset extracted preview when the user switches source type
+    setExtracted(null);
+    setExtractError(null);
+  }, [sourceType]);
+
+  const resolveContent = (): string | null => {
+    if (sourceType === 'lesson') return lessonContent || null;
+    if (sourceType === 'custom') return customContent;
+    return extracted?.content || null;
+  };
+
+  const needsExtraction =
+    sourceType === 'pdf' || sourceType === 'youtube' || sourceType === 'audio';
+
+  const handleExtract = async () => {
+    setExtractError(null);
+    setIsExtracting(true);
+    setLoadingMessageIndex(0);
+    try {
+      let res;
+      if (sourceType === 'pdf') {
+        if (!pdfFile) throw new Error('Zgjidh nje skedar PDF');
+        res = await aiApi.extractPdf(pdfFile);
+      } else if (sourceType === 'youtube') {
+        if (!youtubeUrl.trim()) throw new Error('Vendos URL-ne e YouTube');
+        res = await aiApi.extractYoutube(youtubeUrl.trim(), youtubeLanguage || undefined);
+      } else if (sourceType === 'audio') {
+        if (!audioFile) throw new Error('Zgjidh nje skedar audio/video');
+        res = await aiApi.extractAudio(audioFile, lessonTitle);
+      } else {
+        return;
+      }
+      if (res.data) {
+        setExtracted(res.data);
+      } else if (res.error) {
+        setExtractError(res.error);
+      }
+    } catch (err) {
+      const msg =
+        (err as { response?: { data?: { error?: string } }; message?: string })?.response?.data
+          ?.error ||
+        (err as { message?: string })?.message ||
+        'Ekstrakti deshtoi';
+      setExtractError(msg);
+    } finally {
+      setIsExtracting(false);
+    }
+  };
 
   const handleGenerate = async () => {
-    const content = sourceType === 'lesson' ? lessonContent : customContent;
+    const content = resolveContent();
     if (!content || content.length < 50) {
       alert('Permbajtja duhet te jete te pakten 50 karaktere');
       return;
@@ -98,7 +183,7 @@ export function AIQuizGenerator({
         numQuestions,
         questionTypes,
         difficulty,
-        topic: lessonTitle,
+        topic: extracted?.sourceLabel || lessonTitle,
       });
 
       if (res.data) {
@@ -159,6 +244,12 @@ export function AIQuizGenerator({
     setQuestions([]);
     setQuizTitle('');
     setCustomContent('');
+    setPdfFile(null);
+    setAudioFile(null);
+    setYoutubeUrl('');
+    setYoutubeLanguage('');
+    setExtracted(null);
+    setExtractError(null);
   };
 
   const handleClose = () => {
@@ -223,35 +314,41 @@ export function AIQuizGenerator({
               {/* Source Selector */}
               <div className="space-y-3">
                 <Label>Burimi i Permbajtjes</Label>
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    onClick={() => setSourceType('lesson')}
-                    className={cn(
-                      'p-4 rounded-lg border-2 text-left transition-colors',
-                      sourceType === 'lesson'
-                        ? 'border-indigo-600 bg-indigo-50'
-                        : 'border-slate-200 hover:border-slate-300'
-                    )}
-                    disabled={!lessonContent}
-                  >
-                    <p className="font-medium text-slate-900">Perdor permbajtjen e mesimit</p>
-                    <p className="text-sm text-slate-500">
-                      {lessonContent ? `${lessonContent.length} karaktere` : 'Pa permbajtje'}
-                    </p>
-                  </button>
-                  <button
-                    onClick={() => setSourceType('custom')}
-                    className={cn(
-                      'p-4 rounded-lg border-2 text-left transition-colors',
-                      sourceType === 'custom'
-                        ? 'border-indigo-600 bg-indigo-50'
-                        : 'border-slate-200 hover:border-slate-300'
-                    )}
-                  >
-                    <p className="font-medium text-slate-900">Shkruaj tekst tjeter</p>
-                    <p className="text-sm text-slate-500">Ngjit permbajtje custom</p>
-                  </button>
+                <div className="grid grid-cols-5 gap-2">
+                  {([
+                    { value: 'lesson', label: 'Mesimi', icon: FileText, disabled: !lessonContent },
+                    { value: 'custom', label: 'Tekst', icon: FileText, disabled: false },
+                    { value: 'pdf', label: 'PDF', icon: Upload, disabled: false },
+                    { value: 'youtube', label: 'YouTube', icon: PlaySquare, disabled: false },
+                    { value: 'audio', label: 'Audio/Video', icon: Mic, disabled: false },
+                  ] as const).map(({ value, label, icon: Icon, disabled }) => (
+                    <button
+                      key={value}
+                      onClick={() => setSourceType(value)}
+                      disabled={disabled}
+                      className={cn(
+                        'p-3 rounded-lg border-2 text-center transition-colors flex flex-col items-center gap-1.5',
+                        sourceType === value
+                          ? 'border-indigo-600 bg-indigo-50 text-indigo-700'
+                          : 'border-slate-200 hover:border-slate-300 text-slate-700',
+                        disabled && 'opacity-50 cursor-not-allowed'
+                      )}
+                    >
+                      <Icon className="h-5 w-5" />
+                      <span className="text-xs font-medium">{label}</span>
+                    </button>
+                  ))}
                 </div>
+
+                {/* Per-source input panel */}
+                {sourceType === 'lesson' && (
+                  <div className="p-3 rounded-lg border border-slate-200 bg-slate-50 text-sm text-slate-600">
+                    {lessonContent
+                      ? `Permbajtja e mesimit "${lessonTitle}" do te perdoret (${lessonContent.length} karaktere).`
+                      : 'Ky mesim s\'ka permbajtje teksti. Zgjidh nje burim tjeter.'}
+                  </div>
+                )}
+
                 {sourceType === 'custom' && (
                   <textarea
                     value={customContent}
@@ -259,6 +356,149 @@ export function AIQuizGenerator({
                     placeholder="Ngjitni permbajtjen ketu..."
                     className="w-full h-32 p-3 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
                   />
+                )}
+
+                {sourceType === 'pdf' && (
+                  <div className="space-y-2">
+                    <input
+                      ref={pdfInputRef}
+                      type="file"
+                      accept="application/pdf,.pdf"
+                      className="hidden"
+                      onChange={(e) => {
+                        setPdfFile(e.target.files?.[0] || null);
+                        setExtracted(null);
+                        setExtractError(null);
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => pdfInputRef.current?.click()}
+                      className="w-full p-4 rounded-lg border-2 border-dashed border-slate-300 hover:border-indigo-500 text-center text-sm text-slate-600 transition-colors"
+                    >
+                      <Upload className="h-5 w-5 mx-auto mb-1 text-slate-400" />
+                      {pdfFile ? (
+                        <span className="font-medium text-slate-900">
+                          {pdfFile.name} · {(pdfFile.size / 1024 / 1024).toFixed(2)} MB
+                        </span>
+                      ) : (
+                        <span>Kliko per te zgjedhur PDF (max 25MB)</span>
+                      )}
+                    </button>
+                  </div>
+                )}
+
+                {sourceType === 'youtube' && (
+                  <div className="space-y-2">
+                    <Input
+                      value={youtubeUrl}
+                      onChange={(e) => {
+                        setYoutubeUrl(e.target.value);
+                        setExtracted(null);
+                        setExtractError(null);
+                      }}
+                      placeholder="https://www.youtube.com/watch?v=..."
+                    />
+                    <Input
+                      value={youtubeLanguage}
+                      onChange={(e) => setYoutubeLanguage(e.target.value)}
+                      placeholder="Gjuha e preferuar (psh. 'en', 'sq') — opsionale"
+                    />
+                    <p className="text-xs text-slate-500">
+                      Videoja duhet te kete captions (transcript). Per video pa caption, perdor opsionin &quot;Audio/Video&quot;.
+                    </p>
+                  </div>
+                )}
+
+                {sourceType === 'audio' && (
+                  <div className="space-y-2">
+                    <input
+                      ref={audioInputRef}
+                      type="file"
+                      accept="audio/*,video/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        setAudioFile(e.target.files?.[0] || null);
+                        setExtracted(null);
+                        setExtractError(null);
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => audioInputRef.current?.click()}
+                      className="w-full p-4 rounded-lg border-2 border-dashed border-slate-300 hover:border-indigo-500 text-center text-sm text-slate-600 transition-colors"
+                    >
+                      <Mic className="h-5 w-5 mx-auto mb-1 text-slate-400" />
+                      {audioFile ? (
+                        <span className="font-medium text-slate-900">
+                          {audioFile.name} · {(audioFile.size / 1024 / 1024).toFixed(2)} MB
+                        </span>
+                      ) : (
+                        <span>Kliko per audio/video (max 25MB · limit Whisper)</span>
+                      )}
+                    </button>
+                    <p className="text-xs text-slate-500">
+                      Transkriptohet me OpenAI Whisper. Tipet e mbeshtetura: mp3, mp4, m4a, wav, webm.
+                    </p>
+                  </div>
+                )}
+
+                {/* Extract action + preview (PDF / YouTube / Audio) */}
+                {needsExtraction && (
+                  <div className="space-y-2">
+                    <Button
+                      type="button"
+                      variant={extracted ? 'outline' : 'default'}
+                      onClick={handleExtract}
+                      disabled={
+                        isExtracting ||
+                        (sourceType === 'pdf' && !pdfFile) ||
+                        (sourceType === 'youtube' && !youtubeUrl.trim()) ||
+                        (sourceType === 'audio' && !audioFile)
+                      }
+                      className="w-full"
+                    >
+                      {isExtracting ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          {EXTRACT_MESSAGES[sourceType][loadingMessageIndex % 3]}
+                        </>
+                      ) : extracted ? (
+                        <>
+                          <RotateCcw className="h-4 w-4 mr-2" />
+                          Ri-ekstrakto
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="h-4 w-4 mr-2" />
+                          Ekstrakto Permbajtjen
+                        </>
+                      )}
+                    </Button>
+
+                    {extractError && (
+                      <div className="flex items-start gap-2 p-3 rounded-lg bg-red-50 border border-red-200 text-sm text-red-700">
+                        <AlertTriangle className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                        <span>{extractError}</span>
+                      </div>
+                    )}
+
+                    {extracted && (
+                      <div className="p-3 rounded-lg border border-indigo-200 bg-indigo-50 space-y-2">
+                        <div className="flex items-center justify-between text-xs text-indigo-900">
+                          <span className="font-medium">{extracted.sourceLabel}</span>
+                          <span>
+                            {extracted.charCount.toLocaleString()} karaktere
+                            {extracted.truncated && ' · cunguar'}
+                          </span>
+                        </div>
+                        <div className="max-h-32 overflow-y-auto text-xs text-slate-700 whitespace-pre-wrap bg-white p-2 rounded border border-indigo-100">
+                          {extracted.content.slice(0, 800)}
+                          {extracted.content.length > 800 && '…'}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
 
@@ -336,7 +576,13 @@ export function AIQuizGenerator({
               </Button>
               <Button
                 onClick={handleGenerate}
-                disabled={isGenerating || (sourceType === 'custom' && customContent.length < 50)}
+                disabled={
+                  isGenerating ||
+                  isExtracting ||
+                  (sourceType === 'lesson' && (!lessonContent || lessonContent.length < 50)) ||
+                  (sourceType === 'custom' && customContent.length < 50) ||
+                  (needsExtraction && !extracted)
+                }
               >
                 {isGenerating ? (
                   <>

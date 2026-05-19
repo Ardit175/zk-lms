@@ -16,7 +16,7 @@ class Difficulty(str, Enum):
 
 
 class QuizGenerationRequest(BaseModel):
-    content: str = Field(..., min_length=50, max_length=10000, description="Lesson content to generate quiz from")
+    content: str = Field(..., min_length=50, max_length=30000, description="Lesson content to generate quiz from")
     num_questions: int = Field(default=5, ge=1, le=20, description="Number of questions to generate")
     question_types: List[QuestionType] = Field(
         default=[QuestionType.MULTIPLE_CHOICE],
@@ -79,7 +79,7 @@ class QuizGenerationResponse(BaseModel):
 
 # Content Summarizer Schemas
 class ContentSummaryRequest(BaseModel):
-    content: str = Field(..., min_length=50, max_length=10000, description="Content to summarize")
+    content: str = Field(..., min_length=50, max_length=30000, description="Content to summarize")
     title: Optional[str] = Field(default=None, description="Title of the content")
 
     model_config = {

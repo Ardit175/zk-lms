@@ -54,10 +54,8 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   res.status(500).json(ApiResponse.error(config.nodeEnv === 'development' ? err.message : 'Internal server error'));
 });
 
-if (process.env.NODE_ENV !== 'test') {
-  httpServer.listen(config.port, () => {
-    console.log(`Server running on port ${config.port} in ${config.nodeEnv} mode`);
-  });
-}
+httpServer.listen(config.port, () => {
+  console.log(`Server running on port ${config.port} in ${config.nodeEnv} mode`);
+});
 
 export { app, io };

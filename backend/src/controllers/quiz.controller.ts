@@ -143,7 +143,7 @@ export const startAttempt = async (req: Request, res: Response): Promise<void> =
     }));
 
     res.status(201).json(ApiResponse.success({
-      attempt,
+      attemptId: attempt.id,
       timeLimit: quiz.timeLimit,
       questions,
     }));
@@ -260,7 +260,7 @@ export const submitAttempt = async (req: Request, res: Response): Promise<void> 
     const scorePercent = totalPoints > 0 ? Math.round((earnedPoints / totalPoints) * 100) : 0;
     const isPassed = scorePercent >= attempt.quiz.passingScore;
 
-    const updatedAttempt = await prisma.quizAttempt.update({
+    await prisma.quizAttempt.update({
       where: { id: attemptId },
       data: {
         score: scorePercent,
@@ -270,7 +270,11 @@ export const submitAttempt = async (req: Request, res: Response): Promise<void> 
     });
 
     res.json(ApiResponse.success({
-      attempt: updatedAttempt,
+      score: scorePercent,
+      earnedPoints,
+      totalPoints,
+      isPassed,
+      passingScore: attempt.quiz.passingScore,
       results,
     }));
   } catch (error) {

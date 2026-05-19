@@ -40,11 +40,10 @@ const router = Router();
 router.get('/stats', getPublicStats);
 router.get('/featured', getFeaturedCourses);
 router.get('/', getCourses);
-router.get('/my-courses', requireAuth, requireRole('INSTRUCTOR'), getInstructorCourses);
-
-router.get('/:slug', getCourseBySlug);
+router.get('/slug/:slug', getCourseBySlug);
 
 // ─── INSTRUCTOR ROUTES ───────────────────────────────────────────────────────
+router.get('/my-courses', requireAuth, requireRole('INSTRUCTOR'), getInstructorCourses);
 
 router.get('/:id', requireAuth, requireRole('INSTRUCTOR', 'ADMIN'), getCourseById);
 

@@ -11,6 +11,7 @@ import {
   CheckCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { resolveFileUrl } from '@/lib/fileUrl';
 
 // pdf.js worker, version-matched to the installed pdfjs-dist
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
@@ -30,13 +31,7 @@ export function PdfViewer({ pdfUrl, isCompleted, onComplete }: PdfViewerProps) {
   const [isMarking, setIsMarking] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const src = useMemo(
-    () =>
-      pdfUrl.startsWith('/')
-        ? `${process.env.NEXT_PUBLIC_API_URL || ''}${pdfUrl}`
-        : pdfUrl,
-    [pdfUrl]
-  );
+  const src = useMemo(() => resolveFileUrl(pdfUrl), [pdfUrl]);
 
   useEffect(() => {
     const measure = () => {

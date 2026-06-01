@@ -38,6 +38,8 @@ import {
   GradeSubmissionInput,
 } from '@/lib/api/assignments';
 import { cn } from '@/lib/utils';
+import { sanitizeHtml } from '@/lib/sanitize';
+import { resolveFileUrl } from '@/lib/fileUrl';
 
 export default function AssignmentSubmissionsPage() {
   const params = useParams();
@@ -368,7 +370,7 @@ export default function AssignmentSubmissionsPage() {
                     {selectedSubmission.content && (
                       <div
                         className="prose prose-slate prose-sm max-w-none"
-                        dangerouslySetInnerHTML={{ __html: selectedSubmission.content }}
+                        dangerouslySetInnerHTML={{ __html: sanitizeHtml(selectedSubmission.content) }}
                       />
                     )}
 
@@ -379,7 +381,7 @@ export default function AssignmentSubmissionsPage() {
                           <p className="font-medium text-slate-900">Skedar i ngarkuar</p>
                         </div>
                         <a
-                          href={selectedSubmission.fileUrl}
+                          href={resolveFileUrl(selectedSubmission.fileUrl)}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"

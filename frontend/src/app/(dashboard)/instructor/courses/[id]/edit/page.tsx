@@ -30,7 +30,6 @@ import { cn } from '@/lib/utils';
 import { coursesApi, categoriesApi, type Course, type Module, type Lesson, type Category } from '@/lib/api/courses';
 import { quizzesApi, type QuizWithQuestions } from '@/lib/api/quizzes';
 import { uploadsApi, VIDEO_MAX_BYTES, PDF_MAX_BYTES } from '@/lib/api/uploads';
-import { useDebounce } from '@/lib/hooks/useDebounce';
 import { AIQuizGenerator } from '@/components/instructor/AIQuizGenerator';
 import { VideoPlayer } from '@/components/course-player/VideoPlayer';
 import dynamic from 'next/dynamic';
@@ -251,23 +250,23 @@ export default function CourseBuilderPage() {
     }
   };
 
-  const saveCourseFn = useCallback(async (data: Partial<Course>) => {
-    if (!course) return;
+  const saveCourseFn = useCallback(async (data: Partial<Course>): Promise<boolean> => {
+    if (!course) return false;
     setIsSaving(true);
     try {
       await coursesApi.updateCourse(courseId, data);
       setCourse((prev) => prev ? { ...prev, ...data } : prev);
+      return true;
     } catch (error) {
       console.error('Failed to save course:', error);
+      return false;
     } finally {
       setIsSaving(false);
     }
   }, [course, courseId]);
 
-  const saveCourse = useDebounce(saveCourseFn, 1500);
-
-  const saveLessonFn = useCallback(async (data: Partial<Lesson>) => {
-    if (!selectedLesson) return;
+  const saveLessonFn = useCallback(async (data: Partial<Lesson>): Promise<boolean> => {
+    if (!selectedLesson) return false;
     setIsSaving(true);
     try {
       await coursesApi.updateLesson(courseId, selectedLesson.moduleId, selectedLesson.id, data);
@@ -284,14 +283,14 @@ export default function CourseBuilderPage() {
         )
       );
       setSelectedLesson((prev) => prev ? { ...prev, ...data } : prev);
+      return true;
     } catch (error) {
       console.error('Failed to save lesson:', error);
+      return false;
     } finally {
       setIsSaving(false);
     }
   }, [selectedLesson, courseId]);
-
-  const saveLesson = useDebounce(saveLessonFn, 1500);
 
   const handleModuleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
@@ -502,9 +501,13 @@ export default function CourseBuilderPage() {
         <div className="w-[40%] p-6 min-h-[calc(100vh-57px)] bg-white">
           {selectedLesson ? (
             <LessonEditor
+              key={selectedLesson.id}
               lesson={selectedLesson}
-              onUpdate={saveLesson}
-              onUpdateNow={saveLessonFn}
+              siblingLessons={modules
+                .flatMap((m) => m.lessons)
+                .filter((l) => l.id !== selectedLesson.id && !!l.content)
+                .map((l) => ({ id: l.id, title: l.title, content: l.content }))}
+              onSave={saveLessonFn}
               onDelete={handleDeleteLesson}
               onClose={() => setSelectedLesson(null)}
             />
@@ -512,7 +515,7 @@ export default function CourseBuilderPage() {
             <CourseSettings
               course={course}
               categories={categories}
-              onUpdate={saveCourse}
+              onSave={saveCourseFn}
             />
           )}
         </div>
@@ -523,10 +526,10 @@ export default function CourseBuilderPage() {
 
 interface LessonEditorProps {
   lesson: Lesson;
-  /** debounced — for free-text inputs (title, content, url) */
-  onUpdate: (data: Partial<Lesson>) => void;
-  /** immediate — for discrete actions (type change, uploads, toggles) */
-  onUpdateNow: (data: Partial<Lesson>) => void;
+  /** other lessons in the course (with text content) usable as quiz sources */
+  siblingLessons: { id: string; title: string; content?: string }[];
+  /** persists the whole edited lesson; resolves true on success */
+  onSave: (data: Partial<Lesson>) => Promise<boolean>;
   onDelete: () => void;
   onClose: () => void;
 }
@@ -537,11 +540,48 @@ function detectVideoType(url: string): 'YOUTUBE' | 'VIMEO' | null {
   return null;
 }
 
-function LessonEditor({ lesson, onUpdate, onUpdateNow, onDelete, onClose }: LessonEditorProps) {
+// Fields the editor owns; used for both the draft and dirty comparison.
+type LessonDraft = Pick<
+  Lesson,
+  'title' | 'type' | 'content' | 'videoUrl' | 'videoType' | 'duration' | 'pdfUrl' | 'isPreview' | 'isPublished'
+>;
+
+function toDraft(lesson: Lesson): LessonDraft {
+  return {
+    title: lesson.title,
+    type: lesson.type,
+    content: lesson.content,
+    videoUrl: lesson.videoUrl,
+    videoType: lesson.videoType ?? null,
+    duration: lesson.duration,
+    pdfUrl: lesson.pdfUrl ?? null,
+    isPreview: lesson.isPreview,
+    isPublished: lesson.isPublished,
+  };
+}
+
+function LessonEditor({ lesson, siblingLessons, onSave, onDelete, onClose }: LessonEditorProps) {
   const [isQuizGeneratorOpen, setIsQuizGeneratorOpen] = useState(false);
   const [existingQuiz, setExistingQuiz] = useState<QuizWithQuestions | null>(null);
   const [isLoadingQuiz, setIsLoadingQuiz] = useState(false);
   const [isDeletingQuiz, setIsDeletingQuiz] = useState(false);
+
+  // Local working copy — nothing is persisted until "Ruaj" is pressed.
+  const [draft, setDraft] = useState<LessonDraft>(() => toDraft(lesson));
+  const [isSaving, setIsSaving] = useState(false);
+
+  const dirty = JSON.stringify(draft) !== JSON.stringify(toDraft(lesson));
+
+  const update = (patch: Partial<LessonDraft>) => setDraft((prev) => ({ ...prev, ...patch }));
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      await onSave(draft);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   // Video source: link (YouTube/Vimeo) vs uploaded file
   const [videoMode, setVideoMode] = useState<'link' | 'upload'>(
@@ -556,10 +596,6 @@ function LessonEditor({ lesson, onUpdate, onUpdateNow, onDelete, onClose }: Less
     if (lesson.type === 'QUIZ') {
       loadExistingQuiz();
     }
-    // reset upload modes when a different lesson is selected
-    setVideoMode(lesson.videoType === 'UPLOAD' ? 'upload' : 'link');
-    setTextMode(lesson.pdfUrl ? 'pdf' : 'text');
-    setUploadError('');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lesson.id]);
 
@@ -573,7 +609,7 @@ function LessonEditor({ lesson, onUpdate, onUpdateNow, onDelete, onClose }: Less
     try {
       const res = await uploadsApi.upload(file);
       if (res.data) {
-        onUpdateNow({ videoUrl: res.data.url, videoType: 'UPLOAD' });
+        update({ videoUrl: res.data.url, videoType: 'UPLOAD' });
       }
     } catch {
       setUploadError('Ngarkimi i videos deshtoi');
@@ -592,7 +628,7 @@ function LessonEditor({ lesson, onUpdate, onUpdateNow, onDelete, onClose }: Less
     try {
       const res = await uploadsApi.upload(file);
       if (res.data) {
-        onUpdateNow({ pdfUrl: res.data.url });
+        update({ pdfUrl: res.data.url });
       }
     } catch {
       setUploadError('Ngarkimi i PDF-se deshtoi');
@@ -645,8 +681,8 @@ function LessonEditor({ lesson, onUpdate, onUpdateNow, onDelete, onClose }: Less
         <div className="space-y-2">
           <Label>Titulli</Label>
           <Input
-            value={lesson.title}
-            onChange={(e) => onUpdate({ title: e.target.value })}
+            value={draft.title}
+            onChange={(e) => update({ title: e.target.value })}
           />
         </div>
 
@@ -661,10 +697,10 @@ function LessonEditor({ lesson, onUpdate, onUpdateNow, onDelete, onClose }: Less
             ] as const).map(({ value, label, icon: Icon }) => (
               <button
                 key={value}
-                onClick={() => onUpdateNow({ type: value })}
+                onClick={() => update({ type: value })}
                 className={cn(
                   'flex items-center gap-2 rounded-lg border p-3 transition-colors',
-                  lesson.type === value
+                  draft.type === value
                     ? 'border-indigo-600 bg-indigo-50 text-indigo-600'
                     : 'border-slate-200 text-slate-600 hover:border-slate-300'
                 )}
@@ -676,7 +712,7 @@ function LessonEditor({ lesson, onUpdate, onUpdateNow, onDelete, onClose }: Less
           </div>
         </div>
 
-        {lesson.type === 'VIDEO' && (
+        {draft.type === 'VIDEO' && (
           <div className="space-y-4">
             <div className="flex gap-2">
               <button
@@ -709,9 +745,9 @@ function LessonEditor({ lesson, onUpdate, onUpdateNow, onDelete, onClose }: Less
               <div className="space-y-2">
                 <Label>URL e Videos (YouTube ose Vimeo)</Label>
                 <Input
-                  value={lesson.videoType === 'UPLOAD' ? '' : lesson.videoUrl || ''}
+                  value={draft.videoType === 'UPLOAD' ? '' : draft.videoUrl || ''}
                   onChange={(e) =>
-                    onUpdate({
+                    update({
                       videoUrl: e.target.value,
                       videoType: detectVideoType(e.target.value),
                     })
@@ -728,7 +764,7 @@ function LessonEditor({ lesson, onUpdate, onUpdateNow, onDelete, onClose }: Less
                       <Loader2 className="h-6 w-6 animate-spin text-indigo-600" />
                       <span className="mt-2 text-sm text-slate-500">Duke ngarkuar...</span>
                     </>
-                  ) : lesson.videoType === 'UPLOAD' && lesson.videoUrl ? (
+                  ) : draft.videoType === 'UPLOAD' && draft.videoUrl ? (
                     <>
                       <Video className="h-6 w-6 text-green-600" />
                       <span className="mt-2 text-sm font-medium text-slate-700">Video u ngarkua</span>
@@ -757,12 +793,12 @@ function LessonEditor({ lesson, onUpdate, onUpdateNow, onDelete, onClose }: Less
 
             {uploadError && <p className="text-sm text-red-500">{uploadError}</p>}
 
-            {lesson.videoUrl && (
+            {draft.videoUrl && (
               <div className="space-y-2">
                 <Label>Parapamje</Label>
                 <VideoPlayer
-                  videoUrl={lesson.videoUrl}
-                  videoType={lesson.videoType}
+                  videoUrl={draft.videoUrl}
+                  videoType={draft.videoType}
                   lessonId={lesson.id}
                   onComplete={() => {}}
                 />
@@ -773,14 +809,20 @@ function LessonEditor({ lesson, onUpdate, onUpdateNow, onDelete, onClose }: Less
               <Label>Kohezgjatja (sekonda)</Label>
               <Input
                 type="number"
-                value={lesson.duration || 0}
-                onChange={(e) => onUpdate({ duration: parseInt(e.target.value) || 0 })}
+                min={0}
+                max={86400}
+                step={1}
+                value={draft.duration || 0}
+                onChange={(e) => {
+                  const n = parseInt(e.target.value, 10);
+                  update({ duration: Number.isNaN(n) ? 0 : Math.max(0, Math.min(86400, n)) });
+                }}
               />
             </div>
           </div>
         )}
 
-        {lesson.type === 'TEXT' && (
+        {draft.type === 'TEXT' && (
           <div className="space-y-4">
             <div className="flex gap-2">
               <button
@@ -813,21 +855,21 @@ function LessonEditor({ lesson, onUpdate, onUpdateNow, onDelete, onClose }: Less
               <div className="space-y-2">
                 <Label>Permbajtja</Label>
                 <RichTextEditor
-                  content={lesson.content || ''}
-                  onChange={(content) => onUpdate({ content })}
+                  content={draft.content || ''}
+                  onChange={(content) => update({ content })}
                 />
               </div>
             ) : (
               <div className="space-y-2">
                 <Label>Skedar PDF</Label>
-                {lesson.pdfUrl ? (
+                {draft.pdfUrl ? (
                   <div className="flex items-center justify-between rounded-lg border border-slate-200 p-3">
                     <div className="flex items-center gap-2">
                       <FileText className="h-5 w-5 text-indigo-600" />
                       <span className="text-sm text-slate-700">PDF i ngarkuar</span>
                     </div>
                     <button
-                      onClick={() => onUpdateNow({ pdfUrl: null })}
+                      onClick={() => update({ pdfUrl: null })}
                       className="text-slate-400 transition-colors hover:text-red-600"
                     >
                       <X className="h-4 w-4" />
@@ -866,7 +908,7 @@ function LessonEditor({ lesson, onUpdate, onUpdateNow, onDelete, onClose }: Less
           </div>
         )}
 
-        {lesson.type === 'QUIZ' && (
+        {draft.type === 'QUIZ' && (
           <div className="space-y-4">
             {isLoadingQuiz ? (
               <div className="p-4 bg-slate-50 rounded-lg flex items-center justify-center gap-2 text-slate-600">
@@ -944,8 +986,9 @@ function LessonEditor({ lesson, onUpdate, onUpdateNow, onDelete, onClose }: Less
 
             <AIQuizGenerator
               lessonId={lesson.id}
-              lessonTitle={lesson.title}
-              lessonContent={lesson.content || undefined}
+              lessonTitle={draft.title}
+              lessonContent={draft.content || undefined}
+              siblingLessons={siblingLessons}
               isOpen={isQuizGeneratorOpen}
               onClose={() => setIsQuizGeneratorOpen(false)}
               onQuizCreated={handleQuizCreated}
@@ -953,7 +996,7 @@ function LessonEditor({ lesson, onUpdate, onUpdateNow, onDelete, onClose }: Less
           </div>
         )}
 
-        {lesson.type === 'ASSIGNMENT' && (
+        {draft.type === 'ASSIGNMENT' && (
           <div className="p-4 bg-slate-50 rounded-lg text-center text-sm text-slate-600">
             Detyre Builder do te jete i disponueshem se shpejti.
           </div>
@@ -963,8 +1006,8 @@ function LessonEditor({ lesson, onUpdate, onUpdateNow, onDelete, onClose }: Less
           <label className="flex items-center gap-2 cursor-pointer">
             <input
               type="checkbox"
-              checked={lesson.isPreview}
-              onChange={(e) => onUpdate({ isPreview: e.target.checked })}
+              checked={draft.isPreview}
+              onChange={(e) => update({ isPreview: e.target.checked })}
               className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
             />
             <span className="text-sm text-slate-700">Preview i lire</span>
@@ -973,12 +1016,29 @@ function LessonEditor({ lesson, onUpdate, onUpdateNow, onDelete, onClose }: Less
           <label className="flex items-center gap-2 cursor-pointer">
             <input
               type="checkbox"
-              checked={lesson.isPublished}
-              onChange={(e) => onUpdate({ isPublished: e.target.checked })}
+              checked={draft.isPublished}
+              onChange={(e) => update({ isPublished: e.target.checked })}
               className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
             />
             <span className="text-sm text-slate-700">Publikuar</span>
           </label>
+        </div>
+
+        {/* Save bar — sticks to the bottom of the editor panel */}
+        <div className="sticky bottom-0 -mx-6 mt-2 border-t border-slate-200 bg-white px-6 py-4">
+          <div className="flex items-center gap-3">
+            <Button className="flex-1" onClick={handleSave} disabled={!dirty || isSaving}>
+              {isSaving ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : null}
+              {dirty ? 'Ruaj Ndryshimet' : 'Te Gjitha te Ruajtura'}
+            </Button>
+          </div>
+          {dirty && (
+            <p className="mt-2 text-center text-xs text-amber-600">
+              Keni ndryshime te paruajtura
+            </p>
+          )}
         </div>
 
         <Button variant="destructive" className="w-full" onClick={onDelete}>
@@ -993,11 +1053,49 @@ function LessonEditor({ lesson, onUpdate, onUpdateNow, onDelete, onClose }: Less
 interface CourseSettingsProps {
   course: Course | null;
   categories: Category[];
-  onUpdate: (data: Partial<Course>) => void;
+  onSave: (data: Partial<Course>) => Promise<boolean>;
 }
 
-function CourseSettings({ course, categories, onUpdate }: CourseSettingsProps) {
-  if (!course) return null;
+type CourseDraft = Pick<
+  Course,
+  'title' | 'description' | 'categoryId' | 'level' | 'price' | 'thumbnailUrl'
+>;
+
+function toCourseDraft(course: Course): CourseDraft {
+  return {
+    title: course.title,
+    description: course.description,
+    categoryId: course.categoryId,
+    level: course.level,
+    price: course.price,
+    thumbnailUrl: course.thumbnailUrl,
+  };
+}
+
+function CourseSettings({ course, categories, onSave }: CourseSettingsProps) {
+  const [draft, setDraft] = useState<CourseDraft | null>(course ? toCourseDraft(course) : null);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Re-sync when the course finishes loading or changes identity.
+  useEffect(() => {
+    setDraft(course ? toCourseDraft(course) : null);
+  }, [course?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (!course || !draft) return null;
+
+  const update = (patch: Partial<CourseDraft>) =>
+    setDraft((prev) => (prev ? { ...prev, ...patch } : prev));
+
+  const dirty = JSON.stringify(draft) !== JSON.stringify(toCourseDraft(course));
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      await onSave(draft);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -1007,16 +1105,16 @@ function CourseSettings({ course, categories, onUpdate }: CourseSettingsProps) {
         <div className="space-y-2">
           <Label>Titulli</Label>
           <Input
-            value={course.title}
-            onChange={(e) => onUpdate({ title: e.target.value })}
+            value={draft.title}
+            onChange={(e) => update({ title: e.target.value })}
           />
         </div>
 
         <div className="space-y-2">
           <Label>Pershkrimi</Label>
           <textarea
-            value={course.description}
-            onChange={(e) => onUpdate({ description: e.target.value })}
+            value={draft.description}
+            onChange={(e) => update({ description: e.target.value })}
             rows={4}
             className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
           />
@@ -1025,8 +1123,8 @@ function CourseSettings({ course, categories, onUpdate }: CourseSettingsProps) {
         <div className="space-y-2">
           <Label>Kategoria</Label>
           <select
-            value={course.categoryId || ''}
-            onChange={(e) => onUpdate({ categoryId: e.target.value || undefined })}
+            value={draft.categoryId || ''}
+            onChange={(e) => update({ categoryId: e.target.value || undefined })}
             className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
           >
             <option value="">Zgjidh Kategorine</option>
@@ -1041,8 +1139,8 @@ function CourseSettings({ course, categories, onUpdate }: CourseSettingsProps) {
         <div className="space-y-2">
           <Label>Niveli</Label>
           <select
-            value={course.level}
-            onChange={(e) => onUpdate({ level: e.target.value as Course['level'] })}
+            value={draft.level}
+            onChange={(e) => update({ level: e.target.value as Course['level'] })}
             className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
           >
             <option value="BEGINNER">Fillestar</option>
@@ -1055,9 +1153,13 @@ function CourseSettings({ course, categories, onUpdate }: CourseSettingsProps) {
           <Label>Cmimi (EUR)</Label>
           <Input
             type="number"
-            value={course.price}
-            onChange={(e) => onUpdate({ price: parseFloat(e.target.value) || 0 })}
+            value={draft.price}
+            onChange={(e) => {
+              const n = parseFloat(e.target.value);
+              update({ price: Number.isNaN(n) ? 0 : Math.max(0, Math.min(100000, n)) });
+            }}
             min={0}
+            max={100000}
             step={0.01}
           />
         </div>
@@ -1065,11 +1167,23 @@ function CourseSettings({ course, categories, onUpdate }: CourseSettingsProps) {
         <div className="space-y-2">
           <Label>Thumbnail URL</Label>
           <Input
-            value={course.thumbnailUrl || ''}
-            onChange={(e) => onUpdate({ thumbnailUrl: e.target.value || undefined })}
+            value={draft.thumbnailUrl || ''}
+            onChange={(e) => update({ thumbnailUrl: e.target.value || undefined })}
             placeholder="https://..."
           />
         </div>
+      </div>
+
+      <div className="sticky bottom-0 -mx-6 border-t border-slate-200 bg-white px-6 py-4">
+        <Button className="w-full" onClick={handleSave} disabled={!dirty || isSaving}>
+          {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+          {dirty ? 'Ruaj Ndryshimet' : 'Te Gjitha te Ruajtura'}
+        </Button>
+        {dirty && (
+          <p className="mt-2 text-center text-xs text-amber-600">
+            Keni ndryshime te paruajtura
+          </p>
+        )}
       </div>
     </div>
   );

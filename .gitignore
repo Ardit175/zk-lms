@@ -51,8 +51,9 @@ env/
 uploads/
 !uploads/.gitkeep
 
-# Certificates (generated)
-certificates/
+# Certificates (generated) — scoped to the upload dir so it doesn't
+# accidentally ignore source folders named "certificates" (e.g. app routes).
+/backend/uploads/certificates/
 
 # Misc
 *.tsbuildinfo

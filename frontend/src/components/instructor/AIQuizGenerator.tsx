@@ -17,6 +17,7 @@ import {
   Upload,
   Mic,
   AlertTriangle,
+  Layers,
 } from 'lucide-react';
 import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
@@ -43,17 +44,25 @@ import {
 import { quizzesApi } from '@/lib/api/quizzes';
 import { cn } from '@/lib/utils';
 
+interface SiblingLesson {
+  id: string;
+  title: string;
+  content?: string;
+}
+
 interface AIQuizGeneratorProps {
   lessonId: string;
   lessonTitle: string;
   lessonContent?: string;
+  /** other lessons in the course that have text content */
+  siblingLessons?: SiblingLesson[];
   isOpen: boolean;
   onClose: () => void;
   onQuizCreated: (quizId: string) => void;
 }
 
 type Step = 'input' | 'review';
-type SourceType = 'lesson' | 'custom' | 'pdf' | 'youtube' | 'audio';
+type SourceType = 'lesson' | 'lessons' | 'custom' | 'pdf' | 'youtube' | 'audio';
 
 const LOADING_MESSAGES = [
   'Duke analizuar permbajtjen...',
@@ -61,7 +70,22 @@ const LOADING_MESSAGES = [
   'Duke perfunduar...',
 ];
 
-const EXTRACT_MESSAGES: Record<Exclude<SourceType, 'lesson' | 'custom'>, string[]> = {
+// Strips rich-text HTML to plain text so aggregated lesson content stays clean
+// when fed to the quiz generator.
+function htmlToText(html: string): string {
+  return html
+    .replace(/<\/(p|div|h[1-6]|li|br)>/gi, '\n')
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
+const EXTRACT_MESSAGES: Record<Exclude<SourceType, 'lesson' | 'lessons' | 'custom'>, string[]> = {
   pdf: ['Duke lexuar PDF-ne...', 'Duke ekstraktuar tekstin...', 'Duke pastruar permbajtjen...'],
   youtube: ['Duke u lidhur me YouTube...', 'Duke marre transcript-in...', 'Duke perfunduar...'],
   audio: ['Duke ngarkuar ne Whisper...', 'Duke transkriptuar audion...', 'Mund te zgjase deri ne 1 minute...'],
@@ -71,6 +95,7 @@ export function AIQuizGenerator({
   lessonId,
   lessonTitle,
   lessonContent,
+  siblingLessons = [],
   isOpen,
   onClose,
   onQuizCreated,
@@ -84,6 +109,9 @@ export function AIQuizGenerator({
   // Input state
   const [sourceType, setSourceType] = useState<SourceType>('lesson');
   const [customContent, setCustomContent] = useState('');
+
+  // "Previous lessons" source — selected lesson ids to aggregate as content
+  const [selectedLessonIds, setSelectedLessonIds] = useState<string[]>([]);
 
   // PDF / Audio source state
   const [pdfFile, setPdfFile] = useState<File | null>(null);
@@ -125,12 +153,24 @@ export function AIQuizGenerator({
 
   const resolveContent = (): string | null => {
     if (sourceType === 'lesson') return lessonContent || null;
+    if (sourceType === 'lessons') {
+      const parts = siblingLessons
+        .filter((l) => selectedLessonIds.includes(l.id) && l.content)
+        .map((l) => `## ${l.title}\n${htmlToText(l.content as string)}`);
+      return parts.length ? parts.join('\n\n') : null;
+    }
     if (sourceType === 'custom') return customContent;
     return extracted?.content || null;
   };
 
   const needsExtraction =
     sourceType === 'pdf' || sourceType === 'youtube' || sourceType === 'audio';
+
+  const toggleLessonSelected = (id: string) => {
+    setSelectedLessonIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  };
 
   const handleExtract = async () => {
     setExtractError(null);
@@ -244,6 +284,7 @@ export function AIQuizGenerator({
     setQuestions([]);
     setQuizTitle('');
     setCustomContent('');
+    setSelectedLessonIds([]);
     setPdfFile(null);
     setAudioFile(null);
     setYoutubeUrl('');
@@ -314,9 +355,10 @@ export function AIQuizGenerator({
               {/* Source Selector */}
               <div className="space-y-3">
                 <Label>Burimi i Permbajtjes</Label>
-                <div className="grid grid-cols-5 gap-2">
+                <div className="grid grid-cols-3 gap-2">
                   {([
                     { value: 'lesson', label: 'Mesimi', icon: FileText, disabled: !lessonContent },
+                    { value: 'lessons', label: 'Mesime te tjera', icon: Layers, disabled: siblingLessons.length === 0 },
                     { value: 'custom', label: 'Tekst', icon: FileText, disabled: false },
                     { value: 'pdf', label: 'PDF', icon: Upload, disabled: false },
                     { value: 'youtube', label: 'YouTube', icon: PlaySquare, disabled: false },
@@ -346,6 +388,41 @@ export function AIQuizGenerator({
                     {lessonContent
                       ? `Permbajtja e mesimit "${lessonTitle}" do te perdoret (${lessonContent.length} karaktere).`
                       : 'Ky mesim s\'ka permbajtje teksti. Zgjidh nje burim tjeter.'}
+                  </div>
+                )}
+
+                {sourceType === 'lessons' && (
+                  <div className="space-y-2">
+                    {siblingLessons.length === 0 ? (
+                      <div className="p-3 rounded-lg border border-slate-200 bg-slate-50 text-sm text-slate-600">
+                        S&apos;ka mesime te tjera me permbajtje teksti ne kete kurs.
+                      </div>
+                    ) : (
+                      <>
+                        <div className="max-h-44 overflow-y-auto rounded-lg border border-slate-200 divide-y divide-slate-100">
+                          {siblingLessons.map((l) => (
+                            <label
+                              key={l.id}
+                              className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-slate-50"
+                            >
+                              <input
+                                type="checkbox"
+                                checked={selectedLessonIds.includes(l.id)}
+                                onChange={() => toggleLessonSelected(l.id)}
+                                className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                              />
+                              <span className="flex-1 text-sm text-slate-700 truncate">{l.title}</span>
+                              <span className="text-xs text-slate-400">
+                                {htmlToText(l.content || '').length} karaktere
+                              </span>
+                            </label>
+                          ))}
+                        </div>
+                        <p className="text-xs text-slate-500">
+                          Zgjidh nje ose me shume mesime; permbajtja e tyre kombinohet per gjenerimin.
+                        </p>
+                      </>
+                    )}
                   </div>
                 )}
 
@@ -580,6 +657,7 @@ export function AIQuizGenerator({
                   isGenerating ||
                   isExtracting ||
                   (sourceType === 'lesson' && (!lessonContent || lessonContent.length < 50)) ||
+                  (sourceType === 'lessons' && selectedLessonIds.length === 0) ||
                   (sourceType === 'custom' && customContent.length < 50) ||
                   (needsExtraction && !extracted)
                 }

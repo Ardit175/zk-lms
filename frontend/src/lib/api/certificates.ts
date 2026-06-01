@@ -1,4 +1,5 @@
 import { api, ApiResponse } from '@/lib/api';
+import { resolveFileUrl } from '@/lib/fileUrl';
 
 export interface Certificate {
   id: string;
@@ -37,6 +38,6 @@ export const certificatesApi = {
   },
 
   getDownloadUrl: (certificateId: string) => {
-    return `${process.env.NEXT_PUBLIC_API_URL}/api/certificates/${certificateId}/download`;
+    return resolveFileUrl(`/api/certificates/${certificateId}/download`);
   },
 };

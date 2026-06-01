@@ -26,6 +26,8 @@ import { Badge } from '@/components/ui/badge';
 import { RichTextEditor } from '@/components/editor/RichTextEditor';
 import { assignmentsApi, Assignment, AssignmentSubmission, SubmissionType } from '@/lib/api/assignments';
 import { cn } from '@/lib/utils';
+import { sanitizeHtml } from '@/lib/sanitize';
+import { resolveFileUrl } from '@/lib/fileUrl';
 
 interface AssignmentPlayerProps {
   lessonId: string;
@@ -146,7 +148,11 @@ export function AssignmentPlayer({ lessonId, onComplete }: AssignmentPlayerProps
           return;
         }
         try {
-          new URL(linkUrl);
+          const parsed = new URL(linkUrl);
+          if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+            setError('Linku duhet te filloje me http:// ose https://');
+            return;
+          }
         } catch {
           setError('Ju lutem vendosni nje URL te vlefshme');
           return;
@@ -301,7 +307,7 @@ export function AssignmentPlayer({ lessonId, onComplete }: AssignmentPlayerProps
         <h3 className="font-medium text-slate-900 mb-3">Udhezime</h3>
         <div
           className="prose prose-slate prose-sm max-w-none"
-          dangerouslySetInnerHTML={{ __html: assignment.instructions }}
+          dangerouslySetInnerHTML={{ __html: sanitizeHtml(assignment.instructions) }}
         />
       </div>
 
@@ -327,7 +333,7 @@ export function AssignmentPlayer({ lessonId, onComplete }: AssignmentPlayerProps
                     <Label className="text-slate-500 mb-2 block">Permbajtja:</Label>
                     <div
                       className="prose prose-slate prose-sm max-w-none p-4 bg-slate-50 rounded-lg"
-                      dangerouslySetInnerHTML={{ __html: submission.content }}
+                      dangerouslySetInnerHTML={{ __html: sanitizeHtml(submission.content) }}
                     />
                   </div>
                 )}
@@ -336,7 +342,7 @@ export function AssignmentPlayer({ lessonId, onComplete }: AssignmentPlayerProps
                   <div>
                     <Label className="text-slate-500 mb-2 block">Skedari:</Label>
                     <a
-                      href={submission.fileUrl}
+                      href={resolveFileUrl(submission.fileUrl)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-sm transition-colors"

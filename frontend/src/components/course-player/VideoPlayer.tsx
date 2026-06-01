@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { CheckCircle2 } from 'lucide-react';
+import { resolveFileUrl } from '@/lib/fileUrl';
 
 // react-player is browser-only — load it with SSR disabled
 const ReactPlayer = dynamic(() => import('react-player'), {
@@ -46,10 +47,7 @@ export function VideoPlayer({
   const resolvedType = videoType ?? detectVideoType(videoUrl);
 
   // Uploaded files are stored as relative paths on the backend
-  const src =
-    resolvedType === 'UPLOAD' && videoUrl.startsWith('/')
-      ? `${process.env.NEXT_PUBLIC_API_URL || ''}${videoUrl}`
-      : videoUrl;
+  const src = resolvedType === 'UPLOAD' ? resolveFileUrl(videoUrl) : videoUrl;
 
   const markComplete = () => {
     if (completedRef.current) return;

@@ -25,7 +25,9 @@ export const config = {
 
   redisUrl: process.env.REDIS_URL || 'redis://localhost:6379',
 
-  aiServiceUrl: process.env.AI_SERVICE_URL || 'http://localhost:8000',
+  // Trailing slashes are stripped so `${aiServiceUrl}/api/...` never produces
+  // a "//api/..." path, which FastAPI/Starlette serves as 404.
+  aiServiceUrl: (process.env.AI_SERVICE_URL || 'http://localhost:8000').replace(/\/+$/, ''),
 
   corsOrigin: process.env.CORS_ORIGIN || 'http://localhost:3000',
 

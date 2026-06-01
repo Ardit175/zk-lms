@@ -58,6 +58,8 @@ interface AIQuizGeneratorProps {
   lessonContent?: string;
   /** other lessons in the course that have text content */
   siblingLessons?: SiblingLesson[];
+  /** when regenerating, the existing quiz is replaced (deleted) on save */
+  existingQuizId?: string;
   isOpen: boolean;
   onClose: () => void;
   onQuizCreated: (quizId: string) => void;
@@ -98,6 +100,7 @@ export function AIQuizGenerator({
   lessonTitle,
   lessonContent,
   siblingLessons = [],
+  existingQuizId,
   isOpen,
   onClose,
   onQuizCreated,
@@ -268,6 +271,10 @@ export function AIQuizGenerator({
 
     setIsSaving(true);
     try {
+      // Regeneration: a lesson can only hold one quiz, so replace the old one.
+      if (existingQuizId) {
+        await quizzesApi.deleteQuiz(existingQuizId);
+      }
       const res = await quizzesApi.createQuiz({
         lessonId,
         title: quizTitle || `Kuiz: ${lessonTitle}`,

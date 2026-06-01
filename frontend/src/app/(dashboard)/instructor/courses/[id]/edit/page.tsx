@@ -989,6 +989,7 @@ function LessonEditor({ lesson, siblingLessons, onSave, onDelete, onClose }: Les
               lessonTitle={draft.title}
               lessonContent={draft.content || undefined}
               siblingLessons={siblingLessons}
+              existingQuizId={existingQuiz?.id}
               isOpen={isQuizGeneratorOpen}
               onClose={() => setIsQuizGeneratorOpen(false)}
               onQuizCreated={handleQuizCreated}

@@ -34,6 +34,12 @@ Generate exactly {request.num_questions} quiz question(s) based on the lesson co
 Allowed question types: {type_labels}.
 Difficulty level: {request.difficulty.value} - {difficulty_desc}.{topic_context}
 
+LANGUAGE (HIGHEST PRIORITY):
+- Detect the language of the lesson content below and write EVERYTHING — the
+  title, every question, all options, explanations and sample answers — in that
+  SAME language. Do NOT translate to English. If the content is in Albanian,
+  respond entirely in Albanian.
+
 IMPORTANT RULES:
 1. Questions must TEST UNDERSTANDING, not just memorization of facts.
 2. Distractors (wrong answers) must be PLAUSIBLE and educational.
@@ -43,7 +49,8 @@ IMPORTANT RULES:
 
 TYPE-SPECIFIC RULES:
 - MULTIPLE_CHOICE: Exactly 4 options, exactly 1 correct answer.
-- TRUE_FALSE: Exactly 2 options ["True", "False"], mark the correct one.
+- TRUE_FALSE: Exactly 2 options representing "true" and "false" IN THE CONTENT'S
+  LANGUAGE (e.g. Albanian: "E vërtetë" / "E gabuar"), mark the correct one.
 - SHORT_ANSWER: NO options array (empty []), include "sample_answer" field with ideal response.
 
 Lesson content:
@@ -104,10 +111,12 @@ def _validate_question(q: dict, q_type: QuestionType) -> bool:
             return False
 
     elif q_type == QuestionType.TRUE_FALSE:
+        # Language-agnostic: exactly two options with exactly one correct. The
+        # labels may be localized (e.g. Albanian "E vërtetë" / "E gabuar"), so we
+        # don't require the literal English words "true"/"false".
         if len(options) != 2:
             return False
-        option_texts = [o.get("option_text", "").lower() for o in options]
-        if "true" not in option_texts or "false" not in option_texts:
+        if not all(o.get("option_text", "").strip() for o in options):
             return False
         correct_count = sum(1 for o in options if o.get("is_correct"))
         if correct_count != 1:

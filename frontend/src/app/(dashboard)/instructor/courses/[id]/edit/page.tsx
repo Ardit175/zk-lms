@@ -505,8 +505,8 @@ export default function CourseBuilderPage() {
               lesson={selectedLesson}
               siblingLessons={modules
                 .flatMap((m) => m.lessons)
-                .filter((l) => l.id !== selectedLesson.id && !!l.content)
-                .map((l) => ({ id: l.id, title: l.title, content: l.content }))}
+                .filter((l) => l.id !== selectedLesson.id && (!!l.content || !!l.pdfUrl))
+                .map((l) => ({ id: l.id, title: l.title, content: l.content, pdfUrl: l.pdfUrl }))}
               onSave={saveLessonFn}
               onDelete={handleDeleteLesson}
               onClose={() => setSelectedLesson(null)}
@@ -526,8 +526,8 @@ export default function CourseBuilderPage() {
 
 interface LessonEditorProps {
   lesson: Lesson;
-  /** other lessons in the course (with text content) usable as quiz sources */
-  siblingLessons: { id: string; title: string; content?: string }[];
+  /** other lessons in the course (text or PDF) usable as quiz sources */
+  siblingLessons: { id: string; title: string; content?: string; pdfUrl?: string | null }[];
   /** persists the whole edited lesson; resolves true on success */
   onSave: (data: Partial<Lesson>) => Promise<boolean>;
   onDelete: () => void;

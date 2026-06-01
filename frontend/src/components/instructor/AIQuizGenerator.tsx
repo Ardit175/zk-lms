@@ -42,12 +42,14 @@ import {
   type ExtractionResult,
 } from '@/lib/api/ai';
 import { quizzesApi } from '@/lib/api/quizzes';
+import { resolveFileUrl } from '@/lib/fileUrl';
 import { cn } from '@/lib/utils';
 
 interface SiblingLesson {
   id: string;
   title: string;
   content?: string;
+  pdfUrl?: string | null;
 }
 
 interface AIQuizGeneratorProps {
@@ -153,14 +155,32 @@ export function AIQuizGenerator({
 
   const resolveContent = (): string | null => {
     if (sourceType === 'lesson') return lessonContent || null;
-    if (sourceType === 'lessons') {
-      const parts = siblingLessons
-        .filter((l) => selectedLessonIds.includes(l.id) && l.content)
-        .map((l) => `## ${l.title}\n${htmlToText(l.content as string)}`);
-      return parts.length ? parts.join('\n\n') : null;
-    }
     if (sourceType === 'custom') return customContent;
     return extracted?.content || null;
+  };
+
+  // Aggregates the selected lessons' content. Text lessons are used directly;
+  // PDF-only lessons are fetched and run through the AI PDF extractor.
+  const buildLessonsContent = async (): Promise<string | null> => {
+    const selected = siblingLessons.filter((l) => selectedLessonIds.includes(l.id));
+    const parts: string[] = [];
+    for (const l of selected) {
+      const text = htmlToText(l.content || '');
+      if (text.length > 0) {
+        parts.push(`## ${l.title}\n${text}`);
+      } else if (l.pdfUrl) {
+        try {
+          const resp = await fetch(resolveFileUrl(l.pdfUrl));
+          const blob = await resp.blob();
+          const file = new File([blob], `${l.title || 'lesson'}.pdf`, { type: 'application/pdf' });
+          const ex = await aiApi.extractPdf(file);
+          if (ex.data?.content) parts.push(`## ${l.title}\n${ex.data.content}`);
+        } catch (err) {
+          console.error('PDF extraction failed for lesson', l.id, err);
+        }
+      }
+    }
+    return parts.length ? parts.join('\n\n') : null;
   };
 
   const needsExtraction =
@@ -208,16 +228,17 @@ export function AIQuizGenerator({
   };
 
   const handleGenerate = async () => {
-    const content = resolveContent();
-    if (!content || content.length < 50) {
-      alert('Permbajtja duhet te jete te pakten 50 karaktere');
-      return;
-    }
-
     setIsGenerating(true);
     setLoadingMessageIndex(0);
 
     try {
+      const content =
+        sourceType === 'lessons' ? await buildLessonsContent() : resolveContent();
+      if (!content || content.length < 50) {
+        alert('Permbajtja duhet te jete te pakten 50 karaktere');
+        return;
+      }
+
       const res = await aiApi.generateQuiz({
         content,
         numQuestions,
@@ -336,8 +357,8 @@ export function AIQuizGenerator({
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className={cn(
-        'max-w-2xl',
-        step === 'review' && 'max-w-4xl max-h-[90vh] overflow-y-auto'
+        'max-w-2xl max-h-[90vh] overflow-y-auto',
+        step === 'review' && 'max-w-4xl'
       )}>
         {step === 'input' ? (
           <>
@@ -395,31 +416,41 @@ export function AIQuizGenerator({
                   <div className="space-y-2">
                     {siblingLessons.length === 0 ? (
                       <div className="p-3 rounded-lg border border-slate-200 bg-slate-50 text-sm text-slate-600">
-                        S&apos;ka mesime te tjera me permbajtje teksti ne kete kurs.
+                        S&apos;ka mesime te tjera me permbajtje ne kete kurs.
                       </div>
                     ) : (
                       <>
                         <div className="max-h-44 overflow-y-auto rounded-lg border border-slate-200 divide-y divide-slate-100">
-                          {siblingLessons.map((l) => (
-                            <label
-                              key={l.id}
-                              className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-slate-50"
-                            >
-                              <input
-                                type="checkbox"
-                                checked={selectedLessonIds.includes(l.id)}
-                                onChange={() => toggleLessonSelected(l.id)}
-                                className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                              />
-                              <span className="flex-1 text-sm text-slate-700 truncate">{l.title}</span>
-                              <span className="text-xs text-slate-400">
-                                {htmlToText(l.content || '').length} karaktere
-                              </span>
-                            </label>
-                          ))}
+                          {siblingLessons.map((l) => {
+                            const textLen = htmlToText(l.content || '').length;
+                            const isPdf = textLen === 0 && !!l.pdfUrl;
+                            return (
+                              <label
+                                key={l.id}
+                                className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-slate-50"
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={selectedLessonIds.includes(l.id)}
+                                  onChange={() => toggleLessonSelected(l.id)}
+                                  className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                                />
+                                <span className="flex-1 text-sm text-slate-700 truncate">{l.title}</span>
+                                {isPdf ? (
+                                  <Badge variant="secondary" className="gap-1 text-xs">
+                                    <Upload className="h-3 w-3" />
+                                    PDF
+                                  </Badge>
+                                ) : (
+                                  <span className="text-xs text-slate-400">{textLen} karaktere</span>
+                                )}
+                              </label>
+                            );
+                          })}
                         </div>
                         <p className="text-xs text-slate-500">
                           Zgjidh nje ose me shume mesime; permbajtja e tyre kombinohet per gjenerimin.
+                          Mesimet PDF ekstraktohen automatikisht.
                         </p>
                       </>
                     )}

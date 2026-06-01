@@ -44,6 +44,7 @@ export function QuizPlayer({ quizId, onComplete }: QuizPlayerProps) {
     results: QuizResult[];
   } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isStarting, setIsStarting] = useState(false);
 
   useEffect(() => {
     loadQuizInfo();
@@ -77,6 +78,8 @@ export function QuizPlayer({ quizId, onComplete }: QuizPlayerProps) {
   };
 
   const handleStart = async () => {
+    if (isStarting) return;
+    setIsStarting(true);
     try {
       const res = await quizzesApi.startAttempt(quizId);
       if (res.data) {
@@ -89,6 +92,8 @@ export function QuizPlayer({ quizId, onComplete }: QuizPlayerProps) {
       }
     } catch (error) {
       console.error('Failed to start quiz:', error);
+    } finally {
+      setIsStarting(false);
     }
   };
 
@@ -148,7 +153,7 @@ export function QuizPlayer({ quizId, onComplete }: QuizPlayerProps) {
   }
 
   if (state === 'INTRO' && quizInfo) {
-    return <IntroScreen quizInfo={quizInfo} onStart={handleStart} />;
+    return <IntroScreen quizInfo={quizInfo} onStart={handleStart} isStarting={isStarting} />;
   }
 
   if (state === 'IN_PROGRESS' && questions.length > 0) {
@@ -238,9 +243,10 @@ export function QuizPlayer({ quizId, onComplete }: QuizPlayerProps) {
 interface IntroScreenProps {
   quizInfo: QuizInfo;
   onStart: () => void;
+  isStarting: boolean;
 }
 
-function IntroScreen({ quizInfo, onStart }: IntroScreenProps) {
+function IntroScreen({ quizInfo, onStart, isStarting }: IntroScreenProps) {
   return (
     <Card>
       <CardContent className="p-8 text-center">
@@ -275,7 +281,8 @@ function IntroScreen({ quizInfo, onStart }: IntroScreenProps) {
         </div>
 
         {quizInfo.attemptsRemaining > 0 ? (
-          <Button size="lg" onClick={onStart}>
+          <Button size="lg" onClick={onStart} disabled={isStarting}>
+            {isStarting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
             Fillo Kuizin
           </Button>
         ) : (

@@ -11,6 +11,7 @@ import {
   BookOpen,
   ChevronLeft,
   ChevronRight,
+  Loader2,
 } from 'lucide-react';
 import { DashboardLayout } from '@/components/layouts/DashboardLayout';
 import { Card, CardContent } from '@/components/ui/card';
@@ -27,6 +28,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { adminApi, type AdminUser } from '@/lib/api/admin';
 import { cn } from '@/lib/utils';
+import { showSuccessToast, showErrorToast } from '@/lib/api';
 
 const ROLE_CONFIG = {
   ADMIN: { label: 'Admin', icon: Shield, color: 'bg-red-100 text-red-700' },
@@ -40,6 +42,7 @@ export default function AdminUsersPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('ALL');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
+  const [pendingUserId, setPendingUserId] = useState<string | null>(null);
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 20,
@@ -86,34 +89,48 @@ export default function AdminUsersPage() {
   };
 
   const handleChangeRole = async (userId: string, newRole: string) => {
+    if (pendingUserId) return;
+    setPendingUserId(userId);
+    const prev = users;
+    setUsers((u) => u.map((x) => (x.id === userId ? { ...x, role: newRole as AdminUser['role'] } : x)));
     try {
       await adminApi.updateUser(userId, { role: newRole });
-      setUsers((prev) =>
-        prev.map((u) => (u.id === userId ? { ...u, role: newRole as AdminUser['role'] } : u))
-      );
-    } catch (error) {
-      console.error('Failed to change role:', error);
+      showSuccessToast('Roli u ndryshua me sukses');
+    } catch {
+      setUsers(prev);
+    } finally {
+      setPendingUserId(null);
     }
   };
 
   const handleToggleActive = async (userId: string, isActive: boolean) => {
+    if (pendingUserId) return;
+    setPendingUserId(userId);
+    const prev = users;
+    setUsers((u) => u.map((x) => (x.id === userId ? { ...x, isActive: !isActive } : x)));
     try {
       await adminApi.updateUser(userId, { isActive: !isActive });
-      setUsers((prev) =>
-        prev.map((u) => (u.id === userId ? { ...u, isActive: !isActive } : u))
-      );
-    } catch (error) {
-      console.error('Failed to toggle status:', error);
+      showSuccessToast(isActive ? 'Perdoruesi u deaktivizua' : 'Perdoruesi u aktivizua');
+    } catch {
+      setUsers(prev);
+    } finally {
+      setPendingUserId(null);
     }
   };
 
   const handleDelete = async (userId: string) => {
+    if (pendingUserId) return;
     if (!confirm('Jeni te sigurt qe deshironi te deaktivizoni kete perdorues?')) return;
+    setPendingUserId(userId);
+    const prev = users;
+    setUsers((u) => u.map((x) => (x.id === userId ? { ...x, isActive: false } : x)));
     try {
       await adminApi.deleteUser(userId);
-      setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, isActive: false } : u)));
-    } catch (error) {
-      console.error('Failed to delete user:', error);
+      showSuccessToast('Perdoruesi u deaktivizua');
+    } catch {
+      setUsers(prev);
+    } finally {
+      setPendingUserId(null);
     }
   };
 
@@ -278,8 +295,12 @@ export default function AdminUsersPage() {
                           <td className="px-6 py-4 text-right">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon">
-                                  <MoreVertical className="h-4 w-4" />
+                                <Button variant="ghost" size="icon" disabled={pendingUserId === user.id}>
+                                  {pendingUserId === user.id ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                  ) : (
+                                    <MoreVertical className="h-4 w-4" />
+                                  )}
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">

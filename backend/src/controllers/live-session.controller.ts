@@ -292,14 +292,37 @@ export const upvoteQuestion = async (req: Request, res: Response): Promise<void>
   try {
     const sessionId = req.params.id as string;
     const questionId = req.params.qid as string;
+    const userId = req.user!.id;
+    const userRole = req.user!.role;
 
     const question = await prisma.liveQuestion.findUnique({
       where: { id: questionId },
-      select: { id: true, sessionId: true, upvotes: true },
+      select: {
+        id: true,
+        sessionId: true,
+        upvotes: true,
+        session: { select: { courseId: true, instructorId: true } },
+      },
     });
 
     if (!question || question.sessionId !== sessionId) {
       res.status(404).json(ApiResponse.error('Pyetja nuk u gjet'));
+      return;
+    }
+
+    // Students must be enrolled; instructors must own the session.
+    if (userRole === 'STUDENT') {
+      const enrollment = await prisma.enrollment.findUnique({
+        where: {
+          studentId_courseId: { studentId: userId, courseId: question.session.courseId },
+        },
+      });
+      if (!enrollment) {
+        res.status(403).json(ApiResponse.error('Nuk jeni i regjistruar ne kete kurs'));
+        return;
+      }
+    } else if (userRole === 'INSTRUCTOR' && question.session.instructorId !== userId) {
+      res.status(403).json(ApiResponse.error('Nuk keni akses ne kete sesion'));
       return;
     }
 

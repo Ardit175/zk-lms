@@ -2,13 +2,25 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+const nodeEnv = process.env.NODE_ENV || 'development';
+
+function required(name: string, devFallback: string): string {
+  const value = process.env[name];
+  if (value) return value;
+  if (nodeEnv === 'production') {
+    throw new Error(`Missing required environment variable ${name} in production`);
+  }
+  console.warn(`[config] ${name} not set — using insecure development fallback`);
+  return devFallback;
+}
+
 export const config = {
   port: parseInt(process.env.PORT || '4000', 10),
-  nodeEnv: process.env.NODE_ENV || 'development',
+  nodeEnv,
 
-  databaseUrl: process.env.DATABASE_URL || 'postgresql://postgres:password@localhost:5432/zklms',
+  databaseUrl: required('DATABASE_URL', 'postgresql://postgres:password@localhost:5432/zklms'),
 
-  jwtSecret: process.env.JWT_SECRET || 'dev-secret-change-in-production',
+  jwtSecret: required('JWT_SECRET', 'dev-secret-change-in-production'),
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '7d',
 
   redisUrl: process.env.REDIS_URL || 'redis://localhost:6379',

@@ -8,6 +8,7 @@ import {
   CheckCircle,
   Award,
   Search,
+  Loader2,
 } from 'lucide-react';
 import { DashboardLayout } from '@/components/layouts/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -30,6 +31,7 @@ export default function StudentCoursesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'ACTIVE' | 'COMPLETED'>('ALL');
+  const [continuingId, setContinuingId] = useState<string | null>(null);
 
   useEffect(() => {
     loadEnrollments();
@@ -49,6 +51,8 @@ export default function StudentCoursesPage() {
   };
 
   const handleContinueCourse = async (enrollment: Enrollment) => {
+    if (continuingId) return;
+    setContinuingId(enrollment.id);
     try {
       const res = await enrollmentsApi.getCourseProgress(enrollment.courseId);
       if (res.data) {
@@ -59,10 +63,13 @@ export default function StudentCoursesPage() {
         const lessonId = firstIncompleteLesson?.id || res.data.modules[0]?.lessons[0]?.id;
         if (lessonId) {
           router.push(`/student/courses/${enrollment.courseId}/learn/${lessonId}`);
+          return; // navigation unmounts page; keep button disabled
         }
       }
+      setContinuingId(null);
     } catch (error) {
       console.error('Failed to get course progress:', error);
+      setContinuingId(null);
     }
   };
 
@@ -180,7 +187,11 @@ export default function StudentCoursesPage() {
                         variant="outline"
                         className="flex-1"
                         onClick={() => handleContinueCourse(enrollment)}
+                        disabled={continuingId !== null}
                       >
+                        {continuingId === enrollment.id && (
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        )}
                         Rishiko
                       </Button>
                       {enrollment.certificate && (
@@ -195,8 +206,16 @@ export default function StudentCoursesPage() {
                       )}
                     </div>
                   ) : (
-                    <Button className="w-full" onClick={() => handleContinueCourse(enrollment)}>
-                      <PlayCircle className="h-4 w-4 mr-2" />
+                    <Button
+                      className="w-full"
+                      onClick={() => handleContinueCourse(enrollment)}
+                      disabled={continuingId !== null}
+                    >
+                      {continuingId === enrollment.id ? (
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      ) : (
+                        <PlayCircle className="h-4 w-4 mr-2" />
+                      )}
                       Vazhdo Mesimin
                     </Button>
                   )

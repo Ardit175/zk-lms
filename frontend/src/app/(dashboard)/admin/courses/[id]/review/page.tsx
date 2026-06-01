@@ -153,7 +153,7 @@ export default function CourseReviewPage() {
           </div>
           {course.status === 'PENDING_REVIEW' && (
             <div className="flex gap-3">
-              <Button variant="outline" onClick={() => setShowRejectDialog(true)}>
+              <Button variant="outline" onClick={() => setShowRejectDialog(true)} disabled={isSubmitting}>
                 <X className="h-4 w-4 mr-2" />
                 Kerko Ndryshime
               </Button>

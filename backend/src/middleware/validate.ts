@@ -4,20 +4,27 @@ import { ApiResponse } from '../utils/ApiResponse';
 
 export const validate = (schema: z.ZodSchema) => {
   return (req: Request, res: Response, next: NextFunction): void => {
-    try {
-      schema.parse({
-        body: req.body,
-        query: req.query,
-        params: req.params,
-      });
-      next();
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        const message = error.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`).join(', ');
-        res.status(400).json(ApiResponse.error(message));
-        return;
-      }
-      res.status(400).json(ApiResponse.error('Validation failed'));
+    const result = schema.safeParse({
+      body: req.body,
+      query: req.query,
+      params: req.params,
+    });
+
+    if (!result.success) {
+      const message = result.error.issues
+        .map((issue) => `${issue.path.slice(1).join('.')}: ${issue.message}`)
+        .join(', ');
+      res.status(400).json(ApiResponse.error(message));
+      return;
     }
+
+    // Write coerced/defaulted/trimmed values back so controllers use the
+    // validated data (Zod .default(), .transform(), .trim() now take effect).
+    const data = result.data as { body?: unknown; query?: unknown; params?: unknown };
+    if (data.body !== undefined) req.body = data.body;
+    if (data.query !== undefined) Object.assign(req.query, data.query);
+    if (data.params !== undefined) Object.assign(req.params, data.params);
+
+    next();
   };
 };

@@ -238,9 +238,26 @@ export const updateUser = async (req: Request, res: Response): Promise<void> => 
       return;
     }
 
-    if (user.id === req.user!.id && isActive === false) {
-      res.status(400).json(ApiResponse.error('Nuk mund te deaktivizosh veten'));
-      return;
+    if (user.id === req.user!.id) {
+      if (isActive === false) {
+        res.status(400).json(ApiResponse.error('Nuk mund te deaktivizosh veten'));
+        return;
+      }
+      if (role && role !== 'ADMIN') {
+        res.status(400).json(ApiResponse.error('Nuk mund te ndryshosh rolin tend'));
+        return;
+      }
+    }
+
+    // Prevent removing the last active admin.
+    if (role && role !== 'ADMIN' && user.role === 'ADMIN') {
+      const remainingAdmins = await prisma.user.count({
+        where: { role: 'ADMIN', isActive: true, id: { not: userId } },
+      });
+      if (remainingAdmins === 0) {
+        res.status(400).json(ApiResponse.error('Duhet te mbetet te pakten nje admin aktiv'));
+        return;
+      }
     }
 
     const updateData: Record<string, unknown> = {};

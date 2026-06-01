@@ -88,12 +88,14 @@ export function NotificationBell() {
 
   const handleMarkAsRead = async (notification: Notification) => {
     if (!notification.isRead) {
+      // Optimistic update first — also guards against duplicate clicks
+      // (a second click sees isRead=true and skips the network call).
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === notification.id ? { ...n, isRead: true } : n))
+      );
+      setUnreadCount((prev) => Math.max(0, prev - 1));
       try {
         await notificationsApi.markAsRead(notification.id);
-        setNotifications((prev) =>
-          prev.map((n) => (n.id === notification.id ? { ...n, isRead: true } : n))
-        );
-        setUnreadCount((prev) => Math.max(0, prev - 1));
       } catch (error) {
         console.error('Failed to mark as read:', error);
       }

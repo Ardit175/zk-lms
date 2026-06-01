@@ -25,19 +25,37 @@ api.interceptors.response.use(
   (response) => response,
   (error: AxiosError<{ error?: string; message?: string }>) => {
     const status = error.response?.status;
-    const errorMessage = error.response?.data?.error || error.response?.data?.message || 'Dicka shkoi gabim';
+    const serverMessage = error.response?.data?.error || error.response?.data?.message;
+
+    // Network/timeout error — no response received
+    if (!error.response) {
+      toast.error('Nuk u arrit serveri. Kontrolloni lidhjen e internetit.');
+      return Promise.reject(error);
+    }
 
     if (status === 401) {
       if (typeof window !== 'undefined') {
         localStorage.removeItem('zklms-token');
         localStorage.removeItem('zklms-user');
-        if (!window.location.pathname.includes('/login') && !window.location.pathname.includes('/register')) {
+        const path = window.location.pathname;
+        if (!path.includes('/login') && !path.includes('/register')) {
+          toast.error('Sesioni juaj skadoi. Ju lutem hyni perseri.');
           window.location.href = '/login';
         }
       }
+    } else if (status === 403) {
+      toast.error(serverMessage || 'Nuk keni leje per kete veprim.');
+    } else if (status === 422 || status === 400) {
+      toast.error(serverMessage || 'Te dhena te pavlefshme. Kontrolloni dhe provoni perseri.');
+    } else if (status === 409) {
+      toast.error(serverMessage || 'Konflikt: ky veprim mund te jete kryer tashme.');
+    } else if (status === 429) {
+      toast.error('Shume kerkesa. Prisni pak dhe provoni perseri.');
     } else if (status && status >= 500) {
       toast.error('Gabim ne server. Ju lutem provoni perseri me vone.');
     }
+    // 404 is intentionally not toasted globally — many flows use it as
+    // "not found yet" (e.g. getMySubmission) and handle it locally.
 
     return Promise.reject(error);
   }

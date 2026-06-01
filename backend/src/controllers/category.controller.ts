@@ -80,6 +80,14 @@ export const deleteCategory = async (req: Request, res: Response): Promise<void>
   try {
     const id = getParam(req.params.id);
 
+    const courseCount = await prisma.course.count({ where: { categoryId: id } });
+    if (courseCount > 0) {
+      res.status(400).json(
+        ApiResponse.error(`Nuk mund te fshihet: ${courseCount} kurse perdorin kete kategori`)
+      );
+      return;
+    }
+
     await prisma.category.delete({ where: { id } });
 
     res.json(ApiResponse.success({ message: 'Category deleted successfully' }));

@@ -16,6 +16,12 @@ async function hashPassword(password: string): Promise<string> {
 }
 
 async function main() {
+  if (process.env.NODE_ENV === 'production' && !process.env.ALLOW_PROD_SEED) {
+    throw new Error(
+      'Refusing to seed in production (this wipes all data). Set ALLOW_PROD_SEED=1 to override.'
+    );
+  }
+
   console.log('🌱 Starting database seed...\n');
 
   // Clean existing data

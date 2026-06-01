@@ -2,21 +2,21 @@ import { z } from 'zod';
 
 export const createCourseSchema = z.object({
   body: z.object({
-    title: z.string().min(5, 'Title must be at least 5 characters'),
-    description: z.string().min(20, 'Description must be at least 20 characters'),
+    title: z.string().trim().min(5, 'Title must be at least 5 characters').max(150, 'Title cannot exceed 150 characters'),
+    description: z.string().trim().min(20, 'Description must be at least 20 characters').max(5000, 'Description cannot exceed 5000 characters'),
     categoryId: z.string().optional(),
     level: z.enum(['BEGINNER', 'INTERMEDIATE', 'ADVANCED']).default('BEGINNER'),
-    price: z.number().min(0).default(0),
+    price: z.number().min(0).max(100000).default(0),
   }),
 });
 
 export const updateCourseSchema = z.object({
   body: z.object({
-    title: z.string().min(5).optional(),
-    description: z.string().min(20).optional(),
+    title: z.string().trim().min(5).max(150).optional(),
+    description: z.string().trim().min(20).max(5000).optional(),
     categoryId: z.string().nullable().optional(),
     level: z.enum(['BEGINNER', 'INTERMEDIATE', 'ADVANCED']).optional(),
-    price: z.number().min(0).optional(),
+    price: z.number().min(0).max(100000).optional(),
     thumbnailUrl: z.string().url().nullable().optional(),
   }),
   params: z.object({
@@ -35,8 +35,8 @@ export const updateCourseStatusSchema = z.object({
 
 export const createModuleSchema = z.object({
   body: z.object({
-    title: z.string().min(3, 'Title must be at least 3 characters'),
-    description: z.string().optional(),
+    title: z.string().trim().min(3, 'Title must be at least 3 characters').max(150, 'Title cannot exceed 150 characters'),
+    description: z.string().trim().max(1000).optional(),
   }),
   params: z.object({
     id: z.string(),
@@ -45,8 +45,8 @@ export const createModuleSchema = z.object({
 
 export const updateModuleSchema = z.object({
   body: z.object({
-    title: z.string().min(3).optional(),
-    description: z.string().nullable().optional(),
+    title: z.string().trim().min(3).max(150).optional(),
+    description: z.string().trim().max(1000).nullable().optional(),
     isPublished: z.boolean().optional(),
   }),
   params: z.object({
@@ -69,8 +69,8 @@ export const reorderModulesSchema = z.object({
 
 export const createLessonSchema = z.object({
   body: z.object({
-    title: z.string().min(3, 'Title must be at least 3 characters'),
-    content: z.string().optional(),
+    title: z.string().trim().min(3, 'Title must be at least 3 characters').max(200, 'Title cannot exceed 200 characters'),
+    content: z.string().max(100000).optional(),
     videoUrl: z.string().optional(),
     videoType: z.enum(['YOUTUBE', 'VIMEO', 'UPLOAD']).optional(),
     pdfUrl: z.string().optional(),
@@ -86,8 +86,8 @@ export const createLessonSchema = z.object({
 
 export const updateLessonSchema = z.object({
   body: z.object({
-    title: z.string().min(3).optional(),
-    content: z.string().nullable().optional(),
+    title: z.string().trim().min(3).max(200).optional(),
+    content: z.string().max(100000).nullable().optional(),
     videoUrl: z.string().nullable().optional(),
     videoType: z.enum(['YOUTUBE', 'VIMEO', 'UPLOAD']).nullable().optional(),
     pdfUrl: z.string().nullable().optional(),

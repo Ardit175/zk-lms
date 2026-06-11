@@ -187,16 +187,16 @@ export default function InstructorLivePage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+      <div className="min-h-screen flex items-center justify-center bg-muted/50">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
   if (!session) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <p className="text-slate-500">Sesioni nuk u gjet</p>
+      <div className="min-h-screen flex items-center justify-center bg-muted/50">
+        <p className="text-muted-foreground">Sesioni nuk u gjet</p>
       </div>
     );
   }
@@ -211,7 +211,7 @@ export default function InstructorLivePage() {
               variant="ghost"
               size="sm"
               onClick={() => router.push('/instructor/live')}
-              className="text-slate-300 hover:text-white hover:bg-slate-700"
+              className="text-muted-foreground/60 hover:text-white hover:bg-slate-700"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Kthehu
@@ -219,12 +219,12 @@ export default function InstructorLivePage() {
             <div className="h-6 w-px bg-slate-700" />
             <div>
               <h1 className="font-semibold text-lg">{session.title}</h1>
-              <p className="text-sm text-slate-400">{session.course.title}</p>
+              <p className="text-sm text-muted-foreground">{session.course.title}</p>
             </div>
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 text-slate-300">
+            <div className="flex items-center gap-2 text-muted-foreground/60">
               <Users className="h-4 w-4" />
               <span className="text-sm">{participantCount}</span>
             </div>
@@ -287,11 +287,11 @@ export default function InstructorLivePage() {
                   className={cn(
                     'max-w-[80%] p-3 rounded-lg',
                     msg.userId === user?.id
-                      ? 'ml-auto bg-indigo-600'
+                      ? 'ml-auto bg-primary'
                       : 'bg-slate-700'
                   )}
                 >
-                  <p className="text-xs text-slate-300 mb-1">{msg.userName}</p>
+                  <p className="text-xs text-muted-foreground/60 mb-1">{msg.userName}</p>
                   <p className="text-sm">{msg.message}</p>
                 </div>
               ))}
@@ -311,7 +311,7 @@ export default function InstructorLivePage() {
                 value={chatInput}
                 onChange={(e) => setChatInput(e.target.value)}
                 placeholder="Shkruaj mesazh..."
-                className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
+                className="bg-slate-700 border-slate-600 text-white placeholder:text-muted-foreground"
                 disabled={session.status !== 'LIVE'}
               />
               <Button type="submit" disabled={session.status !== 'LIVE' || !chatInput.trim()}>
@@ -343,7 +343,7 @@ export default function InstructorLivePage() {
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1">
-                        <p className="text-xs text-slate-400 mb-1">
+                        <p className="text-xs text-muted-foreground mb-1">
                           {question.student.firstName} {question.student.lastName}
                         </p>
                         <p className={cn('text-sm text-white', question.isAnswered && 'line-through')}>
@@ -375,7 +375,7 @@ export default function InstructorLivePage() {
               ))}
 
               {questions.length === 0 && (
-                <div className="text-center py-8 text-slate-500">
+                <div className="text-center py-8 text-muted-foreground">
                   Asnje pyetje ende
                 </div>
               )}

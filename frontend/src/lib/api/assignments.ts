@@ -63,6 +63,18 @@ export interface GradeSubmissionInput {
   feedback?: string;
 }
 
+export interface CreateAssignmentInput {
+  lessonId: string;
+  title: string;
+  description: string;
+  instructions: string;
+  dueDate?: string | null;
+  maxScore: number;
+  submissionType: SubmissionType;
+}
+
+export type UpdateAssignmentInput = Partial<Omit<CreateAssignmentInput, 'lessonId'>>;
+
 export const assignmentsApi = {
   // Student endpoints
   getByLesson: async (lessonId: string) => {
@@ -84,6 +96,29 @@ export const assignmentsApi = {
     const response = await api.get<ApiResponse<AssignmentSubmission | null>>(
       `/api/assignments/${assignmentId}/my-submission`
     );
+    return response.data;
+  },
+
+  // Instructor authoring
+  getForEdit: async (lessonId: string) => {
+    const response = await api.get<ApiResponse<Assignment | null>>(
+      `/api/assignments/instructor/lesson/${lessonId}`
+    );
+    return response.data;
+  },
+
+  createAssignment: async (data: CreateAssignmentInput) => {
+    const response = await api.post<ApiResponse<Assignment>>('/api/assignments', data);
+    return response.data;
+  },
+
+  updateAssignment: async (id: string, data: UpdateAssignmentInput) => {
+    const response = await api.put<ApiResponse<Assignment>>(`/api/assignments/${id}`, data);
+    return response.data;
+  },
+
+  deleteAssignment: async (id: string) => {
+    const response = await api.delete<ApiResponse<{ message: string }>>(`/api/assignments/${id}`);
     return response.data;
   },
 

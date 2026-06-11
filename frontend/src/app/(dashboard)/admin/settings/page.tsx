@@ -101,15 +101,15 @@ export default function AdminSettingsPage() {
     <DashboardLayout role="ADMIN">
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Cilesimet</h1>
-          <p className="text-slate-500 mt-1">Konfiguro kategorite dhe parametrat e platformes</p>
+          <h1 className="text-2xl font-bold text-foreground">Cilesimet</h1>
+          <p className="text-muted-foreground mt-1">Konfiguro kategorite dhe parametrat e platformes</p>
         </div>
 
         {/* Categories management */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="flex items-center gap-2">
-              <Tag className="h-5 w-5 text-slate-400" />
+              <Tag className="h-5 w-5 text-muted-foreground" />
               Kategorite e Kurseve
             </CardTitle>
             <Button size="sm" onClick={openCreate}>
@@ -120,34 +120,34 @@ export default function AdminSettingsPage() {
           <CardContent>
             {isLoading ? (
               <div className="flex items-center justify-center py-10">
-                <Loader2 className="h-7 w-7 animate-spin text-indigo-600" />
+                <Loader2 className="h-7 w-7 animate-spin text-primary" />
               </div>
             ) : error ? (
               <div className="flex flex-col items-center justify-center py-10 text-center">
                 <AlertCircle className="h-10 w-10 text-red-400 mb-3" />
-                <p className="text-slate-600">Ngarkimi i kategorive deshtoi</p>
+                <p className="text-muted-foreground">Ngarkimi i kategorive deshtoi</p>
                 <Button className="mt-3" size="sm" onClick={loadCategories}>
                   Provo Perseri
                 </Button>
               </div>
             ) : categories.length === 0 ? (
               <div className="text-center py-10">
-                <FolderOpen className="h-10 w-10 text-slate-300 mx-auto mb-3" />
-                <p className="font-medium text-slate-900">Asnje kategori</p>
-                <p className="text-sm text-slate-500 mt-1">
+                <FolderOpen className="h-10 w-10 text-muted-foreground/60 mx-auto mb-3" />
+                <p className="font-medium text-foreground">Asnje kategori</p>
+                <p className="text-sm text-muted-foreground mt-1">
                   Shtoni kategorine e pare per te organizuar kurset.
                 </p>
               </div>
             ) : (
-              <div className="divide-y divide-slate-100">
+              <div className="divide-y divide-border">
                 {categories.map((category) => (
                   <div
                     key={category.id}
                     className="flex items-center justify-between py-3"
                   >
                     <div>
-                      <p className="font-medium text-slate-900">{category.name}</p>
-                      <p className="text-sm text-slate-500">
+                      <p className="font-medium text-foreground">{category.name}</p>
+                      <p className="text-sm text-muted-foreground">
                         {category._count?.courses ?? 0} kurse
                       </p>
                     </div>
@@ -158,7 +158,7 @@ export default function AdminSettingsPage() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="text-red-600 hover:text-red-700"
+                        className="text-destructive hover:text-destructive"
                         onClick={() => handleDelete(category)}
                       >
                         <Trash2 className="h-4 w-4" />
@@ -178,21 +178,21 @@ export default function AdminSettingsPage() {
           </CardHeader>
           <CardContent>
             <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-              <div className="flex justify-between rounded-lg bg-slate-50 px-4 py-3">
-                <dt className="text-slate-500">Limiti i skedareve video</dt>
-                <dd className="font-medium text-slate-900">50 MB</dd>
+              <div className="flex justify-between rounded-lg bg-muted/50 px-4 py-3">
+                <dt className="text-muted-foreground">Limiti i skedareve video</dt>
+                <dd className="font-medium text-foreground">50 MB</dd>
               </div>
-              <div className="flex justify-between rounded-lg bg-slate-50 px-4 py-3">
-                <dt className="text-slate-500">Limiti i skedareve PDF</dt>
-                <dd className="font-medium text-slate-900">10 MB</dd>
+              <div className="flex justify-between rounded-lg bg-muted/50 px-4 py-3">
+                <dt className="text-muted-foreground">Limiti i skedareve PDF</dt>
+                <dd className="font-medium text-foreground">10 MB</dd>
               </div>
-              <div className="flex justify-between rounded-lg bg-slate-50 px-4 py-3">
-                <dt className="text-slate-500">Pikezimi kalues i kuizit</dt>
-                <dd className="font-medium text-slate-900">70%</dd>
+              <div className="flex justify-between rounded-lg bg-muted/50 px-4 py-3">
+                <dt className="text-muted-foreground">Pikezimi kalues i kuizit</dt>
+                <dd className="font-medium text-foreground">70%</dd>
               </div>
-              <div className="flex justify-between rounded-lg bg-slate-50 px-4 py-3">
-                <dt className="text-slate-500">Gjuha e platformes</dt>
-                <dd className="font-medium text-slate-900">Shqip</dd>
+              <div className="flex justify-between rounded-lg bg-muted/50 px-4 py-3">
+                <dt className="text-muted-foreground">Gjuha e platformes</dt>
+                <dd className="font-medium text-foreground">Shqip</dd>
               </div>
             </dl>
           </CardContent>

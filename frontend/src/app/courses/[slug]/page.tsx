@@ -163,15 +163,15 @@ export default function PublicCourseDetailPage() {
   const totalLessons = course?.modules.reduce((acc, m) => acc + m.lessons.length, 0) ?? 0;
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="fixed left-0 right-0 top-0 z-50 border-b border-slate-200 bg-white/90 backdrop-blur-md">
+      <header className="fixed left-0 right-0 top-0 z-50 border-b border-border bg-background/80 backdrop-blur-xl">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-sm shadow-indigo-200">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-chart-5 text-white shadow-sm shadow-primary/30">
               <GraduationCap className="h-5 w-5" />
             </div>
-            <span className="text-xl font-bold text-slate-900">ZK-LMS</span>
+            <span className="text-xl font-bold text-foreground">ZK-LMS</span>
           </Link>
           <nav className="flex items-center gap-3">
             {isAuthenticated ? (
@@ -203,13 +203,13 @@ export default function PublicCourseDetailPage() {
       <main className="pt-16">
         {isLoading ? (
           <div className="flex min-h-[60vh] items-center justify-center">
-            <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : error || !course ? (
           <div className="container mx-auto flex min-h-[60vh] flex-col items-center justify-center px-4 text-center">
             <AlertCircle className="mb-4 h-12 w-12 text-red-400" />
-            <h2 className="text-xl font-semibold text-slate-900">Kursi nuk u gjet</h2>
-            <p className="mt-1 text-slate-500">
+            <h2 className="text-xl font-semibold text-foreground">Kursi nuk u gjet</h2>
+            <p className="mt-1 text-muted-foreground">
               Ky kurs nuk ekziston ose nuk eshte publik.
             </p>
             <Button className="mt-4" onClick={() => router.push('/courses')}>
@@ -286,8 +286,8 @@ export default function PublicCourseDetailPage() {
                     <Card className="shadow-xl">
                       <CardContent className="p-6">
                         <div className="mb-4">
-                          <p className="text-3xl font-bold text-slate-900">Falas</p>
-                          <p className="mt-1 text-sm text-slate-500">
+                          <p className="text-3xl font-bold text-foreground">Falas</p>
+                          <p className="mt-1 text-sm text-muted-foreground">
                             Akses i plote pas regjistrimit
                           </p>
                         </div>
@@ -321,19 +321,19 @@ export default function PublicCourseDetailPage() {
                           </Button>
                         )}
 
-                        <div className="mt-6 space-y-3 border-t border-slate-100 pt-6 text-sm text-slate-600">
+                        <div className="mt-6 space-y-3 border-t border-border pt-6 text-sm text-muted-foreground">
                           <div className="flex items-center gap-2">
-                            <BookOpen className="h-4 w-4 text-indigo-600" />
+                            <BookOpen className="h-4 w-4 text-primary" />
                             <span>
                               {course.modules.length} module · {totalLessons} mesime
                             </span>
                           </div>
                           <div className="flex items-center gap-2">
-                            <CheckCircle className="h-4 w-4 text-indigo-600" />
+                            <CheckCircle className="h-4 w-4 text-primary" />
                             <span>Certifikate ne perfundim</span>
                           </div>
                           <div className="flex items-center gap-2">
-                            <Clock className="h-4 w-4 text-indigo-600" />
+                            <Clock className="h-4 w-4 text-primary" />
                             <span>Akses pa kufi</span>
                           </div>
                         </div>
@@ -345,16 +345,16 @@ export default function PublicCourseDetailPage() {
             </section>
 
             {/* Curriculum */}
-            <section className="bg-slate-50 py-12">
+            <section className="bg-muted/50 py-12">
               <div className="container mx-auto px-4">
                 <div className="mx-auto max-w-3xl">
-                  <h2 className="mb-6 text-2xl font-bold text-slate-900">
+                  <h2 className="mb-6 text-2xl font-bold text-foreground">
                     Permbajtja e Kursit
                   </h2>
 
                   {course.modules.length === 0 ? (
                     <Card>
-                      <CardContent className="py-10 text-center text-slate-500">
+                      <CardContent className="py-10 text-center text-muted-foreground">
                         Asnje modul i publikuar ende.
                       </CardContent>
                     </Card>
@@ -364,7 +364,7 @@ export default function PublicCourseDetailPage() {
                         <Card key={module.id}>
                           <CardHeader>
                             <CardTitle className="text-base">
-                              <span className="mr-2 text-slate-400">
+                              <span className="mr-2 text-muted-foreground">
                                 Moduli {idx + 1}
                               </span>
                               {module.title}
@@ -372,11 +372,11 @@ export default function PublicCourseDetailPage() {
                           </CardHeader>
                           <CardContent>
                             {module.lessons.length === 0 ? (
-                              <p className="text-sm text-slate-400">
+                              <p className="text-sm text-muted-foreground">
                                 Asnje mesim ende.
                               </p>
                             ) : (
-                              <div className="divide-y divide-slate-100">
+                              <div className="divide-y divide-border">
                                 {module.lessons.map((lesson, lIdx) => {
                                   const Icon = LESSON_ICONS[lesson.type] || FileText;
                                   return (
@@ -384,12 +384,12 @@ export default function PublicCourseDetailPage() {
                                       key={lesson.id}
                                       className="flex items-center gap-3 py-3"
                                     >
-                                      <Icon className="h-4 w-4 flex-shrink-0 text-slate-400" />
-                                      <span className="flex-1 text-sm text-slate-700">
+                                      <Icon className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
+                                      <span className="flex-1 text-sm text-foreground">
                                         {lIdx + 1}. {lesson.title}
                                       </span>
                                       {lesson.duration && (
-                                        <span className="text-xs text-slate-400">
+                                        <span className="text-xs text-muted-foreground">
                                           {Math.ceil(lesson.duration / 60)} min
                                         </span>
                                       )}
@@ -398,7 +398,7 @@ export default function PublicCourseDetailPage() {
                                           Preview
                                         </Badge>
                                       ) : (
-                                        <Lock className="h-3.5 w-3.5 text-slate-300" />
+                                        <Lock className="h-3.5 w-3.5 text-muted-foreground/60" />
                                       )}
                                     </div>
                                   );
@@ -418,7 +418,7 @@ export default function PublicCourseDetailPage() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-slate-900 py-12 text-slate-400">
+      <footer className="border-t border-border bg-card py-12 text-muted-foreground">
         <div className="container mx-auto px-4 text-center text-sm">
           <p>
             &copy; 2026 ZK-LMS · Projekt Diplome · Universiteti i Tiranes

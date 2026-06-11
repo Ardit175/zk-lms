@@ -8,7 +8,7 @@ import { resolveFileUrl } from '@/lib/fileUrl';
 // react-player is browser-only — load it with SSR disabled
 const ReactPlayer = dynamic(() => import('react-player'), {
   ssr: false,
-  loading: () => <div className="aspect-video w-full animate-pulse rounded-xl bg-slate-200" />,
+  loading: () => <div className="aspect-video w-full animate-pulse rounded-xl bg-muted" />,
 });
 
 export type VideoType = 'YOUTUBE' | 'VIMEO' | 'UPLOAD';
@@ -88,11 +88,11 @@ export function VideoPlayer({
         />
       </div>
       <div className="flex items-center justify-between text-sm">
-        <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
+        <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
           {TYPE_LABELS[resolvedType]}
         </span>
         {hasCompleted && (
-          <span className="flex items-center gap-1.5 font-medium text-green-600">
+          <span className="flex items-center gap-1.5 font-medium text-success">
             <CheckCircle2 className="h-4 w-4" />
             Mesimi u shenua si i perfunduar
           </span>

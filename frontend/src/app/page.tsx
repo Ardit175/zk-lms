@@ -18,6 +18,9 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { CourseCard } from '@/components/course/CourseCard';
+import { CountUp } from '@/components/ui/count-up';
+import { Reveal } from '@/components/ui/reveal';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { api } from '@/lib/api';
 import { useAuthStore } from '@/stores/auth-store';
 
@@ -89,12 +92,6 @@ const testimonials = [
   },
 ];
 
-const fadeInUp = {
-  initial: { opacity: 0, y: 24 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.5 },
-};
-
 export default function HomePage() {
   const { user, isAuthenticated } = useAuthStore();
   const [stats, setStats] = useState<PublicStats | null>(null);
@@ -124,27 +121,28 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="fixed left-0 right-0 top-0 z-50 border-b border-slate-200 bg-white/90 backdrop-blur-md">
+      <header className="fixed left-0 right-0 top-0 z-50 border-b border-border bg-background/80 backdrop-blur-xl">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-sm shadow-indigo-200">
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-chart-5 text-white shadow-sm shadow-primary/30">
               <GraduationCap className="h-5 w-5" />
-            </div>
-            <span className="text-xl font-bold text-slate-900">ZK-LMS</span>
+            </span>
+            <span className="font-display text-xl font-bold text-foreground">ZK-LMS</span>
           </Link>
-          <nav className="flex items-center gap-3">
-            <Link href="/courses">
+          <nav className="flex items-center gap-2 sm:gap-3">
+            <Link href="/courses" className="hidden sm:block">
               <Button variant="ghost">Kurset</Button>
             </Link>
+            <ThemeToggle />
             {isAuthenticated ? (
               <Link href={dashboardPath}>
                 <Button>Paneli Kryesor</Button>
               </Link>
             ) : (
               <>
-                <Link href="/login">
+                <Link href="/login" className="hidden sm:block">
                   <Button variant="ghost">Hyr</Button>
                 </Link>
                 <Link href="/register">
@@ -158,10 +156,10 @@ export default function HomePage() {
 
       <main className="pt-16">
         {/* Hero */}
-        <section className="relative overflow-hidden bg-gradient-to-br from-indigo-600 to-purple-600 py-24 lg:py-32">
-          {/* decorative blobs */}
-          <div className="absolute -left-20 -top-20 h-96 w-96 rounded-full bg-white/10 blur-3xl" />
-          <div className="absolute -bottom-32 -right-20 h-96 w-96 rounded-full bg-purple-400/20 blur-3xl" />
+        <section className="relative overflow-hidden bg-gradient-to-br from-indigo-700 via-indigo-600 to-purple-700 py-24 lg:py-36">
+          {/* drifting mesh + grid */}
+          <div className="pointer-events-none absolute inset-0 opacity-60 mix-blend-soft-light [background:radial-gradient(40rem_40rem_at_15%_20%,rgba(255,255,255,0.4),transparent_60%),radial-gradient(35rem_35rem_at_85%_10%,rgba(168,85,247,0.5),transparent_60%)] [background-size:200%_200%] motion-safe:animate-[mesh-drift_22s_ease-in-out_infinite_alternate]" />
+          <div className="pointer-events-none absolute inset-0 opacity-[0.07] [background-image:linear-gradient(rgba(255,255,255,0.6)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.6)_1px,transparent_1px)] [background-size:44px_44px]" />
 
           <div className="container relative mx-auto px-4">
             <motion.div
@@ -170,10 +168,10 @@ export default function HomePage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
             >
-              <span className="mb-6 inline-block rounded-full bg-white/15 px-4 py-1.5 text-sm font-medium text-white backdrop-blur-sm">
+              <span className="mb-6 inline-block rounded-full border border-white/20 bg-white/15 px-4 py-1.5 text-sm font-medium text-white backdrop-blur-sm">
                 Platforma e te Mesuarit te Ardhmes
               </span>
-              <h1 className="text-4xl font-bold leading-tight text-white sm:text-5xl lg:text-6xl">
+              <h1 className="font-display text-4xl font-bold leading-tight text-white sm:text-5xl lg:text-6xl">
                 Meso Pa Kufij me{' '}
                 <span className="bg-gradient-to-r from-amber-200 to-amber-400 bg-clip-text text-transparent">
                   Fuqine e AI
@@ -192,7 +190,7 @@ export default function HomePage() {
                 {isAuthenticated ? (
                   <>
                     <Link href={dashboardPath}>
-                      <Button size="lg" className="bg-white text-indigo-700 shadow-lg hover:bg-indigo-50">
+                      <Button size="lg" className="bg-card text-primary shadow-lg hover:bg-primary/10">
                         Paneli Kryesor
                         <ArrowRight className="ml-2 h-5 w-5" />
                       </Button>
@@ -209,7 +207,7 @@ export default function HomePage() {
                 ) : (
                   <>
                     <Link href="/register">
-                      <Button size="lg" className="bg-white text-indigo-700 shadow-lg hover:bg-indigo-50">
+                      <Button size="lg" className="bg-card text-primary shadow-lg hover:bg-primary/10">
                         Fillo te Mesosh
                         <ArrowRight className="ml-2 h-5 w-5" />
                       </Button>
@@ -231,7 +229,7 @@ export default function HomePage() {
 
         {/* Stats bar */}
         {stats && (
-          <section className="border-b border-slate-100 bg-white py-10">
+          <section className="border-b border-border bg-card py-10">
             <div className="container mx-auto px-4">
               <div className="grid grid-cols-3 gap-8">
                 {[
@@ -240,11 +238,13 @@ export default function HomePage() {
                   { value: stats.instructors, label: 'Instruktore', icon: Brain },
                 ].map((s) => (
                   <div key={s.label} className="flex flex-col items-center text-center">
-                    <div className="mb-2 flex h-11 w-11 items-center justify-center rounded-lg bg-indigo-100">
-                      <s.icon className="h-5 w-5 text-indigo-600" />
+                    <div className="mb-2 flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10">
+                      <s.icon className="h-5 w-5 text-primary" />
                     </div>
-                    <p className="text-3xl font-bold text-slate-900">{s.value}+</p>
-                    <p className="mt-1 text-sm text-slate-500">{s.label}</p>
+                    <p className="font-display text-3xl font-bold text-foreground">
+                      <CountUp value={s.value} suffix="+" />
+                    </p>
+                    <p className="mt-1 text-sm text-muted-foreground">{s.label}</p>
                   </div>
                 ))}
               </div>
@@ -256,34 +256,28 @@ export default function HomePage() {
         <section className="py-24">
           <div className="container mx-auto px-4">
             <div className="mx-auto mb-14 max-w-2xl text-center">
-              <h2 className="text-3xl font-bold text-slate-900 lg:text-4xl">
+              <h2 className="font-display text-3xl font-bold text-foreground lg:text-4xl">
                 Funksionalitete te Fuqishme
               </h2>
-              <p className="mt-3 text-lg text-slate-600">
+              <p className="mt-3 text-lg text-muted-foreground">
                 E gjitha cfare nevojitet per nje eksperience mesimi efektive.
               </p>
             </div>
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {features.map((feature, i) => (
-                <motion.div
-                  key={feature.title}
-                  initial={fadeInUp.initial}
-                  whileInView={fadeInUp.animate}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.4, delay: i * 0.08 }}
-                >
-                  <Card className="h-full transition-all duration-200 hover:-translate-y-1 hover:shadow-md">
+                <Reveal key={feature.title} delay={i * 0.08}>
+                  <Card className="group h-full border-gradient transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/5">
                     <CardContent className="p-6">
-                      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-100">
-                        <feature.icon className="h-6 w-6 text-indigo-600" />
+                      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary transition-transform duration-300 group-hover:scale-110">
+                        <feature.icon className="h-6 w-6" />
                       </div>
-                      <h3 className="mb-2 font-semibold text-slate-900">{feature.title}</h3>
-                      <p className="text-sm leading-relaxed text-slate-600">
+                      <h3 className="mb-2 font-semibold text-foreground">{feature.title}</h3>
+                      <p className="text-sm leading-relaxed text-muted-foreground">
                         {feature.description}
                       </p>
                     </CardContent>
                   </Card>
-                </motion.div>
+                </Reveal>
               ))}
             </div>
           </div>
@@ -291,29 +285,30 @@ export default function HomePage() {
 
         {/* Featured courses */}
         {featuredCourses.length > 0 && (
-          <section className="bg-slate-50 py-24">
+          <section className="bg-muted/40 py-24">
             <div className="container mx-auto px-4">
               <div className="mx-auto mb-14 max-w-2xl text-center">
-                <h2 className="text-3xl font-bold text-slate-900 lg:text-4xl">
+                <h2 className="font-display text-3xl font-bold text-foreground lg:text-4xl">
                   Kurset me Popullarizuara
                 </h2>
-                <p className="mt-3 text-lg text-slate-600">
+                <p className="mt-3 text-lg text-muted-foreground">
                   Fillo udhetimin tend me kurset tona me te mira.
                 </p>
               </div>
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {featuredCourses.map((course) => (
-                  <CourseCard
-                    key={course.id}
-                    href={`/courses/${course.slug}`}
-                    title={course.title}
-                    thumbnailUrl={course.thumbnailUrl}
-                    category={course.category?.name}
-                    level={course.level}
-                    instructor={course.instructor}
-                    enrollmentCount={course.enrollmentCount}
-                    rating={course.averageRating}
-                  />
+                {featuredCourses.map((course, i) => (
+                  <Reveal key={course.id} delay={i * 0.08}>
+                    <CourseCard
+                      href={`/courses/${course.slug}`}
+                      title={course.title}
+                      thumbnailUrl={course.thumbnailUrl}
+                      category={course.category?.name}
+                      level={course.level}
+                      instructor={course.instructor}
+                      enrollmentCount={course.enrollmentCount}
+                      rating={course.averageRating}
+                    />
+                  </Reveal>
                 ))}
               </div>
               <div className="mt-12 text-center">
@@ -332,62 +327,56 @@ export default function HomePage() {
         <section className="py-24">
           <div className="container mx-auto px-4">
             <div className="mx-auto mb-14 max-w-2xl text-center">
-              <h2 className="text-3xl font-bold text-slate-900 lg:text-4xl">Si Funksionon?</h2>
-              <p className="mt-3 text-lg text-slate-600">Tre hapa te thjeshte per te filluar.</p>
+              <h2 className="font-display text-3xl font-bold text-foreground lg:text-4xl">Si Funksionon?</h2>
+              <p className="mt-3 text-lg text-muted-foreground">Tre hapa te thjeshte per te filluar.</p>
             </div>
             <div className="grid gap-8 md:grid-cols-3 lg:gap-12">
               {steps.map((step, index) => (
-                <div key={step.number} className="relative text-center">
-                  <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 text-xl font-bold text-white shadow-lg shadow-indigo-200">
+                <Reveal key={step.number} delay={index * 0.1} className="relative text-center">
+                  <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-chart-5 font-display text-xl font-bold text-white shadow-lg shadow-primary/30">
                     {step.number}
                   </div>
                   {index < steps.length - 1 && (
-                    <div className="absolute left-[60%] top-8 hidden h-0.5 w-[80%] bg-gradient-to-r from-indigo-200 to-transparent md:block" />
+                    <div className="absolute left-[60%] top-8 hidden h-0.5 w-[80%] bg-gradient-to-r from-primary/40 to-transparent md:block" />
                   )}
-                  <h3 className="mb-2 font-semibold text-slate-900">{step.title}</h3>
-                  <p className="text-sm text-slate-600">{step.description}</p>
-                </div>
+                  <h3 className="mb-2 font-semibold text-foreground">{step.title}</h3>
+                  <p className="text-sm text-muted-foreground">{step.description}</p>
+                </Reveal>
               ))}
             </div>
           </div>
         </section>
 
         {/* Testimonials */}
-        <section className="bg-slate-50 py-24">
+        <section className="bg-muted/40 py-24">
           <div className="container mx-auto px-4">
             <div className="mx-auto mb-14 max-w-2xl text-center">
-              <h2 className="text-3xl font-bold text-slate-900 lg:text-4xl">
+              <h2 className="font-display text-3xl font-bold text-foreground lg:text-4xl">
                 Cfare Thone Perdoruesit
               </h2>
-              <p className="mt-3 text-lg text-slate-600">
+              <p className="mt-3 text-lg text-muted-foreground">
                 Mijera studente dhe instruktore na besojne.
               </p>
             </div>
             <div className="grid gap-6 md:grid-cols-3">
               {testimonials.map((t, i) => (
-                <motion.div
-                  key={t.name}
-                  initial={fadeInUp.initial}
-                  whileInView={fadeInUp.animate}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.4, delay: i * 0.1 }}
-                >
+                <Reveal key={t.name} delay={i * 0.1}>
                   <Card className="h-full">
                     <CardContent className="flex h-full flex-col p-6">
-                      <Quote className="mb-4 h-8 w-8 text-indigo-200" />
-                      <p className="flex-1 text-sm leading-relaxed text-slate-700">
+                      <Quote className="mb-4 h-8 w-8 text-primary/30" />
+                      <p className="flex-1 text-sm leading-relaxed text-foreground/80">
                         &ldquo;{t.text}&rdquo;
                       </p>
                       <div className="mt-5 flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-100 text-sm font-semibold text-indigo-700">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
                           {t.name
                             .split(' ')
                             .map((n) => n[0])
                             .join('')}
                         </div>
                         <div>
-                          <p className="text-sm font-semibold text-slate-900">{t.name}</p>
-                          <p className="text-xs text-slate-500">{t.role}</p>
+                          <p className="text-sm font-semibold text-foreground">{t.name}</p>
+                          <p className="text-xs text-muted-foreground">{t.role}</p>
                         </div>
                       </div>
                       <div className="mt-3 flex gap-0.5">
@@ -397,17 +386,18 @@ export default function HomePage() {
                       </div>
                     </CardContent>
                   </Card>
-                </motion.div>
+                </Reveal>
               ))}
             </div>
           </div>
         </section>
 
         {/* CTA */}
-        <section className="bg-gradient-to-br from-indigo-600 to-purple-600 py-24">
-          <div className="container mx-auto px-4">
+        <section className="relative overflow-hidden bg-gradient-to-br from-indigo-700 via-indigo-600 to-purple-700 py-24">
+          <div className="pointer-events-none absolute inset-0 opacity-50 mix-blend-soft-light [background:radial-gradient(30rem_30rem_at_50%_0%,rgba(255,255,255,0.4),transparent_60%)]" />
+          <div className="container relative mx-auto px-4">
             <div className="mx-auto max-w-3xl text-center">
-              <h2 className="mb-4 text-3xl font-bold text-white lg:text-4xl">
+              <h2 className="mb-4 font-display text-3xl font-bold text-white lg:text-4xl">
                 {isAuthenticated
                   ? 'Vazhdo Udhetimin Tend te Mesimit'
                   : 'Gati per te Filluar Udhetimin Tend?'}
@@ -418,7 +408,7 @@ export default function HomePage() {
                   : 'Bashkohu me mijera studente dhe instruktore ne platformen tone.'}
               </p>
               <Link href={isAuthenticated ? dashboardPath : '/register'}>
-                <Button size="lg" className="bg-white text-indigo-700 shadow-lg hover:bg-indigo-50">
+                <Button size="lg" className="bg-card text-primary shadow-lg hover:bg-primary/10">
                   {isAuthenticated ? 'Paneli Kryesor' : 'Krijo Llogari Falas'}
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
@@ -429,15 +419,15 @@ export default function HomePage() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-slate-900 py-16 text-slate-400">
+      <footer className="border-t border-border bg-card py-16 text-muted-foreground">
         <div className="container mx-auto px-4">
           <div className="grid gap-12 md:grid-cols-4">
             <div className="md:col-span-2">
               <Link href="/" className="mb-4 flex items-center gap-2.5">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white">
+                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-chart-5 text-white">
                   <GraduationCap className="h-5 w-5" />
-                </div>
-                <span className="text-xl font-bold text-white">ZK-LMS</span>
+                </span>
+                <span className="font-display text-xl font-bold text-foreground">ZK-LMS</span>
               </Link>
               <p className="max-w-md text-sm leading-relaxed">
                 Platforma moderne e menaxhimit te mesimit me inteligjence artificiale,
@@ -445,15 +435,15 @@ export default function HomePage() {
               </p>
             </div>
             <div>
-              <h4 className="mb-4 font-semibold text-white">Linqe</h4>
+              <h4 className="mb-4 font-semibold text-foreground">Linqe</h4>
               <ul className="space-y-2 text-sm">
-                <li><Link href="/courses" className="transition-colors hover:text-white">Kurset</Link></li>
-                <li><Link href="/register" className="transition-colors hover:text-white">Regjistrohu</Link></li>
-                <li><Link href="/login" className="transition-colors hover:text-white">Hyr</Link></li>
+                <li><Link href="/courses" className="transition-colors hover:text-foreground">Kurset</Link></li>
+                <li><Link href="/register" className="transition-colors hover:text-foreground">Regjistrohu</Link></li>
+                <li><Link href="/login" className="transition-colors hover:text-foreground">Hyr</Link></li>
               </ul>
             </div>
             <div>
-              <h4 className="mb-4 font-semibold text-white">Kontakt</h4>
+              <h4 className="mb-4 font-semibold text-foreground">Kontakt</h4>
               <ul className="space-y-2 text-sm">
                 <li className="flex items-center gap-2">
                   <Mail className="h-4 w-4" />
@@ -466,7 +456,7 @@ export default function HomePage() {
               </ul>
             </div>
           </div>
-          <div className="mt-12 border-t border-slate-800 pt-8 text-center text-sm">
+          <div className="mt-12 border-t border-border pt-8 text-center text-sm">
             <p>
               &copy; 2026 ZK-LMS. Projekt Diplome — Fakulteti i Shkencave te Natyres,
               Departamenti i Informatikes.

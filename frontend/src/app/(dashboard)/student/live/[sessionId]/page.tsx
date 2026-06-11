@@ -160,16 +160,16 @@ export default function StudentLivePage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+      <div className="min-h-screen flex items-center justify-center bg-muted/50">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
   if (!session) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <p className="text-slate-500">Sesioni nuk u gjet</p>
+      <div className="min-h-screen flex items-center justify-center bg-muted/50">
+        <p className="text-muted-foreground">Sesioni nuk u gjet</p>
       </div>
     );
   }
@@ -184,7 +184,7 @@ export default function StudentLivePage() {
               variant="ghost"
               size="sm"
               onClick={() => router.push('/student/dashboard')}
-              className="text-slate-300 hover:text-white hover:bg-slate-700"
+              className="text-muted-foreground/60 hover:text-white hover:bg-slate-700"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Kthehu
@@ -200,14 +200,14 @@ export default function StudentLivePage() {
                   </span>
                 )}
               </h1>
-              <p className="text-sm text-slate-400">
+              <p className="text-sm text-muted-foreground">
                 {session.instructor?.firstName} {session.instructor?.lastName} • {session.course.title}
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 text-slate-300">
+            <div className="flex items-center gap-2 text-muted-foreground/60">
               <Users className="h-4 w-4" />
               <span className="text-sm">{participantCount} pjesemarres</span>
             </div>
@@ -228,7 +228,7 @@ export default function StudentLivePage() {
               variant="ghost"
               size="sm"
               onClick={() => setIsChatOpen(!isChatOpen)}
-              className="text-slate-300 hover:text-white"
+              className="text-muted-foreground/60 hover:text-white"
             >
               {isChatOpen ? <PanelRightClose className="h-5 w-5" /> : <PanelRightOpen className="h-5 w-5" />}
             </Button>
@@ -250,7 +250,7 @@ export default function StudentLivePage() {
                     value={questionInput}
                     onChange={(e) => setQuestionInput(e.target.value)}
                     placeholder="Shkruaj pyetjen tende..."
-                    className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 resize-none"
+                    className="bg-slate-700 border-slate-600 text-white placeholder:text-muted-foreground resize-none"
                     rows={2}
                   />
                   <Button
@@ -294,14 +294,14 @@ export default function StudentLivePage() {
                           'flex flex-col items-center gap-1 px-2 py-1 rounded transition-colors',
                           votedQuestions.has(question.id)
                             ? 'text-indigo-400'
-                            : 'text-slate-400 hover:text-indigo-400 hover:bg-slate-700'
+                            : 'text-muted-foreground hover:text-indigo-400 hover:bg-slate-700'
                         )}
                       >
                         <ThumbsUp className="h-5 w-5" />
                         <span className="text-sm font-medium">{question.upvotes}</span>
                       </button>
                       <div className="flex-1">
-                        <p className="text-xs text-slate-400 mb-1">
+                        <p className="text-xs text-muted-foreground mb-1">
                           {question.student.firstName} {question.student.lastName}
                           {question.studentId === user?.id && (
                             <Badge variant="secondary" className="ml-2 text-xs">Ti</Badge>
@@ -320,7 +320,7 @@ export default function StudentLivePage() {
               ))}
 
               {questions.length === 0 && (
-                <div className="text-center py-12 text-slate-500">
+                <div className="text-center py-12 text-muted-foreground">
                   <ThumbsUp className="h-12 w-12 mx-auto mb-4 opacity-50" />
                   <p>Asnje pyetje ende</p>
                   <p className="text-sm mt-1">Behu i pari qe pyet!</p>
@@ -348,11 +348,11 @@ export default function StudentLivePage() {
                     className={cn(
                       'max-w-[90%] p-3 rounded-lg',
                       msg.userId === user?.id
-                        ? 'ml-auto bg-indigo-600'
+                        ? 'ml-auto bg-primary'
                         : 'bg-slate-700'
                     )}
                   >
-                    <p className="text-xs text-slate-300 mb-1">{msg.userName}</p>
+                    <p className="text-xs text-muted-foreground/60 mb-1">{msg.userName}</p>
                     <p className="text-sm">{msg.message}</p>
                   </div>
                 ))}
@@ -372,7 +372,7 @@ export default function StudentLivePage() {
                   value={chatInput}
                   onChange={(e) => setChatInput(e.target.value)}
                   placeholder="Mesazh..."
-                  className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
+                  className="bg-slate-700 border-slate-600 text-white placeholder:text-muted-foreground"
                   disabled={session.status !== 'LIVE'}
                 />
                 <Button type="submit" size="icon" disabled={session.status !== 'LIVE' || !chatInput.trim()}>

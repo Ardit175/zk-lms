@@ -55,14 +55,14 @@ export function CourseCard({
   const body = (
     <Card
       className={cn(
-        'group overflow-hidden transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md',
+        'group overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-foreground/5',
         (href || onClick) && 'cursor-pointer',
         className
       )}
       onClick={onClick}
     >
       {/* Thumbnail */}
-      <div className="relative aspect-video overflow-hidden bg-slate-100">
+      <div className="relative aspect-video overflow-hidden bg-muted">
         {thumbnailUrl ? (
           <Image
             src={thumbnailUrl}
@@ -72,12 +72,12 @@ export function CourseCard({
             className="object-cover transition-transform duration-300 group-hover:scale-105"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200">
-            <BookOpen className="h-12 w-12 text-slate-300" />
+          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/10 to-chart-5/10">
+            <BookOpen className="h-12 w-12 text-primary/40" />
           </div>
         )}
         {/* hover overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/50 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
         {badge && <div className="absolute right-3 top-3">{badge}</div>}
         {menu && (
           <div
@@ -91,7 +91,7 @@ export function CourseCard({
           </div>
         )}
         {level && (
-          <span className="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-0.5 text-xs font-semibold text-slate-700 backdrop-blur-sm">
+          <span className="absolute left-3 top-3 rounded-full bg-background/90 px-2.5 py-0.5 text-xs font-semibold text-foreground backdrop-blur-sm">
             {LEVEL_LABELS[level] ?? level}
           </span>
         )}
@@ -99,19 +99,19 @@ export function CourseCard({
 
       <CardContent className="p-4">
         {category && (
-          <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-indigo-600">
+          <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-primary">
             {category}
           </p>
         )}
-        <h3 className="line-clamp-2 font-semibold text-slate-900">{title}</h3>
+        <h3 className="line-clamp-2 font-semibold text-foreground">{title}</h3>
 
         {instructor && (
           <div className="mt-2 flex items-center gap-2">
-            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-100 text-[10px] font-semibold text-indigo-700">
+            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-[10px] font-semibold text-primary">
               {instructor.firstName?.[0]}
               {instructor.lastName?.[0]}
             </div>
-            <span className="truncate text-sm text-slate-600">
+            <span className="truncate text-sm text-muted-foreground">
               {instructor.firstName} {instructor.lastName}
             </span>
           </div>
@@ -119,7 +119,7 @@ export function CourseCard({
 
         {/* meta row */}
         {(enrollmentCount !== undefined || rating !== undefined || duration !== undefined) && (
-          <div className="mt-3 flex items-center gap-4 text-sm text-slate-500">
+          <div className="mt-3 flex items-center gap-4 text-sm text-muted-foreground">
             {rating !== undefined && (
               <span className="flex items-center gap-1">
                 <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
@@ -145,12 +145,12 @@ export function CourseCard({
         {progress !== undefined && (
           <div className="mt-4">
             <div className="mb-1 flex items-center justify-between text-sm">
-              <span className="text-slate-500">Progresi</span>
-              <span className="font-semibold text-slate-900">{Math.round(progress)}%</span>
+              <span className="text-muted-foreground">Progresi</span>
+              <span className="font-semibold text-foreground">{Math.round(progress)}%</span>
             </div>
-            <div className="h-2 overflow-hidden rounded-full bg-slate-100">
+            <div className="h-2 overflow-hidden rounded-full bg-muted">
               <div
-                className="h-full rounded-full bg-indigo-600 transition-all"
+                className="h-full rounded-full bg-gradient-to-r from-primary to-chart-5 transition-all"
                 style={{ width: `${Math.min(100, Math.max(0, progress))}%` }}
               />
             </div>

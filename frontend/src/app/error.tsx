@@ -17,17 +17,18 @@ export default function Error({
   }, [error]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
-      <div className="max-w-md w-full text-center">
-        <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
-          <AlertTriangle className="h-10 w-10 text-red-600" />
+    <div className="relative min-h-screen flex items-center justify-center overflow-hidden bg-background px-4">
+      <div className="mesh-bg" />
+      <div className="relative max-w-md w-full text-center">
+        <div className="w-20 h-20 bg-destructive/10 rounded-full flex items-center justify-center mx-auto mb-6">
+          <AlertTriangle className="h-10 w-10 text-destructive" />
         </div>
 
-        <h1 className="text-2xl font-bold text-slate-900 mb-3">
+        <h1 className="text-2xl font-bold text-foreground mb-3">
           Dicka shkoi gabim!
         </h1>
 
-        <p className="text-slate-600 mb-8">
+        <p className="text-muted-foreground mb-8">
           Na vjen keq, por ndodhi nje gabim i papritur.
           Ju lutem provoni perseri ose kthehuni ne faqen kryesore.
         </p>
@@ -46,7 +47,7 @@ export default function Error({
         </div>
 
         {error.digest && (
-          <p className="mt-8 text-xs text-slate-400">
+          <p className="mt-8 text-xs text-muted-foreground/70">
             Kodi i gabimit: {error.digest}
           </p>
         )}

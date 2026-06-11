@@ -130,15 +130,15 @@ export default function PublicCoursesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background">
       {/* Header — matches the landing page header */}
-      <header className="fixed left-0 right-0 top-0 z-50 border-b border-slate-200 bg-white/90 backdrop-blur-md">
+      <header className="fixed left-0 right-0 top-0 z-50 border-b border-border bg-background/80 backdrop-blur-xl">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-sm shadow-indigo-200">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-chart-5 text-white shadow-sm shadow-primary/30">
               <GraduationCap className="h-5 w-5" />
             </div>
-            <span className="text-xl font-bold text-slate-900">ZK-LMS</span>
+            <span className="text-xl font-bold text-foreground">ZK-LMS</span>
           </Link>
           <nav className="flex items-center gap-3">
             {isAuthenticated ? (
@@ -185,11 +185,11 @@ export default function PublicCoursesPage() {
         </section>
 
         {/* Filters */}
-        <section className="border-b border-slate-100 bg-white py-6">
+        <section className="border-b border-border bg-card py-6">
           <div className="container mx-auto px-4">
             <div className="flex flex-wrap items-center gap-3">
               <div className="relative min-w-[220px] flex-1">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   placeholder="Kerko kurse..."
                   value={searchQuery}
@@ -201,7 +201,7 @@ export default function PublicCoursesPage() {
               <select
                 value={categorySlug}
                 onChange={(e) => setCategorySlug(e.target.value)}
-                className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm transition-colors hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="h-10 rounded-lg border border-border bg-card px-3 text-sm transition-colors hover:border-input focus:outline-none focus:ring-2 focus:ring-ring"
               >
                 <option value="ALL">Te gjitha kategorite</option>
                 {categories.map((c) => (
@@ -214,7 +214,7 @@ export default function PublicCoursesPage() {
               <select
                 value={level}
                 onChange={(e) => setLevel(e.target.value)}
-                className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm transition-colors hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="h-10 rounded-lg border border-border bg-card px-3 text-sm transition-colors hover:border-input focus:outline-none focus:ring-2 focus:ring-ring"
               >
                 {LEVELS.map((l) => (
                   <option key={l.value} value={l.value}>
@@ -227,25 +227,25 @@ export default function PublicCoursesPage() {
         </section>
 
         {/* Grid */}
-        <section className="bg-slate-50 py-12">
+        <section className="bg-muted/50 py-12">
           <div className="container mx-auto px-4">
             {isLoading ? (
               <CardGridSkeleton count={6} />
             ) : courses.length === 0 ? (
               <div className="flex flex-col items-center py-20 text-center">
-                <div className="mb-5 flex h-20 w-20 items-center justify-center rounded-2xl bg-indigo-50">
-                  <BookOpen className="h-12 w-12 text-indigo-600" strokeWidth={1.5} />
+                <div className="mb-5 flex h-20 w-20 items-center justify-center rounded-2xl bg-primary/10">
+                  <BookOpen className="h-12 w-12 text-primary" strokeWidth={1.5} />
                 </div>
-                <h3 className="text-lg font-semibold text-slate-900">
+                <h3 className="text-lg font-semibold text-foreground">
                   Asnje kurs nuk u gjet
                 </h3>
-                <p className="mt-1.5 max-w-sm text-sm text-slate-600">
+                <p className="mt-1.5 max-w-sm text-sm text-muted-foreground">
                   Provo te ndryshosh filtrat e kerkimit ose te kerkosh me terma me te pergjithshem.
                 </p>
               </div>
             ) : (
               <>
-                <p className="mb-6 text-sm text-slate-600">
+                <p className="mb-6 text-sm text-muted-foreground">
                   {pagination.total} kurse te gjetura
                 </p>
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -275,7 +275,7 @@ export default function PublicCoursesPage() {
                     >
                       <ChevronLeft className="h-4 w-4" />
                     </Button>
-                    <span className="px-3 text-sm text-slate-600">
+                    <span className="px-3 text-sm text-muted-foreground">
                       Faqja {pagination.page} nga {pagination.totalPages}
                     </span>
                     <Button
@@ -319,7 +319,7 @@ export default function PublicCoursesPage() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-slate-900 py-12 text-slate-400">
+      <footer className="border-t border-border bg-card py-12 text-muted-foreground">
         <div className="container mx-auto px-4 text-center text-sm">
           <p>
             &copy; 2026 ZK-LMS · Projekt Diplome · Universiteti i Tiranes

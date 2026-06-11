@@ -42,6 +42,7 @@ import {
   type ExtractionResult,
 } from '@/lib/api/ai';
 import { quizzesApi } from '@/lib/api/quizzes';
+import { showErrorToast, showSuccessToast } from '@/lib/api';
 import { resolveFileUrl } from '@/lib/fileUrl';
 import { cn } from '@/lib/utils';
 
@@ -238,7 +239,7 @@ export function AIQuizGenerator({
       const content =
         sourceType === 'lessons' ? await buildLessonsContent() : resolveContent();
       if (!content || content.length < 50) {
-        alert('Permbajtja duhet te jete te pakten 50 karaktere');
+        showErrorToast('Permbajtja duhet te jete te pakten 50 karaktere');
         return;
       }
 
@@ -257,7 +258,7 @@ export function AIQuizGenerator({
       }
     } catch (error) {
       console.error('Failed to generate quiz:', error);
-      alert('Gjenerimi i kuizit deshtoi. Provoni perseri.');
+      showErrorToast('Gjenerimi i kuizit deshtoi. Provoni perseri.');
     } finally {
       setIsGenerating(false);
     }
@@ -265,7 +266,7 @@ export function AIQuizGenerator({
 
   const handleSaveQuiz = async () => {
     if (questions.length === 0) {
-      alert('Shtoni te pakten nje pyetje');
+      showErrorToast('Shtoni te pakten nje pyetje');
       return;
     }
 
@@ -287,21 +288,29 @@ export function AIQuizGenerator({
           orderIndex: index,
           points: q.points,
           explanation: q.explanation || undefined,
-          options: q.options.map((opt) => ({
-            optionText: opt.optionText,
-            isCorrect: opt.isCorrect,
-          })),
+          // Persist the AI's ideal answer as a reference option so SHORT_ANSWER
+          // can be auto-graded by normalized comparison on submit.
+          options:
+            q.type === 'SHORT_ANSWER'
+              ? q.sampleAnswer
+                ? [{ optionText: q.sampleAnswer, isCorrect: true }]
+                : []
+              : q.options.map((opt) => ({
+                  optionText: opt.optionText,
+                  isCorrect: opt.isCorrect,
+                })),
         })),
       });
 
       if (res.data) {
+        showSuccessToast('Kuizi u ruajt me sukses!');
         onQuizCreated(res.data.id);
         onClose();
         resetState();
       }
     } catch (error) {
       console.error('Failed to save quiz:', error);
-      alert('Ruajtja e kuizit deshtoi');
+      showErrorToast('Ruajtja e kuizit deshtoi');
     } finally {
       setIsSaving(false);
     }
@@ -371,7 +380,7 @@ export function AIQuizGenerator({
           <>
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-indigo-600" />
+                <Sparkles className="h-5 w-5 text-primary" />
                 Gjenero Kuiz me AI
               </DialogTitle>
               <DialogDescription>
@@ -399,8 +408,8 @@ export function AIQuizGenerator({
                       className={cn(
                         'p-3 rounded-lg border-2 text-center transition-colors flex flex-col items-center gap-1.5',
                         sourceType === value
-                          ? 'border-indigo-600 bg-indigo-50 text-indigo-700'
-                          : 'border-slate-200 hover:border-slate-300 text-slate-700',
+                          ? 'border-primary bg-primary/10 text-primary'
+                          : 'border-border hover:border-primary/40 text-foreground',
                         disabled && 'opacity-50 cursor-not-allowed'
                       )}
                     >
@@ -412,7 +421,7 @@ export function AIQuizGenerator({
 
                 {/* Per-source input panel */}
                 {sourceType === 'lesson' && (
-                  <div className="p-3 rounded-lg border border-slate-200 bg-slate-50 text-sm text-slate-600">
+                  <div className="p-3 rounded-lg border border-border bg-muted/50 text-sm text-muted-foreground">
                     {lessonContent
                       ? `Permbajtja e mesimit "${lessonTitle}" do te perdoret (${lessonContent.length} karaktere).`
                       : 'Ky mesim s\'ka permbajtje teksti. Zgjidh nje burim tjeter.'}
@@ -422,40 +431,40 @@ export function AIQuizGenerator({
                 {sourceType === 'lessons' && (
                   <div className="space-y-2">
                     {siblingLessons.length === 0 ? (
-                      <div className="p-3 rounded-lg border border-slate-200 bg-slate-50 text-sm text-slate-600">
+                      <div className="p-3 rounded-lg border border-border bg-muted/50 text-sm text-muted-foreground">
                         S&apos;ka mesime te tjera me permbajtje ne kete kurs.
                       </div>
                     ) : (
                       <>
-                        <div className="max-h-44 overflow-y-auto rounded-lg border border-slate-200 divide-y divide-slate-100">
+                        <div className="max-h-44 overflow-y-auto rounded-lg border border-border divide-y divide-border">
                           {siblingLessons.map((l) => {
                             const textLen = htmlToText(l.content || '').length;
                             const isPdf = textLen === 0 && !!l.pdfUrl;
                             return (
                               <label
                                 key={l.id}
-                                className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-slate-50"
+                                className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-accent"
                               >
                                 <input
                                   type="checkbox"
                                   checked={selectedLessonIds.includes(l.id)}
                                   onChange={() => toggleLessonSelected(l.id)}
-                                  className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                                  className="rounded border-input text-primary focus:ring-ring"
                                 />
-                                <span className="flex-1 text-sm text-slate-700 truncate">{l.title}</span>
+                                <span className="flex-1 text-sm text-foreground truncate">{l.title}</span>
                                 {isPdf ? (
                                   <Badge variant="secondary" className="gap-1 text-xs">
                                     <Upload className="h-3 w-3" />
                                     PDF
                                   </Badge>
                                 ) : (
-                                  <span className="text-xs text-slate-400">{textLen} karaktere</span>
+                                  <span className="text-xs text-muted-foreground">{textLen} karaktere</span>
                                 )}
                               </label>
                             );
                           })}
                         </div>
-                        <p className="text-xs text-slate-500">
+                        <p className="text-xs text-muted-foreground">
                           Zgjidh nje ose me shume mesime; permbajtja e tyre kombinohet per gjenerimin.
                           Mesimet PDF ekstraktohen automatikisht.
                         </p>
@@ -469,7 +478,7 @@ export function AIQuizGenerator({
                     value={customContent}
                     onChange={(e) => setCustomContent(e.target.value)}
                     placeholder="Ngjitni permbajtjen ketu..."
-                    className="w-full h-32 p-3 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+                    className="w-full h-32 p-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring resize-none"
                   />
                 )}
 
@@ -489,11 +498,11 @@ export function AIQuizGenerator({
                     <button
                       type="button"
                       onClick={() => pdfInputRef.current?.click()}
-                      className="w-full p-4 rounded-lg border-2 border-dashed border-slate-300 hover:border-indigo-500 text-center text-sm text-slate-600 transition-colors"
+                      className="w-full p-4 rounded-lg border-2 border-dashed border-input hover:border-primary text-center text-sm text-muted-foreground transition-colors"
                     >
-                      <Upload className="h-5 w-5 mx-auto mb-1 text-slate-400" />
+                      <Upload className="h-5 w-5 mx-auto mb-1 text-muted-foreground" />
                       {pdfFile ? (
-                        <span className="font-medium text-slate-900">
+                        <span className="font-medium text-foreground">
                           {pdfFile.name} · {(pdfFile.size / 1024 / 1024).toFixed(2)} MB
                         </span>
                       ) : (
@@ -519,7 +528,7 @@ export function AIQuizGenerator({
                       onChange={(e) => setYoutubeLanguage(e.target.value)}
                       placeholder="Gjuha e preferuar (psh. 'en', 'sq') — opsionale"
                     />
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-muted-foreground">
                       Videoja duhet te kete captions (transcript). Per video pa caption, perdor opsionin &quot;Audio/Video&quot;.
                     </p>
                   </div>
@@ -541,18 +550,18 @@ export function AIQuizGenerator({
                     <button
                       type="button"
                       onClick={() => audioInputRef.current?.click()}
-                      className="w-full p-4 rounded-lg border-2 border-dashed border-slate-300 hover:border-indigo-500 text-center text-sm text-slate-600 transition-colors"
+                      className="w-full p-4 rounded-lg border-2 border-dashed border-input hover:border-primary text-center text-sm text-muted-foreground transition-colors"
                     >
-                      <Mic className="h-5 w-5 mx-auto mb-1 text-slate-400" />
+                      <Mic className="h-5 w-5 mx-auto mb-1 text-muted-foreground" />
                       {audioFile ? (
-                        <span className="font-medium text-slate-900">
+                        <span className="font-medium text-foreground">
                           {audioFile.name} · {(audioFile.size / 1024 / 1024).toFixed(2)} MB
                         </span>
                       ) : (
                         <span>Kliko per audio/video (max 25MB · limit Whisper)</span>
                       )}
                     </button>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-muted-foreground">
                       Transkriptohet me OpenAI Whisper. Tipet e mbeshtetura: mp3, mp4, m4a, wav, webm.
                     </p>
                   </div>
@@ -592,22 +601,22 @@ export function AIQuizGenerator({
                     </Button>
 
                     {extractError && (
-                      <div className="flex items-start gap-2 p-3 rounded-lg bg-red-50 border border-red-200 text-sm text-red-700">
+                      <div className="flex items-start gap-2 p-3 rounded-lg bg-destructive/10 border border-destructive/30 text-sm text-destructive">
                         <AlertTriangle className="h-4 w-4 flex-shrink-0 mt-0.5" />
                         <span>{extractError}</span>
                       </div>
                     )}
 
                     {extracted && (
-                      <div className="p-3 rounded-lg border border-indigo-200 bg-indigo-50 space-y-2">
-                        <div className="flex items-center justify-between text-xs text-indigo-900">
+                      <div className="p-3 rounded-lg border border-primary/30 bg-primary/10 space-y-2">
+                        <div className="flex items-center justify-between text-xs text-primary">
                           <span className="font-medium">{extracted.sourceLabel}</span>
                           <span>
                             {extracted.charCount.toLocaleString()} karaktere
                             {extracted.truncated && ' · cunguar'}
                           </span>
                         </div>
-                        <div className="max-h-32 overflow-y-auto text-xs text-slate-700 whitespace-pre-wrap bg-white p-2 rounded border border-indigo-100">
+                        <div className="max-h-32 overflow-y-auto text-xs text-foreground whitespace-pre-wrap bg-card p-2 rounded border border-primary/20">
                           {extracted.content.slice(0, 800)}
                           {extracted.content.length > 800 && '…'}
                         </div>
@@ -621,7 +630,7 @@ export function AIQuizGenerator({
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <Label>Numri i Pyetjeve</Label>
-                  <span className="text-sm font-medium text-indigo-600">{numQuestions}</span>
+                  <span className="text-sm font-medium text-primary">{numQuestions}</span>
                 </div>
                 <input
                   type="range"
@@ -648,8 +657,8 @@ export function AIQuizGenerator({
                       className={cn(
                         'px-4 py-2 rounded-full text-sm font-medium transition-colors',
                         questionTypes.includes(value)
-                          ? 'bg-indigo-100 text-indigo-700'
-                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                          ? 'bg-primary/15 text-primary'
+                          : 'bg-muted text-muted-foreground hover:bg-muted'
                       )}
                     >
                       {questionTypes.includes(value) && <Check className="h-3 w-3 inline mr-1" />}
@@ -674,8 +683,8 @@ export function AIQuizGenerator({
                       className={cn(
                         'px-4 py-2 rounded-lg text-sm font-medium transition-colors border',
                         difficulty === value
-                          ? 'border-indigo-600 bg-indigo-50 text-indigo-700'
-                          : 'border-slate-200 hover:border-slate-300'
+                          ? 'border-primary bg-primary/10 text-primary'
+                          : 'border-border hover:border-primary/40'
                       )}
                     >
                       {label}
@@ -749,13 +758,20 @@ export function AIQuizGenerator({
                 >
                   <div className="space-y-4">
                     {questions.map((question, index) => (
-                      <SortableQuestionCard
+                      // Staggered reveal so the AI-generated questions cascade in
+                      // one after another, like the model is "writing" them out.
+                      <div
                         key={question.questionText}
-                        question={question}
-                        index={index}
-                        onUpdate={(data) => updateQuestion(index, data)}
-                        onDelete={() => deleteQuestion(index)}
-                      />
+                        className="animate-fade-up"
+                        style={{ animationDelay: `${index * 90}ms`, animationFillMode: 'backwards' }}
+                      >
+                        <SortableQuestionCard
+                          question={question}
+                          index={index}
+                          onUpdate={(data) => updateQuestion(index, data)}
+                          onDelete={() => deleteQuestion(index)}
+                        />
+                      </div>
                     ))}
                   </div>
                 </SortableContext>
@@ -844,7 +860,7 @@ function SortableQuestionCard({ question, index, onUpdate, onDelete }: SortableQ
           <button
             {...attributes}
             {...listeners}
-            className="mt-2 text-slate-400 hover:text-slate-600 cursor-grab"
+            className="mt-2 text-muted-foreground hover:text-muted-foreground cursor-grab"
           >
             <GripVertical className="h-5 w-5" />
           </button>
@@ -861,17 +877,17 @@ function SortableQuestionCard({ question, index, onUpdate, onDelete }: SortableQ
                     {question.type === 'TRUE_FALSE' && 'E Vertete/Gabim'}
                     {question.type === 'SHORT_ANSWER' && 'Pergjigje e Shkurter'}
                   </Badge>
-                  <span className="text-xs text-slate-500">{question.points} pike</span>
+                  <span className="text-xs text-muted-foreground">{question.points} pike</span>
                 </div>
                 <textarea
                   value={question.questionText}
                   onChange={(e) => onUpdate({ questionText: e.target.value })}
-                  className="w-full p-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+                  className="w-full p-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none"
                   rows={2}
                 />
               </div>
               <Button variant="ghost" size="icon" onClick={onDelete}>
-                <Trash2 className="h-4 w-4 text-slate-400" />
+                <Trash2 className="h-4 w-4 text-muted-foreground" />
               </Button>
             </div>
 
@@ -884,14 +900,14 @@ function SortableQuestionCard({ question, index, onUpdate, onDelete }: SortableQ
                       name={`q-${index}-correct`}
                       checked={option.isCorrect}
                       onChange={() => updateOption(optIndex, { isCorrect: true })}
-                      className="text-indigo-600 focus:ring-indigo-500"
+                      className="text-primary focus:ring-ring"
                     />
                     <Input
                       value={option.optionText}
                       onChange={(e) => updateOption(optIndex, { optionText: e.target.value })}
                       className={cn(
                         'flex-1 text-sm',
-                        option.isCorrect && 'border-green-300 bg-green-50'
+                        option.isCorrect && 'border-success/40 bg-success/10'
                       )}
                     />
                     {question.options.length > 2 && (
@@ -916,12 +932,12 @@ function SortableQuestionCard({ question, index, onUpdate, onDelete }: SortableQ
             )}
 
             {question.explanation && (
-              <div className="pt-2 border-t border-slate-100">
-                <Label className="text-xs text-slate-500">Shpjegimi</Label>
+              <div className="pt-2 border-t border-border">
+                <Label className="text-xs text-muted-foreground">Shpjegimi</Label>
                 <textarea
                   value={question.explanation}
                   onChange={(e) => onUpdate({ explanation: e.target.value })}
-                  className="w-full p-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none mt-1"
+                  className="w-full p-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none mt-1"
                   rows={2}
                 />
               </div>

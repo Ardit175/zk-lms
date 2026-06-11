@@ -185,12 +185,12 @@ export function AssignmentPlayer({ lessonId, onComplete }: AssignmentPlayerProps
     const hoursUntilDue = differenceInHours(dueDate, new Date());
 
     if (isPast(dueDate)) {
-      return { type: 'overdue', text: 'E kaluar afati', color: 'text-red-600 bg-red-50' };
+      return { type: 'overdue', text: 'E kaluar afati', color: 'text-destructive bg-destructive/10' };
     }
     if (hoursUntilDue < 24) {
-      return { type: 'urgent', text: `${hoursUntilDue}h te mbetura`, color: 'text-amber-600 bg-amber-50' };
+      return { type: 'urgent', text: `${hoursUntilDue}h te mbetura`, color: 'text-warning bg-warning/10' };
     }
-    return { type: 'normal', text: formatDistanceToNow(dueDate, { locale: sq, addSuffix: true }), color: 'text-slate-600 bg-slate-50' };
+    return { type: 'normal', text: formatDistanceToNow(dueDate, { locale: sq, addSuffix: true }), color: 'text-muted-foreground bg-muted/50' };
   };
 
   const getSubmissionTypeIcon = (type: SubmissionType) => {
@@ -224,15 +224,15 @@ export function AssignmentPlayer({ lessonId, onComplete }: AssignmentPlayerProps
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
   if (error && !assignment) {
     return (
-      <div className="bg-white rounded-lg p-6">
-        <div className="flex items-center gap-3 text-red-600">
+      <div className="bg-card rounded-lg p-6">
+        <div className="flex items-center gap-3 text-destructive">
           <AlertCircle className="h-5 w-5" />
           <span>{error}</span>
         </div>
@@ -242,8 +242,8 @@ export function AssignmentPlayer({ lessonId, onComplete }: AssignmentPlayerProps
 
   if (!assignment) {
     return (
-      <div className="bg-white rounded-lg p-6 text-center">
-        <p className="text-slate-600">Detyra nuk u gjet</p>
+      <div className="bg-card rounded-lg p-6 text-center">
+        <p className="text-muted-foreground">Detyra nuk u gjet</p>
       </div>
     );
   }
@@ -251,18 +251,18 @@ export function AssignmentPlayer({ lessonId, onComplete }: AssignmentPlayerProps
   const dueDateStatus = getDueDateStatus();
 
   return (
-    <div className="bg-white rounded-lg overflow-hidden">
+    <div className="bg-card rounded-lg overflow-hidden">
       {/* Header */}
-      <div className="p-6 border-b border-slate-200">
+      <div className="p-6 border-b border-border">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h2 className="text-xl font-semibold text-slate-900 mb-2">{assignment.title}</h2>
-            <p className="text-slate-600">{assignment.description}</p>
+            <h2 className="text-xl font-semibold text-foreground mb-2">{assignment.title}</h2>
+            <p className="text-muted-foreground">{assignment.description}</p>
           </div>
           <div className="flex-shrink-0">
             {submission ? (
               submission.gradedAt ? (
-                <Badge className="bg-green-100 text-green-700 hover:bg-green-100">
+                <Badge className="bg-success/15 text-success hover:bg-success/15">
                   <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
                   Vleresuar
                 </Badge>
@@ -273,7 +273,7 @@ export function AssignmentPlayer({ lessonId, onComplete }: AssignmentPlayerProps
                 </Badge>
               )
             ) : dueDateStatus?.type === 'overdue' ? (
-              <Badge className="bg-red-100 text-red-700 hover:bg-red-100">
+              <Badge className="bg-destructive/15 text-destructive hover:bg-destructive/15">
                 <AlertCircle className="h-3.5 w-3.5 mr-1" />
                 E kaluar
               </Badge>
@@ -295,7 +295,7 @@ export function AssignmentPlayer({ lessonId, onComplete }: AssignmentPlayerProps
               {dueDateStatus && <span className="font-medium">({dueDateStatus.text})</span>}
             </div>
           )}
-          <div className="flex items-center gap-1.5 text-sm text-slate-600">
+          <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
             <Award className="h-4 w-4" />
             <span>Maksimumi: {assignment.maxScore} pike</span>
           </div>
@@ -303,8 +303,8 @@ export function AssignmentPlayer({ lessonId, onComplete }: AssignmentPlayerProps
       </div>
 
       {/* Instructions */}
-      <div className="p-6 border-b border-slate-200 bg-slate-50">
-        <h3 className="font-medium text-slate-900 mb-3">Udhezime</h3>
+      <div className="p-6 border-b border-border bg-muted/50">
+        <h3 className="font-medium text-foreground mb-3">Udhezime</h3>
         <div
           className="prose prose-slate prose-sm max-w-none"
           dangerouslySetInnerHTML={{ __html: sanitizeHtml(assignment.instructions) }}
@@ -319,20 +319,20 @@ export function AssignmentPlayer({ lessonId, onComplete }: AssignmentPlayerProps
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
-                  <CheckCircle2 className="h-5 w-5 text-green-600" />
+                  <CheckCircle2 className="h-5 w-5 text-success" />
                   Dergesa juaj
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="text-sm text-slate-500">
+                <div className="text-sm text-muted-foreground">
                   Derguar me {format(new Date(submission.submittedAt), 'dd MMMM yyyy, HH:mm', { locale: sq })}
                 </div>
 
                 {submission.content && (
                   <div>
-                    <Label className="text-slate-500 mb-2 block">Permbajtja:</Label>
+                    <Label className="text-muted-foreground mb-2 block">Permbajtja:</Label>
                     <div
-                      className="prose prose-slate prose-sm max-w-none p-4 bg-slate-50 rounded-lg"
+                      className="prose prose-slate prose-sm max-w-none p-4 bg-muted/50 rounded-lg"
                       dangerouslySetInnerHTML={{ __html: sanitizeHtml(submission.content) }}
                     />
                   </div>
@@ -340,12 +340,12 @@ export function AssignmentPlayer({ lessonId, onComplete }: AssignmentPlayerProps
 
                 {submission.fileUrl && (
                   <div>
-                    <Label className="text-slate-500 mb-2 block">Skedari:</Label>
+                    <Label className="text-muted-foreground mb-2 block">Skedari:</Label>
                     <a
                       href={resolveFileUrl(submission.fileUrl)}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-sm transition-colors"
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-muted hover:bg-muted rounded-lg text-sm transition-colors"
                     >
                       <FileIcon className="h-4 w-4" />
                       <span>Shiko skedarin</span>
@@ -356,12 +356,12 @@ export function AssignmentPlayer({ lessonId, onComplete }: AssignmentPlayerProps
 
                 {submission.linkUrl && (
                   <div>
-                    <Label className="text-slate-500 mb-2 block">Linku:</Label>
+                    <Label className="text-muted-foreground mb-2 block">Linku:</Label>
                     <a
                       href={submission.linkUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-700"
+                      className="inline-flex items-center gap-2 text-primary hover:text-primary"
                     >
                       <LinkIcon className="h-4 w-4" />
                       <span>{submission.linkUrl}</span>
@@ -374,19 +374,19 @@ export function AssignmentPlayer({ lessonId, onComplete }: AssignmentPlayerProps
 
             {/* Grading result */}
             {submission.gradedAt && (
-              <Card className="border-green-200 bg-green-50/50">
+              <Card className="border-success/30 bg-success/10">
                 <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2 text-green-700">
+                  <CardTitle className="text-lg flex items-center gap-2 text-success">
                     <Award className="h-5 w-5" />
                     Rezultati
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex items-center gap-4">
-                    <div className="text-3xl font-bold text-green-700">
+                    <div className="text-3xl font-bold text-success">
                       {submission.score}/{assignment.maxScore}
                     </div>
-                    <div className="text-sm text-slate-500">
+                    <div className="text-sm text-muted-foreground">
                       Vleresuar me {format(new Date(submission.gradedAt), 'dd MMMM yyyy', { locale: sq })}
                       {submission.gradedBy && (
                         <span> nga {submission.gradedBy.firstName} {submission.gradedBy.lastName}</span>
@@ -396,8 +396,8 @@ export function AssignmentPlayer({ lessonId, onComplete }: AssignmentPlayerProps
 
                   {submission.feedback && (
                     <div>
-                      <Label className="text-slate-600 mb-2 block">Feedback:</Label>
-                      <div className="p-4 bg-white rounded-lg border border-green-200 text-slate-700">
+                      <Label className="text-muted-foreground mb-2 block">Feedback:</Label>
+                      <div className="p-4 bg-card rounded-lg border border-success/30 text-foreground">
                         {submission.feedback}
                       </div>
                     </div>
@@ -410,7 +410,7 @@ export function AssignmentPlayer({ lessonId, onComplete }: AssignmentPlayerProps
           // Show submission form
           <div className="space-y-6">
             {error && (
-              <div className="flex items-center gap-2 p-4 bg-red-50 text-red-700 rounded-lg">
+              <div className="flex items-center gap-2 p-4 bg-destructive/10 text-destructive rounded-lg">
                 <AlertCircle className="h-5 w-5 flex-shrink-0" />
                 <span>{error}</span>
               </div>
@@ -431,11 +431,11 @@ export function AssignmentPlayer({ lessonId, onComplete }: AssignmentPlayerProps
               <div>
                 <Label className="mb-2 block">Ngarkoni skedarin</Label>
                 {uploadedFile ? (
-                  <div className="flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-lg">
-                    <FileIcon className="h-8 w-8 text-green-600" />
+                  <div className="flex items-center gap-3 p-4 bg-success/10 border border-success/30 rounded-lg">
+                    <FileIcon className="h-8 w-8 text-success" />
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-slate-900 truncate">{uploadedFile.originalName}</p>
-                      <p className="text-sm text-slate-500">{formatFileSize(uploadedFile.size)}</p>
+                      <p className="font-medium text-foreground truncate">{uploadedFile.originalName}</p>
+                      <p className="text-sm text-muted-foreground">{formatFileSize(uploadedFile.size)}</p>
                     </div>
                     <Button
                       variant="ghost"
@@ -450,7 +450,7 @@ export function AssignmentPlayer({ lessonId, onComplete }: AssignmentPlayerProps
                   <div
                     className={cn(
                       'border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer',
-                      dragActive ? 'border-indigo-500 bg-indigo-50' : 'border-slate-300 hover:border-slate-400',
+                      dragActive ? 'border-primary bg-primary/10' : 'border-input hover:border-primary/40',
                       isUploading && 'pointer-events-none opacity-60'
                     )}
                     onDrop={handleDrop}
@@ -468,16 +468,16 @@ export function AssignmentPlayer({ lessonId, onComplete }: AssignmentPlayerProps
                     />
                     {isUploading ? (
                       <div className="flex flex-col items-center gap-3">
-                        <Loader2 className="h-10 w-10 animate-spin text-indigo-600" />
-                        <p className="text-slate-600">Duke ngarkuar...</p>
+                        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+                        <p className="text-muted-foreground">Duke ngarkuar...</p>
                       </div>
                     ) : (
                       <>
-                        <Upload className="h-10 w-10 text-slate-400 mx-auto mb-3" />
-                        <p className="text-slate-600 mb-1">
-                          Terhiqni skedarin ketu ose <span className="text-indigo-600">klikoni per te zgjedhur</span>
+                        <Upload className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+                        <p className="text-muted-foreground mb-1">
+                          Terhiqni skedarin ketu ose <span className="text-primary">klikoni per te zgjedhur</span>
                         </p>
-                        <p className="text-sm text-slate-400">PDF, DOC, DOCX, JPG, PNG, GIF, WEBP (max 10MB)</p>
+                        <p className="text-sm text-muted-foreground">PDF, DOC, DOCX, JPG, PNG, GIF, WEBP (max 10MB)</p>
                       </>
                     )}
                   </div>
@@ -497,13 +497,13 @@ export function AssignmentPlayer({ lessonId, onComplete }: AssignmentPlayerProps
                   value={linkUrl}
                   onChange={(e) => setLinkUrl(e.target.value)}
                 />
-                <p className="text-sm text-slate-500 mt-1.5">
+                <p className="text-sm text-muted-foreground mt-1.5">
                   P.sh. link per GitHub, Google Drive, ose faqe tjeter
                 </p>
               </div>
             )}
 
-            <div className="flex justify-end pt-4 border-t border-slate-200">
+            <div className="flex justify-end pt-4 border-t border-border">
               <Button
                 onClick={handleSubmit}
                 disabled={isSubmitting}

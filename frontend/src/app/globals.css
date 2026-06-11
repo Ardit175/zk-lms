@@ -1,39 +1,132 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * ZK-LMS design system
+ * --------------------
+ * The entire color system is driven by CSS variables so theming is trivial:
+ * every semantic token (background, card, primary, …) is defined once for the
+ * light theme on :root and overridden for the dark theme on .dark. Components
+ * consume them through Tailwind's semantic classes (bg-background, text-muted-
+ * foreground, border-border, …) and never hard-code a slate/indigo shade.
+ *
+ * Values are stored as raw HSL channels ("222 47% 11%") so Tailwind can wrap
+ * them in hsl(var(--token) / <alpha>) and opacity modifiers keep working.
+ */
+
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Surfaces */
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 238.7 83.5% 66.7%;
+    --popover-foreground: 222 47% 11%;
+
+    /* Brand / accent — indigo */
+    --primary: 239 84% 60%;
     --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
+
+    /* Neutrals */
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 226 100% 97%;
+    --accent-foreground: 239 84% 60%;
+
+    /* Semantic states */
+    --destructive: 0 72% 51%;
     --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 238.7 83.5% 66.7%;
-    --radius: 0.5rem;
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 238.7 83.5% 66.7%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 238.7 83.5% 66.7%;
+    --success: 142 71% 45%;
+    --success-foreground: 210 40% 98%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 222 47% 11%;
+    --info: 217 91% 60%;
+    --info-foreground: 210 40% 98%;
+
+    /* Lines & controls */
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 239 84% 60%;
+    --radius: 0.75rem;
+
+    /* Sidebar */
+    --sidebar: 0 0% 100%;
+    --sidebar-foreground: 215 25% 27%;
+    --sidebar-accent: 226 100% 97%;
+    --sidebar-accent-foreground: 239 84% 60%;
+    --sidebar-border: 214 32% 91%;
+
+    /* Chart palette (recharts) */
+    --chart-1: 239 84% 60%;
+    --chart-2: 142 71% 45%;
+    --chart-3: 38 92% 50%;
+    --chart-4: 199 89% 48%;
+    --chart-5: 280 65% 60%;
+
+    /* Animated mesh tints (light) */
+    --mesh-1: 226 100% 94%;
+    --mesh-2: 270 100% 95%;
+    --mesh-3: 199 100% 93%;
+  }
+
+  .dark {
+    /* Surfaces — deep slate navy */
+    --background: 222 47% 7%;
+    --foreground: 210 40% 98%;
+    --card: 222 44% 11%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222 44% 11%;
+    --popover-foreground: 210 40% 98%;
+
+    /* Brand / accent — indigo reads a touch brighter on dark */
+    --primary: 235 89% 68%;
+    --primary-foreground: 222 47% 11%;
+
+    /* Neutrals */
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217 33% 15%;
+    --muted-foreground: 217 20% 65%;
+    --accent: 217 33% 18%;
+    --accent-foreground: 235 89% 80%;
+
+    /* Semantic states */
+    --destructive: 0 72% 58%;
+    --destructive-foreground: 210 40% 98%;
+    --success: 142 69% 50%;
+    --success-foreground: 210 40% 98%;
+    --warning: 38 92% 55%;
+    --warning-foreground: 222 47% 11%;
+    --info: 213 94% 68%;
+    --info-foreground: 222 47% 11%;
+
+    /* Lines & controls */
+    --border: 217 33% 20%;
+    --input: 217 33% 22%;
+    --ring: 235 89% 68%;
+
+    /* Sidebar */
+    --sidebar: 222 47% 9%;
+    --sidebar-foreground: 215 20% 75%;
+    --sidebar-accent: 217 33% 17%;
+    --sidebar-accent-foreground: 235 89% 80%;
+    --sidebar-border: 217 33% 18%;
+
+    /* Chart palette (dark) */
+    --chart-1: 235 89% 68%;
+    --chart-2: 142 69% 50%;
+    --chart-3: 38 92% 55%;
+    --chart-4: 199 89% 60%;
+    --chart-5: 280 70% 68%;
+
+    /* Animated mesh tints (dark) */
+    --mesh-1: 239 84% 30%;
+    --mesh-2: 270 70% 28%;
+    --mesh-3: 199 89% 25%;
   }
 }
 
@@ -41,15 +134,166 @@
   * {
     @apply border-border;
   }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
   body {
     @apply bg-background text-foreground;
-    font-family: 'Inter', sans-serif;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    font-feature-settings: "rlig" 1, "calt" 1, "ss01" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::selection {
+    @apply bg-primary/20 text-foreground;
+  }
+
+  /* Display face for headings/marketing surfaces. */
+  .font-display {
+    font-family: var(--font-display), var(--font-inter), system-ui, sans-serif;
+    letter-spacing: -0.02em;
+  }
+
+  /* Custom scrollbars — themed, slim, consistent across the app. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border)) transparent;
+  }
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--muted-foreground) / 0.35);
+    border-radius: 9999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(var(--muted-foreground) / 0.55);
+  }
+}
+
+@layer components {
+  /*
+   * Glassmorphism surface — translucent card with backdrop blur and a soft
+   * gradient hairline border. Works on both themes via the semantic tokens.
+   */
+  .glass {
+    @apply border border-white/40 bg-white/70 backdrop-blur-xl backdrop-saturate-150;
+    box-shadow: 0 1px 1px hsl(var(--foreground) / 0.04), 0 8px 24px -12px hsl(var(--foreground) / 0.12);
+  }
+  .dark .glass {
+    @apply border-white/10 bg-white/[0.04];
+    box-shadow: 0 1px 1px hsl(0 0% 0% / 0.3), 0 12px 32px -12px hsl(0 0% 0% / 0.55);
+  }
+
+  /* Gradient hairline used to outline premium cards. */
+  .border-gradient {
+    position: relative;
+  }
+  .border-gradient::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(
+      135deg,
+      hsl(var(--primary) / 0.5),
+      hsl(var(--primary) / 0) 40%,
+      hsl(var(--chart-5) / 0.35)
+    );
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
   }
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+  .text-pretty {
+    text-wrap: pretty;
+  }
+
+  /*
+   * Subtly moving gradient mesh background. Three blurred radial blobs drift on
+   * a slow loop. Honors prefers-reduced-motion (see below) by freezing.
+   */
+  .mesh-bg {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    background:
+      radial-gradient(40rem 40rem at 15% 20%, hsl(var(--mesh-1) / 0.55), transparent 60%),
+      radial-gradient(35rem 35rem at 85% 15%, hsl(var(--mesh-2) / 0.5), transparent 60%),
+      radial-gradient(45rem 45rem at 50% 100%, hsl(var(--mesh-3) / 0.45), transparent 60%);
+    background-size: 200% 200%;
+    animation: mesh-drift 24s ease-in-out infinite alternate;
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.4s ease forwards;
+  }
+  .animate-fade-up {
+    animation: fade-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+  .animate-scale-in {
+    animation: scale-in 0.25s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+  /* Press feedback for interactive surfaces. */
+  .press {
+    @apply transition-transform active:scale-[0.97];
+  }
+}
+
+@keyframes mesh-drift {
+  0% { background-position: 0% 0%; }
+  100% { background-position: 100% 100%; }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes shimmer {
+  100% { transform: translateX(100%); }
+}
+
+/*
+ * Global accessibility guarantee: when the user asks the OS to reduce motion,
+ * collapse every animation and transition to a single frame. This satisfies the
+ * Step 2 requirement that all motion respects prefers-reduced-motion without
+ * each component having to opt in.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .mesh-bg {
+    animation: none !important;
   }
 }

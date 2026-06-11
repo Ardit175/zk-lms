@@ -62,14 +62,14 @@ export function CardGridSkeleton({ count = 6 }: { count?: number }) {
 export function TableSkeleton({ rows = 6, cols = 5 }: { rows?: number; cols?: number }) {
   return (
     <Card>
-      <div className="border-b border-slate-100 bg-slate-50 px-6 py-3">
+      <div className="border-b border-border bg-muted/50 px-6 py-3">
         <div className="flex gap-6">
           {Array.from({ length: cols }).map((_, i) => (
             <Skeleton key={i} className="h-3 flex-1" />
           ))}
         </div>
       </div>
-      <div className="divide-y divide-slate-100">
+      <div className="divide-y divide-border">
         {Array.from({ length: rows }).map((_, r) => (
           <div key={r} className="flex items-center gap-6 px-6 py-4">
             {Array.from({ length: cols }).map((_, c) => (
@@ -89,7 +89,7 @@ export function ListSkeleton({ rows = 5 }: { rows?: number }) {
       {Array.from({ length: rows }).map((_, i) => (
         <div
           key={i}
-          className="flex items-center gap-3 rounded-lg border border-slate-100 p-4"
+          className="flex items-center gap-3 rounded-lg border border-border p-4"
         >
           <Skeleton className="h-10 w-10 rounded-lg" />
           <div className="flex-1 space-y-2">

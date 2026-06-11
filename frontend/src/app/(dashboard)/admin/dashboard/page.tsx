@@ -8,6 +8,7 @@ import { DashboardLayout } from '@/components/layouts/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { StatCard } from '@/components/ui/stat-card';
+import { Reveal } from '@/components/ui/reveal';
 import { StatGridSkeleton, ChartSkeleton } from '@/components/ui/skeletons';
 import {
   adminApi,
@@ -17,7 +18,7 @@ import {
 } from '@/lib/api/admin';
 
 const chartLoading = () => (
-  <div className="h-[300px] animate-pulse rounded-lg bg-slate-100" />
+  <div className="h-[300px] animate-pulse rounded-lg bg-muted" />
 );
 const EnrollmentLineChart = dynamic(
   () => import('@/components/charts/EnrollmentLineChart').then((m) => m.EnrollmentLineChart),
@@ -64,8 +65,8 @@ export default function AdminDashboard() {
     <DashboardLayout role="ADMIN">
       <div className="space-y-8">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Paneli i Administratorit</h1>
-          <p className="mt-1 text-slate-600">Pasqyra e statistikave te platformes</p>
+          <h1 className="font-display text-3xl font-bold tracking-tight text-foreground">Paneli i Administratorit</h1>
+          <p className="mt-1 text-muted-foreground">Pasqyra e statistikave te platformes</p>
         </div>
 
         {isLoading ? (
@@ -78,9 +79,9 @@ export default function AdminDashboard() {
           </>
         ) : error ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
-            <AlertCircle className="mb-4 h-12 w-12 text-red-400" />
-            <h2 className="text-lg font-semibold text-slate-900">Ngarkimi deshtoi</h2>
-            <p className="mt-1 text-slate-500">Nuk u arriten te ngarkohen te dhenat.</p>
+            <AlertCircle className="mb-4 h-12 w-12 text-destructive/70" />
+            <h2 className="text-lg font-semibold text-foreground">Ngarkimi deshtoi</h2>
+            <p className="mt-1 text-muted-foreground">Nuk u arriten te ngarkohen te dhenat.</p>
             <Button className="mt-4" onClick={loadData}>
               Provo Perseri
             </Button>
@@ -89,34 +90,18 @@ export default function AdminDashboard() {
           <>
             {/* Stat cards */}
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-              <StatCard
-                label="Perdorues Gjithsej"
-                value={stats?.users.total ?? 0}
-                icon={Users}
-                color="indigo"
-                subtitle={`${stats?.users.admins ?? 0} admin · ${stats?.users.instructors ?? 0} instruktor · ${stats?.users.students ?? 0} student`}
-              />
-              <StatCard
-                label="Kurse Gjithsej"
-                value={stats?.courses.total ?? 0}
-                icon={BookOpen}
-                color="blue"
-                subtitle={`${stats?.courses.published ?? 0} publikuar · ${stats?.courses.draft ?? 0} draft`}
-              />
-              <StatCard
-                label="Regjistrime (Muaji)"
-                value={stats?.enrollments.thisMonth ?? 0}
-                icon={GraduationCap}
-                color="green"
-                trend={stats?.enrollments.changePercent ?? 0}
-              />
-              <StatCard
-                label="Ne Pritje per Rishikim"
-                value={stats?.courses.pendingReview ?? 0}
-                icon={Clock}
-                color="amber"
-                subtitle="Kurse qe presin aprovim"
-              />
+              {[
+                <StatCard key="u" label="Perdorues Gjithsej" value={stats?.users.total ?? 0} icon={Users} color="indigo"
+                  subtitle={`${stats?.users.admins ?? 0} admin · ${stats?.users.instructors ?? 0} instruktor · ${stats?.users.students ?? 0} student`} />,
+                <StatCard key="c" label="Kurse Gjithsej" value={stats?.courses.total ?? 0} icon={BookOpen} color="blue"
+                  subtitle={`${stats?.courses.published ?? 0} publikuar · ${stats?.courses.draft ?? 0} draft`} />,
+                <StatCard key="e" label="Regjistrime (Muaji)" value={stats?.enrollments.thisMonth ?? 0} icon={GraduationCap} color="green"
+                  trend={stats?.enrollments.changePercent ?? 0} />,
+                <StatCard key="p" label="Ne Pritje per Rishikim" value={stats?.courses.pendingReview ?? 0} icon={Clock} color="amber"
+                  subtitle="Kurse qe presin aprovim" />,
+              ].map((card, i) => (
+                <Reveal key={i} delay={i * 0.07}>{card}</Reveal>
+              ))}
             </div>
 
             {/* Charts */}
@@ -154,7 +139,7 @@ export default function AdminDashboard() {
               </CardHeader>
               <CardContent>
                 {!stats?.pendingReviewCourses.length ? (
-                  <div className="py-8 text-center text-slate-500">
+                  <div className="py-8 text-center text-muted-foreground">
                     Nuk ka kurse ne pritje per rishikim
                   </div>
                 ) : (
@@ -162,11 +147,11 @@ export default function AdminDashboard() {
                     {stats.pendingReviewCourses.map((course) => (
                       <div
                         key={course.id}
-                        className="flex items-center justify-between rounded-lg border border-slate-100 p-4 transition-colors hover:border-indigo-200 hover:bg-indigo-50/40"
+                        className="flex items-center justify-between rounded-lg border border-border p-4 transition-colors hover:border-primary/40 hover:bg-accent/50"
                       >
                         <div className="min-w-0 flex-1">
-                          <p className="font-medium text-slate-900">{course.title}</p>
-                          <p className="text-sm text-slate-500">
+                          <p className="font-medium text-foreground">{course.title}</p>
+                          <p className="text-sm text-muted-foreground">
                             Nga {course.instructor.firstName} {course.instructor.lastName} ·{' '}
                             {new Date(course.updatedAt).toLocaleDateString('sq-AL')}
                           </p>

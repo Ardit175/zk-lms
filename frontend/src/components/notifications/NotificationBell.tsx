@@ -157,15 +157,15 @@ export function NotificationBell() {
         <Button variant="ghost" size="icon" className="relative">
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
-            <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center font-medium">
+            <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-destructive text-destructive-foreground text-xs flex items-center justify-center font-medium ring-2 ring-background">
               {unreadCount > 9 ? '9+' : unreadCount}
             </span>
           )}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-80 p-0" align="end">
-        <div className="flex items-center justify-between p-4 border-b">
-          <h4 className="font-semibold text-slate-900">Njoftimet</h4>
+        <div className="flex items-center justify-between p-4 border-b border-border">
+          <h4 className="font-semibold text-foreground">Njoftimet</h4>
           {unreadCount > 0 && (
             <Button
               variant="ghost"
@@ -187,22 +187,22 @@ export function NotificationBell() {
         <ScrollArea className="h-[320px]">
           {isLoading ? (
             <div className="flex items-center justify-center h-32">
-              <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
             </div>
           ) : notifications.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-32 text-slate-500">
-              <Bell className="h-8 w-8 mb-2 text-slate-300" />
+            <div className="flex flex-col items-center justify-center h-32 text-muted-foreground">
+              <Bell className="h-8 w-8 mb-2 text-muted-foreground/50" />
               <p className="text-sm">Asnje njoftim</p>
             </div>
           ) : (
-            <div className="divide-y divide-slate-100">
+            <div className="divide-y divide-border">
               {notifications.map((notification) => (
                 <button
                   key={notification.id}
                   onClick={() => handleMarkAsRead(notification)}
                   className={cn(
-                    'w-full text-left p-4 hover:bg-slate-50 transition-colors flex gap-3',
-                    !notification.isRead && 'bg-indigo-50/50'
+                    'w-full text-left p-4 hover:bg-accent transition-colors flex gap-3',
+                    !notification.isRead && 'bg-primary/5'
                   )}
                 >
                   <span className="text-xl flex-shrink-0">
@@ -210,17 +210,17 @@ export function NotificationBell() {
                   </span>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2">
-                      <p className="text-sm font-medium text-slate-900 line-clamp-1">
+                      <p className="text-sm font-medium text-foreground line-clamp-1">
                         {notification.title}
                       </p>
                       {!notification.isRead && (
-                        <span className="w-2 h-2 rounded-full bg-indigo-600 flex-shrink-0 mt-1.5" />
+                        <span className="w-2 h-2 rounded-full bg-primary flex-shrink-0 mt-1.5" />
                       )}
                     </div>
-                    <p className="text-sm text-slate-600 line-clamp-2 mt-0.5">
+                    <p className="text-sm text-muted-foreground line-clamp-2 mt-0.5">
                       {notification.body}
                     </p>
-                    <p className="text-xs text-slate-400 mt-1">
+                    <p className="text-xs text-muted-foreground/70 mt-1">
                       {formatDistanceToNow(new Date(notification.createdAt), {
                         addSuffix: true,
                         locale: sq,
@@ -233,11 +233,11 @@ export function NotificationBell() {
           )}
         </ScrollArea>
 
-        <div className="p-2 border-t">
+        <div className="p-2 border-t border-border">
           <Button
             variant="ghost"
             size="sm"
-            className="w-full text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50"
+            className="w-full text-primary hover:text-primary hover:bg-primary/10"
             onClick={() => {
               setIsOpen(false);
               const role = user?.role.toLowerCase();

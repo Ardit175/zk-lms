@@ -9,7 +9,7 @@ import dynamic from 'next/dynamic';
 
 const CompetencyRadarChart = dynamic(
   () => import('@/components/charts/CompetencyRadarChart').then((m) => m.CompetencyRadarChart),
-  { ssr: false, loading: () => <div className="h-80 animate-pulse rounded-lg bg-slate-100" /> }
+  { ssr: false, loading: () => <div className="h-80 animate-pulse rounded-lg bg-muted" /> }
 );
 import {
   Clock,
@@ -98,9 +98,9 @@ export default function StudentDashboard() {
 
   const getDeadlineColor = (dueDate: string) => {
     const hours = differenceInHours(new Date(dueDate), new Date());
-    if (hours < 24) return 'bg-red-100 text-red-700';
-    if (hours < 72) return 'bg-amber-100 text-amber-700';
-    return 'bg-slate-100 text-slate-700';
+    if (hours < 24) return "bg-destructive/15 text-destructive";
+    if (hours < 72) return "bg-warning/15 text-warning";
+    return "bg-muted text-muted-foreground";
   };
 
   if (isLoading) {
@@ -108,8 +108,8 @@ export default function StudentDashboard() {
       <DashboardLayout role="STUDENT">
         <div className="space-y-8">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">Miresevjen!</h1>
-            <p className="mt-1 text-slate-600">Vazhdo udhetimin tend te mesimit</p>
+            <h1 className="font-display text-3xl font-bold tracking-tight text-foreground">Miresevjen!</h1>
+            <p className="mt-1 text-muted-foreground">Vazhdo udhetimin tend te mesimit</p>
           </div>
           <StatGridSkeleton count={4} />
           <Card>
@@ -130,8 +130,8 @@ export default function StudentDashboard() {
       <div className="space-y-8">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Miresevjen!</h1>
-          <p className="text-slate-500 mt-1">Vazhdo udhetimin tend te mesimit</p>
+          <h1 className="font-display text-3xl font-bold tracking-tight text-foreground">Miresevjen!</h1>
+          <p className="text-muted-foreground mt-1">Vazhdo udhetimin tend te mesimit</p>
         </div>
 
         {/* Course Completion Celebration */}
@@ -148,7 +148,7 @@ export default function StudentDashboard() {
                 </div>
                 <Button
                   variant="secondary"
-                  className="ml-auto bg-white text-green-600 hover:bg-green-50"
+                  className="ml-auto bg-card text-success hover:bg-success/10"
                   onClick={() => router.push('/student/certificates')}
                 >
                   Shiko Certifikatat
@@ -171,7 +171,7 @@ export default function StudentDashboard() {
                   </p>
                   <div className="mt-4 h-2 w-64 bg-indigo-400 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-white rounded-full transition-all"
+                      className="h-full bg-card rounded-full transition-all"
                       style={{ width: `${continueLearning.progressPercent}%` }}
                     />
                   </div>
@@ -179,7 +179,7 @@ export default function StudentDashboard() {
                 <Button
                   variant="secondary"
                   size="lg"
-                  className="bg-white text-indigo-600 hover:bg-indigo-50"
+                  className="bg-card text-primary hover:bg-primary/10"
                   onClick={() => {
                     if (continueLearning.nextLessonId) {
                       router.push(`/student/courses/${continueLearning.courseId}/learn/${continueLearning.nextLessonId}`);
@@ -196,11 +196,11 @@ export default function StudentDashboard() {
 
         {/* No Enrollments CTA */}
         {!continueLearning && enrollments.length === 0 && (
-          <Card className="bg-gradient-to-r from-slate-100 to-slate-50 border-dashed">
+          <Card className="bg-gradient-to-r from-muted to-muted/40 border-dashed">
             <CardContent className="p-8 text-center">
-              <GraduationCap className="h-12 w-12 text-slate-400 mx-auto mb-4" />
-              <h2 className="text-xl font-semibold text-slate-900 mb-2">Fillo udhetimin tend</h2>
-              <p className="text-slate-500 mb-4">
+              <GraduationCap className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h2 className="text-xl font-semibold text-foreground mb-2">Fillo udhetimin tend</h2>
+              <p className="text-muted-foreground mb-4">
                 Nuk je i regjistruar ne asnje kurs ende. Shfleto kurset tona dhe fillo te mesosh sot!
               </p>
               <Button onClick={() => router.push('/courses')}>
@@ -262,7 +262,7 @@ export default function StudentDashboard() {
             </CardHeader>
             <CardContent>
               {filteredEnrollments.length === 0 ? (
-                <div className="text-center py-8 text-slate-500">
+                <div className="text-center py-8 text-muted-foreground">
                   Asnje kurs ne kete kategori
                 </div>
               ) : (
@@ -294,14 +294,14 @@ export default function StudentDashboard() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-5 w-5 text-slate-400" />
+                <Calendar className="h-5 w-5 text-muted-foreground" />
                 Afatet e Ardhshme
               </CardTitle>
             </CardHeader>
             <CardContent>
               {deadlines.length === 0 ? (
-                <div className="text-center py-8 text-slate-500">
-                  <FileText className="h-10 w-10 mx-auto mb-3 text-slate-300" />
+                <div className="text-center py-8 text-muted-foreground">
+                  <FileText className="h-10 w-10 mx-auto mb-3 text-muted-foreground/50" />
                   <p>Asnje afat ne 7 ditet e ardhshme</p>
                 </div>
               ) : (
@@ -311,10 +311,10 @@ export default function StudentDashboard() {
                       key={deadline.id}
                       href={`/student/courses/${deadline.courseId}/learn/${deadline.lessonId}`}
                     >
-                      <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors">
+                      <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-slate-900 truncate">{deadline.title}</p>
-                          <p className="text-xs text-slate-500">{deadline.courseName}</p>
+                          <p className="text-sm font-medium text-foreground truncate">{deadline.title}</p>
+                          <p className="text-xs text-muted-foreground">{deadline.courseName}</p>
                         </div>
                         <Badge className={getDeadlineColor(deadline.dueDate)}>
                           {formatDistanceToNow(new Date(deadline.dueDate), { locale: sq, addSuffix: true })}
@@ -331,14 +331,14 @@ export default function StudentDashboard() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Video className="h-5 w-5 text-slate-400" />
+                <Video className="h-5 w-5 text-muted-foreground" />
                 Sesionet Live
               </CardTitle>
             </CardHeader>
             <CardContent>
               {liveSessions.length === 0 ? (
-                <div className="text-center py-8 text-slate-500">
-                  <Video className="h-10 w-10 mx-auto mb-3 text-slate-300" />
+                <div className="text-center py-8 text-muted-foreground">
+                  <Video className="h-10 w-10 mx-auto mb-3 text-muted-foreground/50" />
                   <p>Asnje sesion i planifikuar</p>
                 </div>
               ) : (
@@ -346,23 +346,23 @@ export default function StudentDashboard() {
                   {liveSessions.map((session) => (
                     <div
                       key={session.id}
-                      className="flex items-center justify-between p-3 rounded-lg bg-slate-50"
+                      className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
                     >
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-slate-900 truncate">{session.title}</p>
-                        <p className="text-xs text-slate-500">
+                        <p className="text-sm font-medium text-foreground truncate">{session.title}</p>
+                        <p className="text-xs text-muted-foreground">
                           {format(new Date(session.scheduledAt), 'dd MMM, HH:mm', { locale: sq })}
                         </p>
                       </div>
                       {session.status === 'LIVE' ? (
                         <Button
                           size="sm"
-                          className="bg-red-600 hover:bg-red-700"
+                          className="bg-destructive hover:bg-destructive/90"
                           onClick={() => router.push(`/student/live/${session.id}`)}
                         >
                           <span className="relative flex h-2 w-2 mr-2">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-card opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-card"></span>
                           </span>
                           Bashkohu
                         </Button>
@@ -384,16 +384,16 @@ export default function StudentDashboard() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Target className="h-5 w-5 text-slate-400" />
+                <Target className="h-5 w-5 text-muted-foreground" />
                 Kompetencat e Mia
               </CardTitle>
             </CardHeader>
             <CardContent>
               <CompetencyRadarChart data={competencies} />
-              <div className="flex justify-center gap-6 mt-4 text-sm text-slate-500">
+              <div className="flex justify-center gap-6 mt-4 text-sm text-muted-foreground">
                 {competencies.map((comp) => (
                   <div key={comp.category} className="text-center">
-                    <p className="font-medium text-slate-700">{comp.category}</p>
+                    <p className="font-medium text-foreground">{comp.category}</p>
                     <p>{comp.score}% ({comp.quizzesTaken} kuize)</p>
                   </div>
                 ))}

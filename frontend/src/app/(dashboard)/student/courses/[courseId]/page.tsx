@@ -71,7 +71,7 @@ export default function StudentCourseOverviewPage() {
     return (
       <DashboardLayout role="STUDENT">
         <div className="flex items-center justify-center min-h-[400px]">
-          <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
       </DashboardLayout>
     );
@@ -82,8 +82,8 @@ export default function StudentCourseOverviewPage() {
       <DashboardLayout role="STUDENT">
         <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
           <AlertCircle className="h-12 w-12 text-red-400 mb-4" />
-          <h2 className="text-lg font-semibold text-slate-900">Kursi nuk u gjet</h2>
-          <p className="text-slate-500 mt-1">
+          <h2 className="text-lg font-semibold text-foreground">Kursi nuk u gjet</h2>
+          <p className="text-muted-foreground mt-1">
             Nuk u arrit te ngarkohej ky kurs ose nuk jeni i regjistruar.
           </p>
           <Button className="mt-4" onClick={() => router.push('/student/courses')}>
@@ -103,8 +103,8 @@ export default function StudentCourseOverviewPage() {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div className="flex-1">
-            <h1 className="text-2xl font-bold text-slate-900">Permbledhje e Kursit</h1>
-            <p className="text-slate-500 mt-1">
+            <h1 className="text-2xl font-bold text-foreground">Permbledhje e Kursit</h1>
+            <p className="text-muted-foreground mt-1">
               {progress.completedLessons} nga {progress.totalLessons} mesime te perfunduara
             </p>
           </div>
@@ -120,8 +120,8 @@ export default function StudentCourseOverviewPage() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-slate-600">Progresi i Pergjithshem</span>
-              <span className="text-sm font-semibold text-slate-900">
+              <span className="text-sm font-medium text-muted-foreground">Progresi i Pergjithshem</span>
+              <span className="text-sm font-semibold text-foreground">
                 {Math.round(progress.overallProgress)}%
               </span>
             </div>
@@ -136,7 +136,7 @@ export default function StudentCourseOverviewPage() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-base">
-                    <span className="text-slate-400 mr-2">Moduli {moduleIndex + 1}</span>
+                    <span className="text-muted-foreground mr-2">Moduli {moduleIndex + 1}</span>
                     {module.title}
                   </CardTitle>
                   <Badge variant={module.completedLessons === module.totalLessons ? 'success' : 'secondary'}>
@@ -145,31 +145,31 @@ export default function StudentCourseOverviewPage() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="divide-y divide-slate-100">
+                <div className="divide-y divide-border">
                   {module.lessons.map((lesson, lessonIndex) => {
                     const Icon = LESSON_ICONS[lesson.type] || FileText;
                     return (
                       <button
                         key={lesson.id}
                         onClick={() => goToLesson(lesson.id)}
-                        className="w-full flex items-center gap-3 py-3 text-left hover:bg-slate-50 transition-colors rounded-lg px-2 -mx-2"
+                        className="w-full flex items-center gap-3 py-3 text-left hover:bg-muted/50 transition-colors rounded-lg px-2 -mx-2"
                       >
                         {lesson.isCompleted ? (
                           <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
                         ) : (
-                          <Circle className="h-5 w-5 text-slate-300 flex-shrink-0" />
+                          <Circle className="h-5 w-5 text-muted-foreground/60 flex-shrink-0" />
                         )}
-                        <Icon className="h-4 w-4 text-slate-400 flex-shrink-0" />
+                        <Icon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                         <span
                           className={cn(
                             'flex-1 text-sm',
-                            lesson.isCompleted ? 'text-slate-500' : 'text-slate-900'
+                            lesson.isCompleted ? 'text-muted-foreground' : 'text-foreground'
                           )}
                         >
                           {lessonIndex + 1}. {lesson.title}
                         </span>
                         {lesson.duration && (
-                          <span className="text-xs text-slate-400">
+                          <span className="text-xs text-muted-foreground">
                             {Math.ceil(lesson.duration / 60)} min
                           </span>
                         )}

@@ -91,8 +91,8 @@ export default function StudentCoursesPage() {
       <div className="space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Kurset e Mia</h1>
-          <p className="text-slate-500 mt-1">
+          <h1 className="text-2xl font-bold text-foreground">Kurset e Mia</h1>
+          <p className="text-muted-foreground mt-1">
             Vazhdo mesimin ose rishiko kurset e perfunduara
           </p>
         </div>
@@ -101,34 +101,34 @@ export default function StudentCoursesPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card>
             <CardContent className="p-4 flex items-center gap-4">
-              <div className="h-12 w-12 rounded-full bg-indigo-100 flex items-center justify-center">
-                <PlayCircle className="h-6 w-6 text-indigo-600" />
+              <div className="h-12 w-12 rounded-full bg-primary/15 flex items-center justify-center">
+                <PlayCircle className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-slate-900">{activeCount}</p>
-                <p className="text-sm text-slate-500">Kurse Aktive</p>
+                <p className="text-2xl font-bold text-foreground">{activeCount}</p>
+                <p className="text-sm text-muted-foreground">Kurse Aktive</p>
               </div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-4 flex items-center gap-4">
-              <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center">
-                <CheckCircle className="h-6 w-6 text-green-600" />
+              <div className="h-12 w-12 rounded-full bg-success/15 flex items-center justify-center">
+                <CheckCircle className="h-6 w-6 text-success" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-slate-900">{completedCount}</p>
-                <p className="text-sm text-slate-500">Kurse te Perfunduara</p>
+                <p className="text-2xl font-bold text-foreground">{completedCount}</p>
+                <p className="text-sm text-muted-foreground">Kurse te Perfunduara</p>
               </div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-4 flex items-center gap-4">
-              <div className="h-12 w-12 rounded-full bg-amber-100 flex items-center justify-center">
-                <Award className="h-6 w-6 text-amber-600" />
+              <div className="h-12 w-12 rounded-full bg-warning/15 flex items-center justify-center">
+                <Award className="h-6 w-6 text-warning" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-slate-900">{completedCount}</p>
-                <p className="text-sm text-slate-500">Certifikata</p>
+                <p className="text-2xl font-bold text-foreground">{completedCount}</p>
+                <p className="text-sm text-muted-foreground">Certifikata</p>
               </div>
             </CardContent>
           </Card>
@@ -137,7 +137,7 @@ export default function StudentCoursesPage() {
         {/* Filters */}
         <div className="flex flex-wrap items-center gap-4">
           <div className="relative flex-1 min-w-[200px] max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Kerko kurse..."
               value={searchQuery}
@@ -238,24 +238,24 @@ function EmptyState({ hasFilters }: EmptyStateProps) {
 
   return (
     <div className="text-center py-12">
-      <div className="mx-auto w-24 h-24 rounded-full bg-slate-100 flex items-center justify-center mb-4">
-        <BookOpen className="h-12 w-12 text-slate-400" />
+      <div className="mx-auto w-24 h-24 rounded-full bg-muted flex items-center justify-center mb-4">
+        <BookOpen className="h-12 w-12 text-muted-foreground" />
       </div>
       {hasFilters ? (
         <>
-          <h3 className="text-lg font-semibold text-slate-900">
+          <h3 className="text-lg font-semibold text-foreground">
             Asnje kurs i gjetur
           </h3>
-          <p className="text-slate-500 mt-1">
+          <p className="text-muted-foreground mt-1">
             Provo te ndryshosh filtrat e kerkimit.
           </p>
         </>
       ) : (
         <>
-          <h3 className="text-lg font-semibold text-slate-900">
+          <h3 className="text-lg font-semibold text-foreground">
             Nuk ke kurse te regjistruara
           </h3>
-          <p className="text-slate-500 mt-1">
+          <p className="text-muted-foreground mt-1">
             Eksploro kurset tona dhe fillo te mesosh sot.
           </p>
           <Button className="mt-4" onClick={() => router.push('/courses')}>

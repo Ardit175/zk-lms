@@ -110,7 +110,7 @@ export default function CourseReviewPage() {
     return (
       <DashboardLayout role="ADMIN">
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
       </DashboardLayout>
     );
@@ -120,7 +120,7 @@ export default function CourseReviewPage() {
     return (
       <DashboardLayout role="ADMIN">
         <div className="text-center py-12">
-          <p className="text-slate-600">Kursi nuk u gjet</p>
+          <p className="text-muted-foreground">Kursi nuk u gjet</p>
           <Button className="mt-4" onClick={() => router.push('/admin/courses')}>
             Kthehu te Kurset
           </Button>
@@ -144,12 +144,12 @@ export default function CourseReviewPage() {
           </Button>
           <div className="flex-1">
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold text-slate-900">{course.title}</h1>
+              <h1 className="text-2xl font-bold text-foreground">{course.title}</h1>
               <Badge variant={course.status === 'PENDING_REVIEW' ? 'warning' : 'default'}>
                 {course.status === 'PENDING_REVIEW' ? 'Ne Pritje' : course.status}
               </Badge>
             </div>
-            <p className="text-slate-500 mt-1">Rishikimi i kursit</p>
+            <p className="text-muted-foreground mt-1">Rishikimi i kursit</p>
           </div>
           {course.status === 'PENDING_REVIEW' && (
             <div className="flex gap-3">
@@ -190,27 +190,27 @@ export default function CourseReviewPage() {
                   </div>
                 )}
                 <div>
-                  <h3 className="text-sm font-medium text-slate-500 mb-1">Pershkrimi</h3>
-                  <p className="text-slate-700">{course.description}</p>
+                  <h3 className="text-sm font-medium text-muted-foreground mb-1">Pershkrimi</h3>
+                  <p className="text-foreground">{course.description}</p>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="bg-slate-50 rounded-lg p-3">
-                    <p className="text-sm text-slate-500">Niveli</p>
-                    <p className="font-medium text-slate-900">{LEVEL_LABELS[course.level]}</p>
+                  <div className="bg-muted/50 rounded-lg p-3">
+                    <p className="text-sm text-muted-foreground">Niveli</p>
+                    <p className="font-medium text-foreground">{LEVEL_LABELS[course.level]}</p>
                   </div>
-                  <div className="bg-slate-50 rounded-lg p-3">
-                    <p className="text-sm text-slate-500">Kategoria</p>
-                    <p className="font-medium text-slate-900">
+                  <div className="bg-muted/50 rounded-lg p-3">
+                    <p className="text-sm text-muted-foreground">Kategoria</p>
+                    <p className="font-medium text-foreground">
                       {course.category?.name || 'Pa kategori'}
                     </p>
                   </div>
-                  <div className="bg-slate-50 rounded-lg p-3">
-                    <p className="text-sm text-slate-500">Module</p>
-                    <p className="font-medium text-slate-900">{course.modules.length}</p>
+                  <div className="bg-muted/50 rounded-lg p-3">
+                    <p className="text-sm text-muted-foreground">Module</p>
+                    <p className="font-medium text-foreground">{course.modules.length}</p>
                   </div>
-                  <div className="bg-slate-50 rounded-lg p-3">
-                    <p className="text-sm text-slate-500">Mesime</p>
-                    <p className="font-medium text-slate-900">{totalLessons}</p>
+                  <div className="bg-muted/50 rounded-lg p-3">
+                    <p className="text-sm text-muted-foreground">Mesime</p>
+                    <p className="font-medium text-foreground">{totalLessons}</p>
                   </div>
                 </div>
               </CardContent>
@@ -224,35 +224,35 @@ export default function CourseReviewPage() {
               <CardContent>
                 <div className="space-y-4">
                   {course.modules.map((module, moduleIndex) => (
-                    <div key={module.id} className="border border-slate-200 rounded-lg">
-                      <div className="p-4 bg-slate-50 border-b border-slate-200">
+                    <div key={module.id} className="border border-border rounded-lg">
+                      <div className="p-4 bg-muted/50 border-b border-border">
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium text-slate-500">
+                          <span className="text-sm font-medium text-muted-foreground">
                             Moduli {moduleIndex + 1}
                           </span>
-                          <h3 className="font-semibold text-slate-900">{module.title}</h3>
-                          <span className="text-sm text-slate-500 ml-auto">
+                          <h3 className="font-semibold text-foreground">{module.title}</h3>
+                          <span className="text-sm text-muted-foreground ml-auto">
                             {module.lessons.length} mesime
                           </span>
                         </div>
                       </div>
-                      <div className="divide-y divide-slate-100">
+                      <div className="divide-y divide-border">
                         {module.lessons.map((lesson, lessonIndex) => {
                           const Icon = LESSON_TYPE_ICONS[lesson.type as keyof typeof LESSON_TYPE_ICONS] || FileText;
                           return (
                             <div
                               key={lesson.id}
-                              className="p-3 flex items-center gap-3 hover:bg-slate-50"
+                              className="p-3 flex items-center gap-3 hover:bg-muted/50"
                             >
-                              <Icon className="h-4 w-4 text-slate-400 flex-shrink-0" />
-                              <span className="text-sm text-slate-700 flex-1">
+                              <Icon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                              <span className="text-sm text-foreground flex-1">
                                 {lessonIndex + 1}. {lesson.title}
                               </span>
-                              <span className="text-xs text-slate-500">
+                              <span className="text-xs text-muted-foreground">
                                 {lesson.type}
                               </span>
                               {lesson.duration && (
-                                <span className="text-xs text-slate-400">
+                                <span className="text-xs text-muted-foreground">
                                   {Math.floor(lesson.duration / 60)}:{String(lesson.duration % 60).padStart(2, '0')}
                                 </span>
                               )}
@@ -290,22 +290,22 @@ export default function CourseReviewPage() {
                       className="h-16 w-16 rounded-full object-cover"
                     />
                   ) : (
-                    <div className="h-16 w-16 rounded-full bg-slate-200 flex items-center justify-center">
-                      <User className="h-8 w-8 text-slate-500" />
+                    <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center">
+                      <User className="h-8 w-8 text-muted-foreground" />
                     </div>
                   )}
                   <div>
-                    <p className="font-semibold text-slate-900">
+                    <p className="font-semibold text-foreground">
                       {course.instructor.firstName} {course.instructor.lastName}
                     </p>
-                    <p className="text-sm text-slate-500 flex items-center gap-1">
+                    <p className="text-sm text-muted-foreground flex items-center gap-1">
                       <Mail className="h-3 w-3" />
                       {course.instructor.email}
                     </p>
                   </div>
                 </div>
                 {course.instructor.instructorProfile?.bio && (
-                  <p className="text-sm text-slate-600 mb-3">
+                  <p className="text-sm text-muted-foreground mb-3">
                     {course.instructor.instructorProfile.bio}
                   </p>
                 )}
@@ -326,21 +326,21 @@ export default function CourseReviewPage() {
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-slate-500 flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground flex items-center gap-2">
                     <BookOpen className="h-4 w-4" />
                     Module
                   </span>
                   <span className="font-medium">{course.modules.length}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-slate-500 flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground flex items-center gap-2">
                     <FileText className="h-4 w-4" />
                     Mesime
                   </span>
                   <span className="font-medium">{totalLessons}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-slate-500 flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground flex items-center gap-2">
                     <Clock className="h-4 w-4" />
                     Kohezgjatja Totale
                   </span>
@@ -368,7 +368,7 @@ export default function CourseReviewPage() {
               value={feedback}
               onChange={(e) => setFeedback(e.target.value)}
               placeholder="Pershkruani ndryshimet e nevojshme..."
-              className="w-full h-32 p-3 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+              className="w-full h-32 p-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring resize-none"
             />
           </div>
           <DialogFooter>

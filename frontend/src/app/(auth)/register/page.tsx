@@ -12,6 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useAuthStore, getRedirectPath } from '@/stores/auth-store';
 import { registerSchema, RegisterInput } from '@/lib/validations/auth';
 import { al } from '@/lib/i18n/al';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { Loader2, GraduationCap, BookOpen } from 'lucide-react';
 
 function RegisterForm() {
@@ -61,14 +62,18 @@ function RegisterForm() {
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-slate-50 px-4 py-12">
-      {/* subtle dot pattern */}
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,theme(colors.slate.200)_1px,transparent_0)] [background-size:24px_24px]" />
-      <Card className="relative w-full max-w-md shadow-lg">
+    <div className="relative flex min-h-screen items-center justify-center bg-background px-4 py-12">
+      {/* animated gradient mesh + dot grid */}
+      <div className="mesh-bg" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,hsl(var(--border))_1px,transparent_0)] [background-size:24px_24px] opacity-40" />
+      <div className="absolute right-4 top-4 z-10">
+        <ThemeToggle />
+      </div>
+      <Card className="relative w-full max-w-md shadow-xl">
         <CardHeader className="text-center">
           <Link
             href="/"
-            className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-sm shadow-indigo-200"
+            className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-chart-5 text-white shadow-sm shadow-primary/30"
           >
             <GraduationCap className="h-6 w-6" />
           </Link>
@@ -78,7 +83,7 @@ function RegisterForm() {
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             {serverError && (
-              <div className="rounded-md bg-red-50 p-3 text-sm text-red-600">
+              <div className="rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-sm text-destructive">
                 {serverError}
               </div>
             )}
@@ -90,10 +95,10 @@ function RegisterForm() {
                   id="firstName"
                   placeholder="Emri"
                   {...register('firstName')}
-                  className={errors.firstName ? 'border-red-500' : ''}
+                  className={errors.firstName ? 'border-destructive' : ''}
                 />
                 {errors.firstName && (
-                  <p className="text-sm text-red-500">{errors.firstName.message}</p>
+                  <p className="text-sm text-destructive">{errors.firstName.message}</p>
                 )}
               </div>
               <div className="space-y-2">
@@ -102,10 +107,10 @@ function RegisterForm() {
                   id="lastName"
                   placeholder="Mbiemri"
                   {...register('lastName')}
-                  className={errors.lastName ? 'border-red-500' : ''}
+                  className={errors.lastName ? 'border-destructive' : ''}
                 />
                 {errors.lastName && (
-                  <p className="text-sm text-red-500">{errors.lastName.message}</p>
+                  <p className="text-sm text-destructive">{errors.lastName.message}</p>
                 )}
               </div>
             </div>
@@ -117,10 +122,10 @@ function RegisterForm() {
                 type="email"
                 placeholder="email@shembull.com"
                 {...register('email')}
-                className={errors.email ? 'border-red-500' : ''}
+                className={errors.email ? 'border-destructive' : ''}
               />
               {errors.email && (
-                <p className="text-sm text-red-500">{errors.email.message}</p>
+                <p className="text-sm text-destructive">{errors.email.message}</p>
               )}
             </div>
 
@@ -131,10 +136,10 @@ function RegisterForm() {
                 type="password"
                 placeholder="Krijoni nje fjalekalim"
                 {...register('password')}
-                className={errors.password ? 'border-red-500' : ''}
+                className={errors.password ? 'border-destructive' : ''}
               />
               {errors.password && (
-                <p className="text-sm text-red-500">{errors.password.message}</p>
+                <p className="text-sm text-destructive">{errors.password.message}</p>
               )}
             </div>
 
@@ -145,10 +150,10 @@ function RegisterForm() {
                 type="password"
                 placeholder="Konfirmo fjalekalimin"
                 {...register('confirmPassword')}
-                className={errors.confirmPassword ? 'border-red-500' : ''}
+                className={errors.confirmPassword ? 'border-destructive' : ''}
               />
               {errors.confirmPassword && (
-                <p className="text-sm text-red-500">{errors.confirmPassword.message}</p>
+                <p className="text-sm text-destructive">{errors.confirmPassword.message}</p>
               )}
             </div>
 
@@ -158,32 +163,32 @@ function RegisterForm() {
                 <button
                   type="button"
                   onClick={() => setValue('role', 'STUDENT')}
-                  className={`rounded-lg border-2 p-4 text-center transition-colors ${
+                  className={`press rounded-xl border-2 p-4 text-center transition-colors ${
                     selectedRole === 'STUDENT'
-                      ? 'border-indigo-600 bg-indigo-50 text-indigo-600'
-                      : 'border-slate-200 hover:border-slate-300'
+                      ? 'border-primary bg-primary/10 text-primary'
+                      : 'border-border text-foreground hover:border-primary/40'
                   }`}
                 >
                   <GraduationCap className="h-6 w-6 mx-auto mb-2" />
                   <div className="font-medium">Mesoj</div>
-                  <div className="text-sm text-slate-500">Si student</div>
+                  <div className="text-sm text-muted-foreground">Si student</div>
                 </button>
                 <button
                   type="button"
                   onClick={() => setValue('role', 'INSTRUCTOR')}
-                  className={`rounded-lg border-2 p-4 text-center transition-colors ${
+                  className={`press rounded-xl border-2 p-4 text-center transition-colors ${
                     selectedRole === 'INSTRUCTOR'
-                      ? 'border-indigo-600 bg-indigo-50 text-indigo-600'
-                      : 'border-slate-200 hover:border-slate-300'
+                      ? 'border-primary bg-primary/10 text-primary'
+                      : 'border-border text-foreground hover:border-primary/40'
                   }`}
                 >
                   <BookOpen className="h-6 w-6 mx-auto mb-2" />
                   <div className="font-medium">Mesoj te tjeret</div>
-                  <div className="text-sm text-slate-500">Si instruktor</div>
+                  <div className="text-sm text-muted-foreground">Si instruktor</div>
                 </button>
               </div>
               {errors.role && (
-                <p className="text-sm text-red-500">{errors.role.message}</p>
+                <p className="text-sm text-destructive">{errors.role.message}</p>
               )}
             </div>
 
@@ -198,9 +203,9 @@ function RegisterForm() {
               )}
             </Button>
           </form>
-          <p className="mt-6 text-center text-sm text-slate-600">
+          <p className="mt-6 text-center text-sm text-muted-foreground">
             {al.auth.hasAccount}{' '}
-            <Link href="/login" className="text-indigo-600 hover:underline font-medium">
+            <Link href="/login" className="text-primary hover:underline font-medium">
               {al.auth.login}
             </Link>
           </p>
@@ -212,7 +217,7 @@ function RegisterForm() {
 
 export default function RegisterPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-slate-50">Duke ngarkuar...</div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-background text-muted-foreground">Duke ngarkuar...</div>}>
       <RegisterForm />
     </Suspense>
   );

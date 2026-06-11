@@ -110,8 +110,8 @@ export function NotificationsPage() {
     <div className="max-w-3xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Njoftimet</h1>
-          <p className="text-sm text-slate-500 mt-1">
+          <h1 className="text-2xl font-bold text-foreground">Njoftimet</h1>
+          <p className="text-sm text-muted-foreground mt-1">
             {unreadCount > 0
               ? `${unreadCount} njofitme te palexuara`
               : 'Te gjitha njoftimet jane lexuar'}
@@ -135,12 +135,12 @@ export function NotificationsPage() {
 
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
       ) : notifications.length === 0 ? (
         <Card>
-          <CardContent className="flex flex-col items-center justify-center py-12 text-slate-500">
-            <Bell className="h-12 w-12 mb-4 text-slate-300" />
+          <CardContent className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+            <Bell className="h-12 w-12 mb-4 text-muted-foreground/60" />
             <p className="text-lg font-medium">Asnje njoftim</p>
             <p className="text-sm mt-1">Do te shfaqen ketu njoftimet e reja</p>
           </CardContent>
@@ -151,8 +151,8 @@ export function NotificationsPage() {
             <Card
               key={notification.id}
               className={cn(
-                'cursor-pointer hover:bg-slate-50 transition-colors',
-                !notification.isRead && 'bg-indigo-50/50 border-indigo-200'
+                'cursor-pointer hover:bg-muted/50 transition-colors',
+                !notification.isRead && 'bg-primary/10 border-primary/30'
               )}
               onClick={() => handleMarkAsRead(notification)}
             >
@@ -162,15 +162,15 @@ export function NotificationsPage() {
                 </span>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2">
-                    <p className="font-medium text-slate-900">
+                    <p className="font-medium text-foreground">
                       {notification.title}
                     </p>
                     {!notification.isRead && (
-                      <span className="w-2.5 h-2.5 rounded-full bg-indigo-600 flex-shrink-0 mt-1.5" />
+                      <span className="w-2.5 h-2.5 rounded-full bg-primary flex-shrink-0 mt-1.5" />
                     )}
                   </div>
-                  <p className="text-sm text-slate-600 mt-1">{notification.body}</p>
-                  <p className="text-xs text-slate-400 mt-2">
+                  <p className="text-sm text-muted-foreground mt-1">{notification.body}</p>
+                  <p className="text-xs text-muted-foreground mt-2">
                     {formatDistanceToNow(new Date(notification.createdAt), {
                       addSuffix: true,
                       locale: sq,

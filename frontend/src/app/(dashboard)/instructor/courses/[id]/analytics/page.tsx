@@ -22,7 +22,7 @@ import {
 import { Button } from '@/components/ui/button';
 
 const chartLoading = () => (
-  <div className="h-[280px] animate-pulse rounded-lg bg-slate-100" />
+  <div className="h-[280px] animate-pulse rounded-lg bg-muted" />
 );
 const EnrollmentLineChart = dynamic(
   () => import('@/components/charts/EnrollmentLineChart').then((m) => m.EnrollmentLineChart),
@@ -118,7 +118,7 @@ export default function CourseAnalyticsPage() {
     return (
       <DashboardLayout role="INSTRUCTOR">
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
       </DashboardLayout>
     );
@@ -127,7 +127,7 @@ export default function CourseAnalyticsPage() {
   if (!analytics) {
     return (
       <DashboardLayout role="INSTRUCTOR">
-        <div className="text-center py-12 text-slate-500">
+        <div className="text-center py-12 text-muted-foreground">
           Nuk u gjet analitika
         </div>
       </DashboardLayout>
@@ -148,8 +148,8 @@ export default function CourseAnalyticsPage() {
               <ArrowLeft className="h-4 w-4 mr-2" />
               Kurset
             </Button>
-            <div className="h-6 w-px bg-slate-200" />
-            <h1 className="text-2xl font-bold text-slate-900">Analitika e Kursit</h1>
+            <div className="h-6 w-px bg-muted" />
+            <h1 className="text-2xl font-bold text-foreground">Analitika e Kursit</h1>
           </div>
           <div className="flex items-center gap-3">
             <Select value={days.toString()} onValueChange={(v) => setDays(parseInt(v))}>
@@ -174,12 +174,12 @@ export default function CourseAnalyticsPage() {
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center gap-4">
-                <div className="p-3 bg-indigo-100 rounded-lg">
-                  <Users className="h-6 w-6 text-indigo-600" />
+                <div className="p-3 bg-primary/15 rounded-lg">
+                  <Users className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm text-slate-500">Total Studente</p>
-                  <p className="text-2xl font-bold text-slate-900">
+                  <p className="text-sm text-muted-foreground">Total Studente</p>
+                  <p className="text-2xl font-bold text-foreground">
                     {analytics.overview.totalStudents}
                   </p>
                 </div>
@@ -190,12 +190,12 @@ export default function CourseAnalyticsPage() {
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center gap-4">
-                <div className="p-3 bg-green-100 rounded-lg">
-                  <Target className="h-6 w-6 text-green-600" />
+                <div className="p-3 bg-success/15 rounded-lg">
+                  <Target className="h-6 w-6 text-success" />
                 </div>
                 <div>
-                  <p className="text-sm text-slate-500">Norma Perfundimit</p>
-                  <p className="text-2xl font-bold text-slate-900">
+                  <p className="text-sm text-muted-foreground">Norma Perfundimit</p>
+                  <p className="text-2xl font-bold text-foreground">
                     {analytics.overview.completionRate}%
                   </p>
                 </div>
@@ -206,12 +206,12 @@ export default function CourseAnalyticsPage() {
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center gap-4">
-                <div className="p-3 bg-amber-100 rounded-lg">
-                  <Award className="h-6 w-6 text-amber-600" />
+                <div className="p-3 bg-warning/15 rounded-lg">
+                  <Award className="h-6 w-6 text-warning" />
                 </div>
                 <div>
-                  <p className="text-sm text-slate-500">Rezultat Mesatar Kuizesh</p>
-                  <p className="text-2xl font-bold text-slate-900">
+                  <p className="text-sm text-muted-foreground">Rezultat Mesatar Kuizesh</p>
+                  <p className="text-2xl font-bold text-foreground">
                     {analytics.overview.averageScore}%
                   </p>
                 </div>
@@ -226,9 +226,9 @@ export default function CourseAnalyticsPage() {
                   <Star className="h-6 w-6 text-purple-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-slate-500">Vleresim Mesatar</p>
+                  <p className="text-sm text-muted-foreground">Vleresim Mesatar</p>
                   <div className="flex items-center gap-2">
-                    <p className="text-2xl font-bold text-slate-900">
+                    <p className="text-2xl font-bold text-foreground">
                       {analytics.overview.averageRating.toFixed(1)}
                     </p>
                     <div className="flex">
@@ -239,7 +239,7 @@ export default function CourseAnalyticsPage() {
                             'h-4 w-4',
                             star <= Math.round(analytics.overview.averageRating)
                               ? 'text-amber-400 fill-amber-400'
-                              : 'text-slate-200'
+                              : 'text-muted-foreground/30'
                           )}
                         />
                       ))}
@@ -298,13 +298,13 @@ export default function CourseAnalyticsPage() {
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <Progress value={module.completionRate} className="flex-1 h-2" />
-                        <span className="text-sm text-slate-600 w-12">
+                        <span className="text-sm text-muted-foreground w-12">
                           {module.completionRate}%
                         </span>
                       </div>
                     </TableCell>
                     <TableCell className="text-right">
-                      <span className="flex items-center justify-end gap-1 text-slate-600">
+                      <span className="flex items-center justify-end gap-1 text-muted-foreground">
                         <Clock className="h-4 w-4" />
                         {module.avgTimeMinutes} min
                       </span>
@@ -328,17 +328,17 @@ export default function CourseAnalyticsPage() {
             </CardHeader>
             <CardContent>
               {analytics.hardestQuestions.length === 0 ? (
-                <p className="text-sm text-slate-500 text-center py-4">
+                <p className="text-sm text-muted-foreground text-center py-4">
                   Ende pa te dhena te mjaftueshme
                 </p>
               ) : (
                 <div className="space-y-4">
                   {analytics.hardestQuestions.map((q, i) => (
                     <div key={i} className="flex items-start gap-3">
-                      <span className="text-sm text-slate-400 mt-0.5">{i + 1}.</span>
+                      <span className="text-sm text-muted-foreground mt-0.5">{i + 1}.</span>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm text-slate-900 line-clamp-2">{q.questionText}</p>
-                        <p className="text-xs text-slate-500 mt-1">{q.quizTitle}</p>
+                        <p className="text-sm text-foreground line-clamp-2">{q.questionText}</p>
+                        <p className="text-xs text-muted-foreground mt-1">{q.quizTitle}</p>
                       </div>
                       <Badge variant="destructive" className="flex-shrink-0">
                         {q.wrongAnswerRate}% gabim
@@ -357,7 +357,7 @@ export default function CourseAnalyticsPage() {
             </CardHeader>
             <CardContent>
               {analytics.recentActivity.length === 0 ? (
-                <p className="text-sm text-slate-500 text-center py-4">
+                <p className="text-sm text-muted-foreground text-center py-4">
                   Asnje aktivitet i fundit
                 </p>
               ) : (
@@ -367,21 +367,21 @@ export default function CourseAnalyticsPage() {
                       <div
                         className={cn(
                           'p-2 rounded-full flex-shrink-0',
-                          activity.type === 'enrollment' ? 'bg-green-100' : 'bg-indigo-100'
+                          activity.type === 'enrollment' ? 'bg-success/15' : 'bg-primary/15'
                         )}
                       >
                         {activity.type === 'enrollment' ? (
-                          <UserPlus className="h-4 w-4 text-green-600" />
+                          <UserPlus className="h-4 w-4 text-success" />
                         ) : (
-                          <CheckCircle className="h-4 w-4 text-indigo-600" />
+                          <CheckCircle className="h-4 w-4 text-primary" />
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm text-slate-900">
+                        <p className="text-sm text-foreground">
                           <span className="font-medium">{activity.studentName}</span>{' '}
                           {activity.action}
                         </p>
-                        <p className="text-xs text-slate-500">
+                        <p className="text-xs text-muted-foreground">
                           {formatDistanceToNow(new Date(activity.timestamp), {
                             addSuffix: true,
                             locale: sq,

@@ -48,8 +48,8 @@ export function RichTextEditor({ content, onChange, placeholder = 'Shkruaj permb
       type="button"
       onClick={onClick}
       className={cn(
-        'p-2 rounded hover:bg-slate-100 transition-colors',
-        isActive && 'bg-slate-200 text-indigo-600'
+        'p-2 rounded hover:bg-muted transition-colors',
+        isActive && 'bg-muted text-primary'
       )}
     >
       {children}
@@ -57,8 +57,8 @@ export function RichTextEditor({ content, onChange, placeholder = 'Shkruaj permb
   );
 
   return (
-    <div className="border border-slate-200 rounded-lg overflow-hidden">
-      <div className="flex items-center gap-1 p-2 border-b border-slate-200 bg-slate-50">
+    <div className="border border-border rounded-lg overflow-hidden">
+      <div className="flex items-center gap-1 p-2 border-b border-border bg-muted/50">
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleBold().run()}
           isActive={editor.isActive('bold')}
@@ -71,7 +71,7 @@ export function RichTextEditor({ content, onChange, placeholder = 'Shkruaj permb
         >
           <Italic className="h-4 w-4" />
         </ToolbarButton>
-        <div className="w-px h-6 bg-slate-200 mx-1" />
+        <div className="w-px h-6 bg-muted mx-1" />
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
           isActive={editor.isActive('heading', { level: 2 })}
@@ -96,7 +96,7 @@ export function RichTextEditor({ content, onChange, placeholder = 'Shkruaj permb
         >
           <Code className="h-4 w-4" />
         </ToolbarButton>
-        <div className="w-px h-6 bg-slate-200 mx-1" />
+        <div className="w-px h-6 bg-muted mx-1" />
         <ToolbarButton onClick={() => editor.chain().focus().undo().run()}>
           <Undo className="h-4 w-4" />
         </ToolbarButton>

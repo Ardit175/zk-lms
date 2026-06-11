@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Clock,
   CheckCircle,
@@ -10,9 +11,12 @@ import {
   ChevronRight,
   RotateCcw,
   Trophy,
+  Check,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { CountUp } from '@/components/ui/count-up';
+import { Confetti } from '@/components/ui/confetti';
 import {
   quizzesApi,
   type QuizInfo,
@@ -147,7 +151,7 @@ export function QuizPlayer({ quizId, onComplete }: QuizPlayerProps) {
   if (state === 'LOADING') {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -163,17 +167,17 @@ export function QuizPlayer({ quizId, onComplete }: QuizPlayerProps) {
     const hasAnswer = currentAnswer?.selectedOptionId || currentAnswer?.textAnswer;
 
     return (
-      <div className="bg-white rounded-lg shadow-sm">
+      <div className="bg-card rounded-lg shadow-sm">
         {/* Header */}
-        <div className="border-b border-slate-200 p-4 flex items-center justify-between">
-          <div className="text-sm text-slate-500">
+        <div className="border-b border-border p-4 flex items-center justify-between">
+          <div className="text-sm text-muted-foreground">
             Pyetja {currentIndex + 1} nga {questions.length}
           </div>
           {timeRemaining !== null && (
             <div
               className={cn(
                 'flex items-center gap-2 font-mono text-sm font-medium',
-                timeRemaining <= 30 ? 'text-red-600' : 'text-slate-700'
+                timeRemaining <= 30 ? 'text-destructive' : 'text-foreground'
               )}
             >
               <Clock className="h-4 w-4" />
@@ -183,24 +187,34 @@ export function QuizPlayer({ quizId, onComplete }: QuizPlayerProps) {
         </div>
 
         {/* Progress Bar */}
-        <div className="h-1 bg-slate-100">
+        <div className="h-1 bg-muted">
           <div
-            className="h-full bg-indigo-600 transition-all"
+            className="h-full bg-primary transition-all"
             style={{ width: `${((currentIndex + 1) / questions.length) * 100}%` }}
           />
         </div>
 
-        {/* Question Content */}
+        {/* Question Content — each question animates in as you advance */}
         <div className="p-6">
-          <QuestionCard
-            question={currentQuestion}
-            answer={currentAnswer}
-            onAnswer={(answer) => handleAnswer(currentQuestion.id, answer)}
-          />
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentQuestion.id}
+              initial={{ opacity: 0, x: 24 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -24 }}
+              transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <QuestionCard
+                question={currentQuestion}
+                answer={currentAnswer}
+                onAnswer={(answer) => handleAnswer(currentQuestion.id, answer)}
+              />
+            </motion.div>
+          </AnimatePresence>
         </div>
 
         {/* Footer */}
-        <div className="border-t border-slate-200 p-4 flex justify-end gap-3">
+        <div className="border-t border-border p-4 flex justify-end gap-3">
           {isLastQuestion ? (
             <Button onClick={handleSubmit} disabled={!hasAnswer || isSubmitting}>
               {isSubmitting ? (
@@ -250,33 +264,33 @@ function IntroScreen({ quizInfo, onStart, isStarting }: IntroScreenProps) {
   return (
     <Card>
       <CardContent className="p-8 text-center">
-        <div className="mx-auto w-16 h-16 rounded-full bg-indigo-100 flex items-center justify-center mb-6">
-          <AlertCircle className="h-8 w-8 text-indigo-600" />
+        <div className="mx-auto w-16 h-16 rounded-full bg-primary/15 flex items-center justify-center mb-6">
+          <AlertCircle className="h-8 w-8 text-primary" />
         </div>
 
-        <h2 className="text-2xl font-bold text-slate-900 mb-2">{quizInfo.title}</h2>
+        <h2 className="text-2xl font-bold text-foreground mb-2">{quizInfo.title}</h2>
         {quizInfo.description && (
-          <p className="text-slate-500 mb-6">{quizInfo.description}</p>
+          <p className="text-muted-foreground mb-6">{quizInfo.description}</p>
         )}
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 max-w-2xl mx-auto">
-          <div className="bg-slate-50 rounded-lg p-4">
-            <p className="text-2xl font-bold text-slate-900">{quizInfo.questionCount}</p>
-            <p className="text-sm text-slate-500">Pyetje</p>
+          <div className="bg-muted/50 rounded-lg p-4">
+            <p className="text-2xl font-bold text-foreground">{quizInfo.questionCount}</p>
+            <p className="text-sm text-muted-foreground">Pyetje</p>
           </div>
-          <div className="bg-slate-50 rounded-lg p-4">
-            <p className="text-2xl font-bold text-slate-900">{quizInfo.passingScore}%</p>
-            <p className="text-sm text-slate-500">Per te Kaluar</p>
+          <div className="bg-muted/50 rounded-lg p-4">
+            <p className="text-2xl font-bold text-foreground">{quizInfo.passingScore}%</p>
+            <p className="text-sm text-muted-foreground">Per te Kaluar</p>
           </div>
-          <div className="bg-slate-50 rounded-lg p-4">
-            <p className="text-2xl font-bold text-slate-900">
+          <div className="bg-muted/50 rounded-lg p-4">
+            <p className="text-2xl font-bold text-foreground">
               {quizInfo.timeLimit ? `${Math.floor(quizInfo.timeLimit / 60)}min` : '∞'}
             </p>
-            <p className="text-sm text-slate-500">Koha</p>
+            <p className="text-sm text-muted-foreground">Koha</p>
           </div>
-          <div className="bg-slate-50 rounded-lg p-4">
-            <p className="text-2xl font-bold text-slate-900">{quizInfo.attemptsRemaining}</p>
-            <p className="text-sm text-slate-500">Tentativa</p>
+          <div className="bg-muted/50 rounded-lg p-4">
+            <p className="text-2xl font-bold text-foreground">{quizInfo.attemptsRemaining}</p>
+            <p className="text-sm text-muted-foreground">Tentativa</p>
           </div>
         </div>
 
@@ -286,7 +300,7 @@ function IntroScreen({ quizInfo, onStart, isStarting }: IntroScreenProps) {
             Fillo Kuizin
           </Button>
         ) : (
-          <p className="text-red-600 font-medium">
+          <p className="text-destructive font-medium">
             Ke perdorur te gjitha tentativat per kete kuiz.
           </p>
         )}
@@ -305,24 +319,28 @@ function QuestionCard({ question, answer, onAnswer }: QuestionCardProps) {
   if (question.type === 'TRUE_FALSE') {
     return (
       <div>
-        <h3 className="text-lg font-semibold text-slate-900 mb-6">
+        <h3 className="text-lg font-semibold text-foreground mb-6">
           {question.questionText}
         </h3>
         <div className="flex gap-4 justify-center">
-          {question.options.map((option) => (
-            <button
-              key={option.id}
-              onClick={() => onAnswer({ selectedOptionId: option.id })}
-              className={cn(
-                'w-32 h-24 rounded-lg border-2 text-lg font-semibold transition-all',
-                answer?.selectedOptionId === option.id
-                  ? 'border-indigo-600 bg-indigo-50 text-indigo-700'
-                  : 'border-slate-200 hover:border-slate-300 text-slate-700'
-              )}
-            >
-              {option.optionText}
-            </button>
-          ))}
+          {question.options.map((option) => {
+            const selected = answer?.selectedOptionId === option.id;
+            return (
+              <button
+                key={option.id}
+                onClick={() => onAnswer({ selectedOptionId: option.id })}
+                className={cn(
+                  'press relative h-24 w-32 rounded-xl border-2 text-lg font-semibold transition-all',
+                  selected
+                    ? 'border-primary bg-primary/10 text-primary shadow-sm shadow-primary/20'
+                    : 'border-border text-foreground hover:border-primary/40 hover:bg-accent/50'
+                )}
+              >
+                {option.optionText}
+                {selected && <SelectedTick />}
+              </button>
+            );
+          })}
         </div>
       </div>
     );
@@ -331,14 +349,14 @@ function QuestionCard({ question, answer, onAnswer }: QuestionCardProps) {
   if (question.type === 'SHORT_ANSWER') {
     return (
       <div>
-        <h3 className="text-lg font-semibold text-slate-900 mb-6">
+        <h3 className="text-lg font-semibold text-foreground mb-6">
           {question.questionText}
         </h3>
         <textarea
           value={answer?.textAnswer || ''}
           onChange={(e) => onAnswer({ textAnswer: e.target.value })}
           placeholder="Shkruaj pergjigjen tende ketu..."
-          className="w-full h-32 p-4 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+          className="w-full h-32 p-4 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring resize-none"
         />
       </div>
     );
@@ -346,35 +364,60 @@ function QuestionCard({ question, answer, onAnswer }: QuestionCardProps) {
 
   return (
     <div>
-      <h3 className="text-lg font-semibold text-slate-900 mb-6">
+      <h3 className="text-lg font-semibold text-foreground mb-6">
         {question.questionText}
       </h3>
       <div className="space-y-3">
-        {question.options.map((option) => (
-          <button
-            key={option.id}
-            onClick={() => onAnswer({ selectedOptionId: option.id })}
-            className={cn(
-              'w-full p-4 rounded-lg border-2 text-left transition-all',
-              answer?.selectedOptionId === option.id
-                ? 'border-indigo-600 bg-indigo-50'
-                : 'border-slate-200 hover:border-slate-300'
-            )}
-          >
-            <span
+        {question.options.map((option, i) => {
+          const selected = answer?.selectedOptionId === option.id;
+          return (
+            <motion.button
+              key={option.id}
+              onClick={() => onAnswer({ selectedOptionId: option.id })}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.25, delay: i * 0.06 }}
               className={cn(
-                'font-medium',
-                answer?.selectedOptionId === option.id
-                  ? 'text-indigo-700'
-                  : 'text-slate-700'
+                'press flex w-full items-center gap-3 rounded-xl border-2 p-4 text-left transition-all',
+                selected
+                  ? 'border-primary bg-primary/10 shadow-sm shadow-primary/20'
+                  : 'border-border hover:border-primary/40 hover:bg-accent/50'
               )}
             >
-              {option.optionText}
-            </span>
-          </button>
-        ))}
+              <span
+                className={cn(
+                  'flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 transition-colors',
+                  selected ? 'border-primary bg-primary text-primary-foreground' : 'border-muted-foreground/40'
+                )}
+              >
+                {selected && (
+                  <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 500, damping: 20 }}>
+                    <Check className="h-4 w-4" />
+                  </motion.span>
+                )}
+              </span>
+              <span className={cn('font-medium', selected ? 'text-primary' : 'text-foreground')}>
+                {option.optionText}
+              </span>
+            </motion.button>
+          );
+        })}
       </div>
     </div>
+  );
+}
+
+/** Animated tick badge for the True/False tiles. */
+function SelectedTick() {
+  return (
+    <motion.span
+      initial={{ scale: 0 }}
+      animate={{ scale: 1 }}
+      transition={{ type: 'spring', stiffness: 500, damping: 18 }}
+      className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-primary-foreground"
+    >
+      <Check className="h-3 w-3" />
+    </motion.span>
   );
 }
 
@@ -391,36 +434,45 @@ interface ReviewScreenProps {
 }
 
 function ReviewScreen({ results, attemptsRemaining, onRetry, onFinish }: ReviewScreenProps) {
+  // Celebrate a pass — a bigger burst for a high score.
+  const celebrate = results.isPassed;
   return (
     <div className="space-y-6">
+      {celebrate && <Confetti count={results.score >= 90 ? 220 : 150} />}
       {/* Score Card */}
-      <Card>
+      <Card className="overflow-hidden border-gradient">
         <CardContent className="p-8 text-center">
-          <div
+          <motion.div
+            initial={{ scale: 0, rotate: -25 }}
+            animate={{ scale: 1, rotate: 0 }}
+            transition={{ type: 'spring', stiffness: 260, damping: 18, delay: 0.1 }}
             className={cn(
-              'mx-auto w-20 h-20 rounded-full flex items-center justify-center mb-4',
-              results.isPassed ? 'bg-green-100' : 'bg-red-100'
+              'mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full',
+              results.isPassed ? 'bg-success/15' : 'bg-destructive/15'
             )}
           >
             {results.isPassed ? (
-              <Trophy className="h-10 w-10 text-green-600" />
+              <Trophy className="h-10 w-10 text-success" />
             ) : (
-              <XCircle className="h-10 w-10 text-red-600" />
+              <XCircle className="h-10 w-10 text-destructive" />
             )}
-          </div>
+          </motion.div>
 
-          <h2 className="text-3xl font-bold text-slate-900 mb-2">
-            {results.score}%
+          <h2 className="font-display text-5xl font-bold tracking-tight text-foreground">
+            <CountUp value={results.score} duration={1400} suffix="%" />
           </h2>
-          <p
+          <motion.p
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
             className={cn(
-              'text-lg font-medium mb-4',
-              results.isPassed ? 'text-green-600' : 'text-red-600'
+              'mb-4 mt-2 text-lg font-medium',
+              results.isPassed ? 'text-success' : 'text-destructive'
             )}
           >
             {results.isPassed ? 'Urime! Kaluat kuizin!' : 'Nuk kaluat. Provoni perseri.'}
-          </p>
-          <p className="text-sm text-slate-500">
+          </motion.p>
+          <p className="text-sm text-muted-foreground">
             Nota kaluese: {results.passingScore}%
           </p>
 
@@ -448,7 +500,7 @@ function ReviewScreen({ results, attemptsRemaining, onRetry, onFinish }: ReviewS
       {/* Results Breakdown */}
       <Card>
         <CardContent className="p-6">
-          <h3 className="font-semibold text-slate-900 mb-4">Rishikimi i Pergjigjeve</h3>
+          <h3 className="font-semibold text-foreground mb-4">Rishikimi i Pergjigjeve</h3>
           <div className="space-y-4">
             {results.results.map((result, index) => (
               <div
@@ -456,27 +508,27 @@ function ReviewScreen({ results, attemptsRemaining, onRetry, onFinish }: ReviewS
                 className={cn(
                   'p-4 rounded-lg border',
                   result.isCorrect
-                    ? 'border-green-200 bg-green-50'
-                    : 'border-red-200 bg-red-50'
+                    ? 'border-success/30 bg-success/10'
+                    : 'border-destructive/30 bg-destructive/10'
                 )}
               >
                 <div className="flex items-start gap-3">
                   {result.isCorrect ? (
-                    <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                    <CheckCircle className="h-5 w-5 text-success flex-shrink-0 mt-0.5" />
                   ) : (
-                    <XCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+                    <XCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
                   )}
                   <div className="flex-1">
-                    <p className="font-medium text-slate-900 mb-2">
+                    <p className="font-medium text-foreground mb-2">
                       {index + 1}. {result.questionText}
                     </p>
                     <div className="text-sm space-y-1">
                       <p>
-                        <span className="text-slate-500">Pergjigja jote:</span>{' '}
+                        <span className="text-muted-foreground">Pergjigja jote:</span>{' '}
                         <span
                           className={cn(
                             'font-medium',
-                            result.isCorrect ? 'text-green-700' : 'text-red-700'
+                            result.isCorrect ? 'text-success' : 'text-destructive'
                           )}
                         >
                           {result.studentAnswer || '(Pa pergjigjur)'}
@@ -484,20 +536,20 @@ function ReviewScreen({ results, attemptsRemaining, onRetry, onFinish }: ReviewS
                       </p>
                       {!result.isCorrect && (
                         <p>
-                          <span className="text-slate-500">Pergjigja e sakte:</span>{' '}
-                          <span className="font-medium text-green-700">
+                          <span className="text-muted-foreground">Pergjigja e sakte:</span>{' '}
+                          <span className="font-medium text-success">
                             {result.correctAnswer}
                           </span>
                         </p>
                       )}
                       {result.explanation && (
-                        <p className="text-slate-600 mt-2 p-2 bg-white/50 rounded">
+                        <p className="text-muted-foreground mt-2 p-2 bg-background/50 rounded">
                           <span className="font-medium">Shpjegim:</span> {result.explanation}
                         </p>
                       )}
                     </div>
                   </div>
-                  <div className="text-sm font-medium text-slate-500">
+                  <div className="text-sm font-medium text-muted-foreground">
                     {result.pointsEarned}/{result.maxPoints}
                   </div>
                 </div>

@@ -150,8 +150,8 @@ export default function InstructorCoursesPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">Kurset e Mia</h1>
-            <p className="text-slate-500 mt-1">Menaxho dhe krijo kurse te reja</p>
+            <h1 className="text-2xl font-bold text-foreground">Kurset e Mia</h1>
+            <p className="text-muted-foreground mt-1">Menaxho dhe krijo kurse te reja</p>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
@@ -186,7 +186,7 @@ export default function InstructorCoursesPage() {
                       id="description"
                       rows={3}
                       placeholder="Pershkruaj kursin tend..."
-                      className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full rounded-md border border-input bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                       {...register('description')}
                     />
                     {errors.description && (
@@ -198,7 +198,7 @@ export default function InstructorCoursesPage() {
                       <Label htmlFor="category">Kategoria</Label>
                       <select
                         id="category"
-                        className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        className="w-full rounded-md border border-input bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                         {...register('categoryId')}
                       >
                         <option value="">Zgjidh...</option>
@@ -213,7 +213,7 @@ export default function InstructorCoursesPage() {
                       <Label htmlFor="level">Niveli</Label>
                       <select
                         id="level"
-                        className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        className="w-full rounded-md border border-input bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                         {...register('level')}
                       >
                         <option value="BEGINNER">Fillestar</option>
@@ -246,7 +246,7 @@ export default function InstructorCoursesPage() {
         {/* Filters */}
         <div className="flex flex-wrap items-center gap-4">
           <div className="relative flex-1 min-w-[200px] max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Kerko kurse..."
               value={searchQuery}
@@ -257,7 +257,7 @@ export default function InstructorCoursesPage() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as Course['status'] | 'ALL')}
-            className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="rounded-md border border-input bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           >
             <option value="ALL">Te gjithe statuset</option>
             <option value="DRAFT">Draft</option>
@@ -268,7 +268,7 @@ export default function InstructorCoursesPage() {
           <select
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
-            className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="rounded-md border border-input bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           >
             <option value="ALL">Te gjitha kategorite</option>
             {categories.map((cat) => (
@@ -310,7 +310,7 @@ export default function InstructorCoursesPage() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 bg-white/90 backdrop-blur-sm hover:bg-white"
+                        className="h-8 w-8 bg-card/90 backdrop-blur-sm hover:bg-card"
                       >
                         <MoreVertical className="h-4 w-4" />
                       </Button>
@@ -343,7 +343,7 @@ export default function InstructorCoursesPage() {
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
                         onClick={() => handleArchive(course.id)}
-                        className="text-red-600"
+                        className="text-destructive"
                       >
                         <Archive className="h-4 w-4 mr-2" />
                         Arkivo
@@ -369,18 +369,18 @@ interface EmptyStateProps {
 function EmptyState({ hasFilters, onCreateClick }: EmptyStateProps) {
   return (
     <div className="text-center py-12">
-      <div className="mx-auto w-24 h-24 rounded-full bg-slate-100 flex items-center justify-center mb-4">
-        <BookOpen className="h-12 w-12 text-slate-400" />
+      <div className="mx-auto w-24 h-24 rounded-full bg-muted flex items-center justify-center mb-4">
+        <BookOpen className="h-12 w-12 text-muted-foreground" />
       </div>
       {hasFilters ? (
         <>
-          <h3 className="text-lg font-semibold text-slate-900">Asnje kurs i gjetur</h3>
-          <p className="text-slate-500 mt-1">Provo te ndrryshosh filtrat e kerkimit.</p>
+          <h3 className="text-lg font-semibold text-foreground">Asnje kurs i gjetur</h3>
+          <p className="text-muted-foreground mt-1">Provo te ndrryshosh filtrat e kerkimit.</p>
         </>
       ) : (
         <>
-          <h3 className="text-lg font-semibold text-slate-900">Krijo kursin tend te pare</h3>
-          <p className="text-slate-500 mt-1">
+          <h3 className="text-lg font-semibold text-foreground">Krijo kursin tend te pare</h3>
+          <p className="text-muted-foreground mt-1">
             Fillo te ndertosh permbajtje dhe te ndash dijen me te tjeret.
           </p>
           <Button className="mt-4" onClick={onCreateClick}>

@@ -31,9 +31,9 @@ import { cn } from '@/lib/utils';
 import { showSuccessToast, showErrorToast } from '@/lib/api';
 
 const ROLE_CONFIG = {
-  ADMIN: { label: 'Admin', icon: Shield, color: 'bg-red-100 text-red-700' },
-  INSTRUCTOR: { label: 'Instruktor', icon: BookOpen, color: 'bg-indigo-100 text-indigo-700' },
-  STUDENT: { label: 'Student', icon: GraduationCap, color: 'bg-green-100 text-green-700' },
+  ADMIN: { label: 'Admin', icon: Shield, color: 'bg-destructive/15 text-destructive' },
+  INSTRUCTOR: { label: 'Instruktor', icon: BookOpen, color: 'bg-primary/15 text-primary' },
+  STUDENT: { label: 'Student', icon: GraduationCap, color: 'bg-success/15 text-success' },
 };
 
 export default function AdminUsersPage() {
@@ -139,8 +139,8 @@ export default function AdminUsersPage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">Perdoruesit</h1>
-            <p className="text-slate-500 mt-1">Menaxho perdoruesit e platformes</p>
+            <h1 className="text-2xl font-bold text-foreground">Perdoruesit</h1>
+            <p className="text-muted-foreground mt-1">Menaxho perdoruesit e platformes</p>
           </div>
         </div>
 
@@ -149,7 +149,7 @@ export default function AdminUsersPage() {
           <CardContent className="p-4">
             <div className="flex flex-wrap items-center gap-4">
               <div className="relative flex-1 min-w-[200px] max-w-md">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Kerko sipas emrit ose emailit..."
                   value={searchQuery}
@@ -163,7 +163,7 @@ export default function AdminUsersPage() {
                   setRoleFilter(e.target.value);
                   setPagination((p) => ({ ...p, page: 1 }));
                 }}
-                className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="rounded-md border border-input bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
               >
                 <option value="ALL">Te gjitha rolet</option>
                 <option value="ADMIN">Admin</option>
@@ -176,7 +176,7 @@ export default function AdminUsersPage() {
                   setStatusFilter(e.target.value);
                   setPagination((p) => ({ ...p, page: 1 }));
                 }}
-                className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="rounded-md border border-input bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
               >
                 <option value="ALL">Te gjitha statuset</option>
                 <option value="active">Aktiv</option>
@@ -190,7 +190,7 @@ export default function AdminUsersPage() {
         <Card>
           <CardContent className="p-0">
             {isLoading ? (
-              <div className="divide-y divide-slate-100">
+              <div className="divide-y divide-border">
                 {Array.from({ length: 8 }).map((_, i) => (
                   <div key={i} className="flex items-center gap-4 px-6 py-4">
                     <Skeleton className="h-10 w-10 rounded-full" />
@@ -205,41 +205,41 @@ export default function AdminUsersPage() {
                 ))}
               </div>
             ) : users.length === 0 ? (
-              <div className="text-center py-16 text-slate-500">
+              <div className="text-center py-16 text-muted-foreground">
                 Nuk u gjeten perdorues
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="sticky top-0 z-10 bg-slate-50 border-b border-slate-200">
+                  <thead className="sticky top-0 z-10 bg-muted/50 border-b border-border">
                     <tr>
-                      <th className="text-left px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
+                      <th className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                         Perdoruesi
                       </th>
-                      <th className="text-left px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
+                      <th className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                         Roli
                       </th>
-                      <th className="text-left px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
+                      <th className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                         Statusi
                       </th>
-                      <th className="text-left px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
+                      <th className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                         Regjistruar
                       </th>
-                      <th className="text-left px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
+                      <th className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                         Aktiviteti
                       </th>
-                      <th className="text-right px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
+                      <th className="text-right px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                         Veprime
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody className="divide-y divide-border">
                     {users.map((user) => {
                       const roleConfig = ROLE_CONFIG[user.role];
                       return (
                         <tr
                           key={user.id}
-                          className="odd:bg-slate-50/50 transition-colors hover:bg-indigo-50/60"
+                          className="odd:bg-muted/50 transition-colors hover:bg-primary/10"
                         >
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
@@ -252,15 +252,15 @@ export default function AdminUsersPage() {
                                   className="h-10 w-10 rounded-full object-cover"
                                 />
                               ) : (
-                                <div className="h-10 w-10 rounded-full bg-slate-200 flex items-center justify-center">
-                                  <User className="h-5 w-5 text-slate-500" />
+                                <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
+                                  <User className="h-5 w-5 text-muted-foreground" />
                                 </div>
                               )}
                               <div>
-                                <p className="font-medium text-slate-900">
+                                <p className="font-medium text-foreground">
                                   {user.firstName} {user.lastName}
                                 </p>
-                                <p className="text-sm text-slate-500">{user.email}</p>
+                                <p className="text-sm text-muted-foreground">{user.email}</p>
                               </div>
                             </div>
                           </td>
@@ -280,10 +280,10 @@ export default function AdminUsersPage() {
                               {user.isActive ? 'Aktiv' : 'Joaktiv'}
                             </Badge>
                           </td>
-                          <td className="px-6 py-4 text-sm text-slate-500">
+                          <td className="px-6 py-4 text-sm text-muted-foreground">
                             {new Date(user.createdAt).toLocaleDateString('sq-AL')}
                           </td>
-                          <td className="px-6 py-4 text-sm text-slate-500">
+                          <td className="px-6 py-4 text-sm text-muted-foreground">
                             {user.role === 'INSTRUCTOR' ? (
                               <span>{user._count.coursesCreated} kurse</span>
                             ) : user.role === 'STUDENT' ? (
@@ -331,7 +331,7 @@ export default function AdminUsersPage() {
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem
                                   onClick={() => handleDelete(user.id)}
-                                  className="text-red-600"
+                                  className="text-destructive"
                                 >
                                   Fshi
                                 </DropdownMenuItem>
@@ -351,7 +351,7 @@ export default function AdminUsersPage() {
         {/* Pagination */}
         {pagination.totalPages > 1 && (
           <div className="flex items-center justify-between">
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-muted-foreground">
               Duke shfaqur {(pagination.page - 1) * pagination.limit + 1} -{' '}
               {Math.min(pagination.page * pagination.limit, pagination.total)} nga{' '}
               {pagination.total} perdorues
@@ -365,7 +365,7 @@ export default function AdminUsersPage() {
               >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
-              <span className="text-sm text-slate-700">
+              <span className="text-sm text-foreground">
                 Faqja {pagination.page} nga {pagination.totalPages}
               </span>
               <Button

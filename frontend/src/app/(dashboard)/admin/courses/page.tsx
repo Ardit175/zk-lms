@@ -101,12 +101,12 @@ export default function AdminCoursesPage() {
     <DashboardLayout role="ADMIN">
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Kurset</h1>
-          <p className="text-slate-500 mt-1">Menaxho dhe rishiko kurset e platformes</p>
+          <h1 className="text-2xl font-bold text-foreground">Kurset</h1>
+          <p className="text-muted-foreground mt-1">Menaxho dhe rishiko kurset e platformes</p>
         </div>
 
         {/* Status Tabs */}
-        <div className="flex gap-2 border-b border-slate-200 pb-2">
+        <div className="flex gap-2 border-b border-border pb-2">
           {statusTabs.map((tab) => (
             <button
               key={tab.value}
@@ -117,14 +117,14 @@ export default function AdminCoursesPage() {
               className={cn(
                 'px-4 py-2 text-sm font-medium rounded-t-lg transition-colors',
                 statusFilter === tab.value
-                  ? 'bg-indigo-100 text-indigo-700'
-                  : 'text-slate-600 hover:bg-slate-100',
-                tab.highlight && statusFilter !== tab.value && 'text-amber-600'
+                  ? 'bg-primary/15 text-primary'
+                  : 'text-muted-foreground hover:bg-muted',
+                tab.highlight && statusFilter !== tab.value && 'text-warning'
               )}
             >
               {tab.label}
               {tab.highlight && (
-                <span className="ml-2 px-1.5 py-0.5 text-xs bg-amber-100 text-amber-700 rounded">
+                <span className="ml-2 px-1.5 py-0.5 text-xs bg-warning/15 text-warning rounded">
                   !
                 </span>
               )}
@@ -134,7 +134,7 @@ export default function AdminCoursesPage() {
 
         {/* Search */}
         <div className="relative max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Kerko kurse..."
             value={searchQuery}
@@ -147,7 +147,7 @@ export default function AdminCoursesPage() {
         <Card>
           <CardContent className="p-0">
             {isLoading ? (
-              <div className="divide-y divide-slate-100">
+              <div className="divide-y divide-border">
                 {Array.from({ length: 8 }).map((_, i) => (
                   <div key={i} className="flex items-center gap-4 px-6 py-4">
                     <div className="flex-1 space-y-2">
@@ -162,59 +162,59 @@ export default function AdminCoursesPage() {
                 ))}
               </div>
             ) : courses.length === 0 ? (
-              <div className="text-center py-16 text-slate-500">
+              <div className="text-center py-16 text-muted-foreground">
                 Nuk u gjeten kurse
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="sticky top-0 z-10 bg-slate-50 border-b border-slate-200">
+                  <thead className="sticky top-0 z-10 bg-muted/50 border-b border-border">
                     <tr>
-                      <th className="text-left px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
+                      <th className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                         Kursi
                       </th>
-                      <th className="text-left px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
+                      <th className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                         Instruktori
                       </th>
-                      <th className="text-left px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
+                      <th className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                         Statusi
                       </th>
-                      <th className="text-left px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
+                      <th className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                         Statistika
                       </th>
-                      <th className="text-left px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
+                      <th className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                         Krijuar
                       </th>
-                      <th className="text-right px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">
+                      <th className="text-right px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                         Veprime
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody className="divide-y divide-border">
                     {courses.map((course) => {
                       const status = STATUS_CONFIG[course.status];
                       return (
                         <tr
                           key={course.id}
-                          className="odd:bg-slate-50/50 transition-colors hover:bg-indigo-50/60"
+                          className="odd:bg-muted/50 transition-colors hover:bg-primary/10"
                         >
                           <td className="px-6 py-4">
                             <div>
-                              <p className="font-medium text-slate-900">{course.title}</p>
-                              <p className="text-sm text-slate-500">
+                              <p className="font-medium text-foreground">{course.title}</p>
+                              <p className="text-sm text-muted-foreground">
                                 {course.category?.name || 'Pa kategori'} •{' '}
                                 {LEVEL_LABELS[course.level]}
                               </p>
                             </div>
                           </td>
-                          <td className="px-6 py-4 text-sm text-slate-700">
+                          <td className="px-6 py-4 text-sm text-foreground">
                             {course.instructor.firstName} {course.instructor.lastName}
                           </td>
                           <td className="px-6 py-4">
                             <Badge variant={status.variant}>{status.label}</Badge>
                           </td>
                           <td className="px-6 py-4">
-                            <div className="flex items-center gap-4 text-sm text-slate-500">
+                            <div className="flex items-center gap-4 text-sm text-muted-foreground">
                               <span className="flex items-center gap-1">
                                 <Users className="h-4 w-4" />
                                 {course.enrollmentCount}
@@ -225,7 +225,7 @@ export default function AdminCoursesPage() {
                               </span>
                             </div>
                           </td>
-                          <td className="px-6 py-4 text-sm text-slate-500">
+                          <td className="px-6 py-4 text-sm text-muted-foreground">
                             {new Date(course.createdAt).toLocaleDateString('sq-AL')}
                           </td>
                           <td className="px-6 py-4 text-right">
@@ -257,7 +257,7 @@ export default function AdminCoursesPage() {
         {/* Pagination */}
         {pagination.totalPages > 1 && (
           <div className="flex items-center justify-between">
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-muted-foreground">
               Duke shfaqur {(pagination.page - 1) * pagination.limit + 1} -{' '}
               {Math.min(pagination.page * pagination.limit, pagination.total)} nga{' '}
               {pagination.total} kurse
@@ -271,7 +271,7 @@ export default function AdminCoursesPage() {
               >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
-              <span className="text-sm text-slate-700">
+              <span className="text-sm text-foreground">
                 Faqja {pagination.page} nga {pagination.totalPages}
               </span>
               <Button

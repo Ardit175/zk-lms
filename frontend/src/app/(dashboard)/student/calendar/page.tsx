@@ -84,27 +84,27 @@ export default function StudentCalendarPage() {
     <DashboardLayout role="STUDENT">
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Kalendari</h1>
-          <p className="text-slate-500 mt-1">Afatet dhe sesionet live te ardhshme</p>
+          <h1 className="text-2xl font-bold text-foreground">Kalendari</h1>
+          <p className="text-muted-foreground mt-1">Afatet dhe sesionet live te ardhshme</p>
         </div>
 
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : error ? (
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <AlertCircle className="h-12 w-12 text-red-400 mb-4" />
-            <h2 className="text-lg font-semibold text-slate-900">Ngarkimi deshtoi</h2>
+            <h2 className="text-lg font-semibold text-foreground">Ngarkimi deshtoi</h2>
             <Button className="mt-4" onClick={loadData}>
               Provo Perseri
             </Button>
           </div>
         ) : items.length === 0 ? (
           <div className="text-center py-12">
-            <CalendarIcon className="h-12 w-12 text-slate-300 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-slate-900">Asnje ngjarje e ardhshme</h3>
-            <p className="text-slate-500 mt-1">
+            <CalendarIcon className="h-12 w-12 text-muted-foreground/60 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-foreground">Asnje ngjarje e ardhshme</h3>
+            <p className="text-muted-foreground mt-1">
               Nuk keni afate ose sesione live te planifikuara.
             </p>
             <Button className="mt-4" onClick={() => router.push('/student/courses')}>
@@ -115,7 +115,7 @@ export default function StudentCalendarPage() {
           <div className="space-y-6">
             {Object.entries(grouped).map(([dayKey, dayItems]) => (
               <div key={dayKey}>
-                <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-3">
+                <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
                   {dayLabel(dayItems[0].date)}
                 </h2>
                 <div className="space-y-3">
@@ -164,19 +164,19 @@ function DeadlineRow({
 
   return (
     <Card
-      className="cursor-pointer hover:border-indigo-300 transition-colors"
+      className="cursor-pointer hover:border-primary/40 transition-colors"
       onClick={onClick}
     >
       <CardContent className="p-4 flex items-center gap-3">
-        <div className="p-2.5 bg-amber-100 rounded-lg flex-shrink-0">
-          <FileText className="h-5 w-5 text-amber-600" />
+        <div className="p-2.5 bg-warning/15 rounded-lg flex-shrink-0">
+          <FileText className="h-5 w-5 text-warning" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="font-medium text-slate-900 truncate">{deadline.title}</p>
-          <p className="text-sm text-slate-500 truncate">{deadline.courseName}</p>
+          <p className="font-medium text-foreground truncate">{deadline.title}</p>
+          <p className="text-sm text-muted-foreground truncate">{deadline.courseName}</p>
         </div>
         <div className="flex items-center gap-3 flex-shrink-0">
-          <span className="text-sm text-slate-500 flex items-center gap-1">
+          <span className="text-sm text-muted-foreground flex items-center gap-1">
             <Clock className="h-4 w-4" />
             {format(date, 'HH:mm')}
           </span>
@@ -198,19 +198,19 @@ function SessionRow({
 }) {
   return (
     <Card
-      className="cursor-pointer hover:border-indigo-300 transition-colors"
+      className="cursor-pointer hover:border-primary/40 transition-colors"
       onClick={onClick}
     >
       <CardContent className="p-4 flex items-center gap-3">
-        <div className="p-2.5 bg-indigo-100 rounded-lg flex-shrink-0">
-          <Video className="h-5 w-5 text-indigo-600" />
+        <div className="p-2.5 bg-primary/15 rounded-lg flex-shrink-0">
+          <Video className="h-5 w-5 text-primary" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="font-medium text-slate-900 truncate">{session.title}</p>
-          <p className="text-sm text-slate-500 truncate">{session.course.title}</p>
+          <p className="font-medium text-foreground truncate">{session.title}</p>
+          <p className="text-sm text-muted-foreground truncate">{session.course.title}</p>
         </div>
         <div className="flex items-center gap-3 flex-shrink-0">
-          <span className="text-sm text-slate-500 flex items-center gap-1">
+          <span className="text-sm text-muted-foreground flex items-center gap-1">
             <Clock className="h-4 w-4" />
             {format(date, 'HH:mm')}
           </span>

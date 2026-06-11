@@ -14,7 +14,7 @@ import {
 } from '@/lib/api/admin';
 
 const chartLoading = () => (
-  <div className="h-[300px] animate-pulse rounded-lg bg-slate-100" />
+  <div className="h-[300px] animate-pulse rounded-lg bg-muted" />
 );
 const EnrollmentLineChart = dynamic(
   () => import('@/components/charts/EnrollmentLineChart').then((m) => m.EnrollmentLineChart),
@@ -60,7 +60,7 @@ export default function AdminAnalyticsPage() {
     return (
       <DashboardLayout role="ADMIN">
         <div className="flex items-center justify-center min-h-[400px]">
-          <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
       </DashboardLayout>
     );
@@ -71,8 +71,8 @@ export default function AdminAnalyticsPage() {
       <DashboardLayout role="ADMIN">
         <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
           <AlertCircle className="h-12 w-12 text-red-400 mb-4" />
-          <h2 className="text-lg font-semibold text-slate-900">Ngarkimi deshtoi</h2>
-          <p className="text-slate-500 mt-1">Nuk u arrit te ngarkohej analitika.</p>
+          <h2 className="text-lg font-semibold text-foreground">Ngarkimi deshtoi</h2>
+          <p className="text-muted-foreground mt-1">Nuk u arrit te ngarkohej analitika.</p>
           <Button className="mt-4" onClick={loadData}>
             Provo Perseri
           </Button>
@@ -98,8 +98,8 @@ export default function AdminAnalyticsPage() {
     <DashboardLayout role="ADMIN">
       <div className="space-y-8">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Analitika</h1>
-          <p className="text-slate-500 mt-1">Pasqyre e detajuar e platformes</p>
+          <h1 className="text-2xl font-bold text-foreground">Analitika</h1>
+          <p className="text-muted-foreground mt-1">Pasqyre e detajuar e platformes</p>
         </div>
 
         {/* Summary cards */}
@@ -130,14 +130,14 @@ export default function AdminAnalyticsPage() {
                 return (
                   <div key={item.label}>
                     <div className="flex items-center justify-between text-sm mb-1">
-                      <span className="text-slate-600">{item.label}</span>
-                      <span className="font-medium text-slate-900">
+                      <span className="text-muted-foreground">{item.label}</span>
+                      <span className="font-medium text-foreground">
                         {item.value} ({percent}%)
                       </span>
                     </div>
-                    <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                    <div className="h-2 bg-muted rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-indigo-600 rounded-full"
+                        className="h-full bg-primary rounded-full"
                         style={{ width: `${percent}%` }}
                       />
                     </div>
@@ -160,12 +160,12 @@ export default function AdminAnalyticsPage() {
                 return (
                   <div key={item.label}>
                     <div className="flex items-center justify-between text-sm mb-1">
-                      <span className="text-slate-600">{item.label}</span>
-                      <span className="font-medium text-slate-900">
+                      <span className="text-muted-foreground">{item.label}</span>
+                      <span className="font-medium text-foreground">
                         {item.value} ({percent}%)
                       </span>
                     </div>
-                    <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                    <div className="h-2 bg-muted rounded-full overflow-hidden">
                       <div
                         className={`h-full rounded-full ${item.color}`}
                         style={{ width: `${percent}%` }}
@@ -216,12 +216,12 @@ function SummaryCard({
     <Card>
       <CardContent className="pt-6">
         <div className="flex items-center gap-4">
-          <div className="p-3 bg-indigo-100 rounded-lg">
-            <Icon className="h-6 w-6 text-indigo-600" />
+          <div className="p-3 bg-primary/15 rounded-lg">
+            <Icon className="h-6 w-6 text-primary" />
           </div>
           <div>
-            <p className="text-sm text-slate-500">{label}</p>
-            <p className="text-2xl font-bold text-slate-900">
+            <p className="text-sm text-muted-foreground">{label}</p>
+            <p className="text-2xl font-bold text-foreground">
               {typeof value === 'number' ? value.toLocaleString() : value}
             </p>
           </div>

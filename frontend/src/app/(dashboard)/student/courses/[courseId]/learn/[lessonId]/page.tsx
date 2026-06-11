@@ -20,7 +20,7 @@ const PdfViewer = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="aspect-video w-full animate-pulse rounded-xl bg-slate-200" />
+      <div className="aspect-video w-full animate-pulse rounded-xl bg-muted" />
     ),
   }
 );
@@ -183,17 +183,17 @@ export default function CoursePlayerPage() {
 
   if (isLoading) {
     return (
-      <div className="h-screen flex items-center justify-center bg-slate-50">
-        <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+      <div className="h-screen flex items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
   if (!progress || !currentLesson) {
     return (
-      <div className="h-screen flex items-center justify-center bg-slate-50">
+      <div className="h-screen flex items-center justify-center bg-background">
         <div className="text-center">
-          <p className="text-slate-600 mb-4">Mesimi nuk u gjet</p>
+          <p className="text-muted-foreground mb-4">Mesimi nuk u gjet</p>
           <Button onClick={() => router.push('/student/dashboard')}>
             Kthehu ne Dashboard
           </Button>
@@ -203,9 +203,9 @@ export default function CoursePlayerPage() {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-slate-50">
+    <div className="h-screen flex flex-col bg-background">
       {/* Top Navigation Bar */}
-      <header className="h-16 bg-white border-b border-slate-200 flex items-center px-4 gap-4 flex-shrink-0">
+      <header className="h-16 bg-card border-b border-border flex items-center px-4 gap-4 flex-shrink-0">
         <Button
           variant="ghost"
           size="icon"
@@ -216,10 +216,10 @@ export default function CoursePlayerPage() {
         </Button>
 
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 text-sm text-slate-500">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <span className="truncate">{currentLesson.moduleTitle}</span>
             <ChevronRight className="h-4 w-4 flex-shrink-0" />
-            <span className="truncate font-medium text-slate-900">
+            <span className="truncate font-medium text-foreground">
               {currentLesson.title}
             </span>
           </div>
@@ -227,13 +227,13 @@ export default function CoursePlayerPage() {
 
         <div className="flex items-center gap-4 flex-shrink-0">
           <div className="flex items-center gap-2">
-            <div className="w-32 h-2 bg-slate-200 rounded-full overflow-hidden">
+            <div className="w-32 h-2 bg-muted rounded-full overflow-hidden">
               <div
-                className="h-full bg-indigo-600 transition-all duration-300"
+                className="h-full bg-primary transition-all duration-300"
                 style={{ width: `${progress.overallProgress}%` }}
               />
             </div>
-            <span className="text-sm font-medium text-slate-700">
+            <span className="text-sm font-medium text-foreground">
               {progress.overallProgress}%
             </span>
           </div>
@@ -266,9 +266,9 @@ export default function CoursePlayerPage() {
             isRightPanelOpen && 'lg:mr-80'
           )}>
             {isNavigating && (
-              <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3">
-                <Loader2 className="h-5 w-5 animate-spin text-green-600" />
-                <span className="text-green-800">
+              <div className="mb-4 p-4 bg-success/10 border border-success/30 rounded-lg flex items-center gap-3">
+                <Loader2 className="h-5 w-5 animate-spin text-success" />
+                <span className="text-success">
                   Duke shkuar te mesimi tjeter...
                 </span>
               </div>
@@ -322,13 +322,13 @@ export default function CoursePlayerPage() {
         {/* Right Panel - Lesson Info */}
         <aside
           className={cn(
-            'w-80 bg-white border-l border-slate-200 flex-shrink-0 overflow-y-auto transition-all hidden lg:block',
+            'w-80 bg-card border-l border-border flex-shrink-0 overflow-y-auto transition-all hidden lg:block',
             isRightPanelOpen ? 'translate-x-0' : 'translate-x-full'
           )}
         >
           <div className="p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-slate-900">Detajet e Mesimit</h3>
+              <h3 className="font-semibold text-foreground">Detajet e Mesimit</h3>
               <Button
                 variant="ghost"
                 size="icon"
@@ -340,24 +340,24 @@ export default function CoursePlayerPage() {
 
             <div className="space-y-4">
               <div>
-                <p className="text-sm text-slate-500 mb-1">Titulli</p>
-                <p className="font-medium text-slate-900">{currentLesson.title}</p>
+                <p className="text-sm text-muted-foreground mb-1">Titulli</p>
+                <p className="font-medium text-foreground">{currentLesson.title}</p>
               </div>
 
               <div>
-                <p className="text-sm text-slate-500 mb-1">Moduli</p>
-                <p className="text-slate-700">{currentLesson.moduleTitle}</p>
+                <p className="text-sm text-muted-foreground mb-1">Moduli</p>
+                <p className="text-foreground">{currentLesson.moduleTitle}</p>
               </div>
 
               <div>
-                <p className="text-sm text-slate-500 mb-1">Tipi</p>
-                <p className="text-slate-700 capitalize">{currentLesson.type.toLowerCase()}</p>
+                <p className="text-sm text-muted-foreground mb-1">Tipi</p>
+                <p className="text-foreground capitalize">{currentLesson.type.toLowerCase()}</p>
               </div>
 
               {currentLesson.duration && (
                 <div>
-                  <p className="text-sm text-slate-500 mb-1">Kohezgjatja</p>
-                  <p className="text-slate-700">
+                  <p className="text-sm text-muted-foreground mb-1">Kohezgjatja</p>
+                  <p className="text-foreground">
                     {Math.floor(currentLesson.duration / 60)} min{' '}
                     {currentLesson.duration % 60} sek
                   </p>
@@ -365,11 +365,11 @@ export default function CoursePlayerPage() {
               )}
 
               <div>
-                <p className="text-sm text-slate-500 mb-1">Statusi</p>
+                <p className="text-sm text-muted-foreground mb-1">Statusi</p>
                 <p
                   className={cn(
                     'font-medium',
-                    currentLesson.isCompleted ? 'text-green-600' : 'text-amber-600'
+                    currentLesson.isCompleted ? 'text-success' : 'text-warning'
                   )}
                 >
                   {currentLesson.isCompleted ? 'Perfunduar' : 'Ne progres'}

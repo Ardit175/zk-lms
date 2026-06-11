@@ -3,10 +3,10 @@ import { StatGridSkeleton } from '@/components/ui/skeletons';
 
 export default function DashboardLoading() {
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-muted/50">
       {/* sidebar placeholder */}
-      <div className="fixed left-0 top-0 z-40 h-screen w-64 border-r border-slate-200 bg-white">
-        <div className="flex h-16 items-center border-b border-slate-100 px-6">
+      <div className="fixed left-0 top-0 z-40 h-screen w-64 border-r border-border bg-card">
+        <div className="flex h-16 items-center border-b border-border px-6">
           <Skeleton className="h-9 w-32" />
         </div>
         <div className="space-y-2 p-3 pt-4">
@@ -18,7 +18,7 @@ export default function DashboardLoading() {
 
       {/* content placeholder */}
       <div className="pl-64">
-        <div className="h-14 border-b border-slate-200 bg-white" />
+        <div className="h-14 border-b border-border bg-card" />
         <div className="space-y-8 p-8">
           <div className="space-y-2">
             <Skeleton className="h-8 w-64" />

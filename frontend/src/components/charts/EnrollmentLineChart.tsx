@@ -9,6 +9,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
+import { useChartColors } from '@/lib/hooks/useChartColors';
 
 interface EnrollmentLineChartProps {
   data: Array<{ date: string; count: number }>;
@@ -16,29 +17,32 @@ interface EnrollmentLineChartProps {
 }
 
 export function EnrollmentLineChart({ data, height = 300 }: EnrollmentLineChartProps) {
+  const c = useChartColors();
   return (
     <div style={{ height }}>
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+          <CartesianGrid strokeDasharray="3 3" stroke={c.grid} />
           <XAxis
             dataKey="date"
-            tick={{ fontSize: 12 }}
-            stroke="#94a3b8"
+            tick={{ fontSize: 12, fill: c.axis }}
+            stroke={c.grid}
             tickFormatter={(value) => {
               const d = new Date(value);
               return `${d.getDate()}/${d.getMonth() + 1}`;
             }}
           />
-          <YAxis tick={{ fontSize: 12 }} stroke="#94a3b8" />
+          <YAxis tick={{ fontSize: 12, fill: c.axis }} stroke={c.grid} allowDecimals={false} />
           <Tooltip
             contentStyle={{
-              backgroundColor: '#fff',
-              border: '1px solid #e2e8f0',
-              borderRadius: '8px',
+              backgroundColor: c.tooltipBg,
+              border: `1px solid ${c.tooltipBorder}`,
+              borderRadius: '12px',
+              color: c.tooltipText,
             }}
+            labelStyle={{ color: c.tooltipText }}
           />
-          <Line type="monotone" dataKey="count" stroke="#4f46e5" strokeWidth={2} dot={false} />
+          <Line type="monotone" dataKey="count" stroke={c.primary} strokeWidth={2.5} dot={false} />
         </LineChart>
       </ResponsiveContainer>
     </div>

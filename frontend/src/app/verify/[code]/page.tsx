@@ -46,91 +46,91 @@ export default function VerifyCertificatePage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-muted/50 flex items-center justify-center p-4">
       <div className="w-full max-w-lg">
         {/* Logo */}
         <div className="flex items-center justify-center gap-3 mb-8">
-          <div className="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-xl">
+          <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center text-white font-bold text-xl">
             Z
           </div>
-          <span className="text-2xl font-semibold text-slate-900">ZK-LMS</span>
+          <span className="text-2xl font-semibold text-foreground">ZK-LMS</span>
         </div>
 
         {isLoading ? (
           <Card>
             <CardContent className="py-12 flex flex-col items-center justify-center">
-              <Loader2 className="h-12 w-12 animate-spin text-indigo-600 mb-4" />
-              <p className="text-slate-600">Duke verifikuar certifikaten...</p>
+              <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
+              <p className="text-muted-foreground">Duke verifikuar certifikaten...</p>
             </CardContent>
           </Card>
         ) : error ? (
-          <Card className="border-red-200 bg-red-50">
+          <Card className="border-destructive/30 bg-destructive/10">
             <CardContent className="py-12 flex flex-col items-center justify-center">
               <XCircle className="h-16 w-16 text-red-500 mb-4" />
-              <h2 className="text-xl font-semibold text-red-700 mb-2">
+              <h2 className="text-xl font-semibold text-destructive mb-2">
                 Verifikimi Deshtoi
               </h2>
-              <p className="text-red-600 text-center">{error}</p>
+              <p className="text-destructive text-center">{error}</p>
             </CardContent>
           </Card>
         ) : result ? (
-          <Card className="border-green-200">
+          <Card className="border-success/30">
             <CardContent className="py-8">
               {/* Success Header */}
               <div className="flex items-center justify-center gap-3 mb-6">
-                <div className="p-3 bg-green-100 rounded-full">
-                  <CheckCircle className="h-8 w-8 text-green-600" />
+                <div className="p-3 bg-success/15 rounded-full">
+                  <CheckCircle className="h-8 w-8 text-success" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-semibold text-green-700">
+                  <h2 className="text-xl font-semibold text-success">
                     Certifikate e Vlefshme
                   </h2>
-                  <p className="text-green-600 text-sm">Verifikuar me sukses</p>
+                  <p className="text-success text-sm">Verifikuar me sukses</p>
                 </div>
               </div>
 
               {/* Certificate Details */}
-              <div className="bg-slate-50 rounded-lg p-6 space-y-4">
+              <div className="bg-muted/50 rounded-lg p-6 space-y-4">
                 <div className="text-center mb-6">
-                  <Award className="h-12 w-12 text-indigo-600 mx-auto mb-3" />
-                  <h3 className="text-2xl font-bold text-slate-900">
+                  <Award className="h-12 w-12 text-primary mx-auto mb-3" />
+                  <h3 className="text-2xl font-bold text-foreground">
                     {result.studentName}
                   </h3>
-                  <p className="text-slate-600">ka perfunduar me sukses kursin</p>
+                  <p className="text-muted-foreground">ka perfunduar me sukses kursin</p>
                 </div>
 
                 <div className="space-y-3">
-                  <div className="flex items-center gap-3 p-3 bg-white rounded-lg">
-                    <BookOpen className="h-5 w-5 text-indigo-600" />
+                  <div className="flex items-center gap-3 p-3 bg-card rounded-lg">
+                    <BookOpen className="h-5 w-5 text-primary" />
                     <div>
-                      <p className="text-xs text-slate-500">Kursi</p>
-                      <p className="font-medium text-slate-900">{result.courseName}</p>
+                      <p className="text-xs text-muted-foreground">Kursi</p>
+                      <p className="font-medium text-foreground">{result.courseName}</p>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3 p-3 bg-white rounded-lg">
-                    <User className="h-5 w-5 text-indigo-600" />
+                  <div className="flex items-center gap-3 p-3 bg-card rounded-lg">
+                    <User className="h-5 w-5 text-primary" />
                     <div>
-                      <p className="text-xs text-slate-500">Instruktor</p>
-                      <p className="font-medium text-slate-900">{result.instructorName}</p>
+                      <p className="text-xs text-muted-foreground">Instruktor</p>
+                      <p className="font-medium text-foreground">{result.instructorName}</p>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3 p-3 bg-white rounded-lg">
-                    <Calendar className="h-5 w-5 text-indigo-600" />
+                  <div className="flex items-center gap-3 p-3 bg-card rounded-lg">
+                    <Calendar className="h-5 w-5 text-primary" />
                     <div>
-                      <p className="text-xs text-slate-500">Data e Leshimit</p>
-                      <p className="font-medium text-slate-900">
+                      <p className="text-xs text-muted-foreground">Data e Leshimit</p>
+                      <p className="font-medium text-foreground">
                         {format(new Date(result.issuedAt), 'dd MMMM yyyy', { locale: sq })}
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3 p-3 bg-white rounded-lg">
-                    <Hash className="h-5 w-5 text-indigo-600" />
+                  <div className="flex items-center gap-3 p-3 bg-card rounded-lg">
+                    <Hash className="h-5 w-5 text-primary" />
                     <div>
-                      <p className="text-xs text-slate-500">Numri i Certifikates</p>
-                      <p className="font-mono text-sm text-slate-900">
+                      <p className="text-xs text-muted-foreground">Numri i Certifikates</p>
+                      <p className="font-mono text-sm text-foreground">
                         {result.certificateNumber}
                       </p>
                     </div>
@@ -138,7 +138,7 @@ export default function VerifyCertificatePage() {
                 </div>
               </div>
 
-              <p className="text-center text-sm text-slate-500 mt-6">
+              <p className="text-center text-sm text-muted-foreground mt-6">
                 Ky verifikim u krye nga platforma ZK-LMS
               </p>
             </CardContent>

@@ -189,7 +189,7 @@ export default function AssignmentSubmissionsPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -197,7 +197,7 @@ export default function AssignmentSubmissionsPage() {
   if (error && !assignment) {
     return (
       <div className="p-8">
-        <div className="flex items-center gap-3 text-red-600 mb-4">
+        <div className="flex items-center gap-3 text-destructive mb-4">
           <AlertCircle className="h-5 w-5" />
           <span>{error}</span>
         </div>
@@ -209,7 +209,7 @@ export default function AssignmentSubmissionsPage() {
   if (!assignment) {
     return (
       <div className="p-8">
-        <p className="text-slate-600">Detyra nuk u gjet</p>
+        <p className="text-muted-foreground">Detyra nuk u gjet</p>
       </div>
     );
   }
@@ -217,24 +217,24 @@ export default function AssignmentSubmissionsPage() {
   return (
     <div className="h-[calc(100vh-4rem)] flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-white flex-shrink-0">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-card flex-shrink-0">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={() => router.back()}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
-            <h1 className="text-xl font-bold text-slate-900">{assignment.title}</h1>
-            <div className="flex items-center gap-4 text-sm text-slate-500 mt-1">
+            <h1 className="text-xl font-bold text-foreground">{assignment.title}</h1>
+            <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
               <span className="flex items-center gap-1">
                 <Users className="h-4 w-4" />
                 {stats?.total || 0} dergesa
               </span>
               <span className="flex items-center gap-1">
-                <CheckCircle2 className="h-4 w-4 text-green-600" />
+                <CheckCircle2 className="h-4 w-4 text-success" />
                 {stats?.graded || 0} te vleresuara
               </span>
               <span className="flex items-center gap-1">
-                <Clock className="h-4 w-4 text-amber-600" />
+                <Clock className="h-4 w-4 text-warning" />
                 {stats?.ungraded || 0} per vleresim
               </span>
             </div>
@@ -242,16 +242,16 @@ export default function AssignmentSubmissionsPage() {
         </div>
 
         {/* Keyboard shortcuts hint */}
-        <div className="hidden md:flex items-center gap-4 text-xs text-slate-400">
+        <div className="hidden md:flex items-center gap-4 text-xs text-muted-foreground">
           <span className="flex items-center gap-1">
-            <kbd className="px-1.5 py-0.5 bg-slate-100 rounded">Alt</kbd>
-            <kbd className="px-1.5 py-0.5 bg-slate-100 rounded"><ArrowUp className="h-3 w-3" /></kbd>
-            <kbd className="px-1.5 py-0.5 bg-slate-100 rounded"><ArrowDown className="h-3 w-3" /></kbd>
+            <kbd className="px-1.5 py-0.5 bg-muted rounded">Alt</kbd>
+            <kbd className="px-1.5 py-0.5 bg-muted rounded"><ArrowUp className="h-3 w-3" /></kbd>
+            <kbd className="px-1.5 py-0.5 bg-muted rounded"><ArrowDown className="h-3 w-3" /></kbd>
             Navigo
           </span>
           <span className="flex items-center gap-1">
-            <kbd className="px-1.5 py-0.5 bg-slate-100 rounded">Ctrl</kbd>
-            <kbd className="px-1.5 py-0.5 bg-slate-100 rounded">Enter</kbd>
+            <kbd className="px-1.5 py-0.5 bg-muted rounded">Ctrl</kbd>
+            <kbd className="px-1.5 py-0.5 bg-muted rounded">Enter</kbd>
             Ruaj
           </span>
         </div>
@@ -260,12 +260,12 @@ export default function AssignmentSubmissionsPage() {
       {/* Main Content */}
       <div className="flex-1 flex overflow-hidden">
         {/* Submissions List */}
-        <div className="w-80 border-r border-slate-200 bg-white flex-shrink-0">
+        <div className="w-80 border-r border-border bg-card flex-shrink-0">
           <ScrollArea className="h-full">
             <div className="p-2">
               {submissions.length === 0 ? (
-                <div className="p-6 text-center text-slate-500">
-                  <Users className="h-10 w-10 mx-auto mb-3 text-slate-300" />
+                <div className="p-6 text-center text-muted-foreground">
+                  <Users className="h-10 w-10 mx-auto mb-3 text-muted-foreground/60" />
                   <p>Asnje dergese ende</p>
                 </div>
               ) : (
@@ -276,8 +276,8 @@ export default function AssignmentSubmissionsPage() {
                     className={cn(
                       'w-full text-left p-3 rounded-lg mb-1 transition-colors',
                       selectedSubmission?.id === submission.id
-                        ? 'bg-indigo-50 border border-indigo-200'
-                        : 'hover:bg-slate-50'
+                        ? 'bg-primary/10 border border-primary/30'
+                        : 'hover:bg-muted/50'
                     )}
                   >
                     <div className="flex items-center gap-3">
@@ -290,22 +290,22 @@ export default function AssignmentSubmissionsPage() {
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-slate-900 truncate">
+                        <p className="font-medium text-foreground truncate">
                           {submission.student
                             ? `${submission.student.firstName} ${submission.student.lastName}`
                             : 'Student'}
                         </p>
-                        <p className="text-sm text-slate-500">
+                        <p className="text-sm text-muted-foreground">
                           {format(new Date(submission.submittedAt), 'dd MMM, HH:mm', { locale: sq })}
                         </p>
                       </div>
                       <div className="flex-shrink-0">
                         {submission.gradedAt ? (
-                          <Badge className="bg-green-100 text-green-700 hover:bg-green-100">
+                          <Badge className="bg-success/15 text-success hover:bg-success/15">
                             {submission.score}/{assignment.maxScore}
                           </Badge>
                         ) : (
-                          <Badge className="bg-amber-100 text-amber-700 hover:bg-amber-100">
+                          <Badge className="bg-warning/15 text-warning hover:bg-warning/15">
                             <Clock className="h-3 w-3 mr-1" />
                             Pret
                           </Badge>
@@ -320,7 +320,7 @@ export default function AssignmentSubmissionsPage() {
         </div>
 
         {/* Detail/Grading Panel */}
-        <div className="flex-1 overflow-hidden bg-slate-50">
+        <div className="flex-1 overflow-hidden bg-muted/50">
           {selectedSubmission ? (
             <ScrollArea className="h-full">
               <div className="p-6 max-w-3xl mx-auto">
@@ -346,13 +346,13 @@ export default function AssignmentSubmissionsPage() {
                             : 'Student'}
                         </CardTitle>
                         {selectedSubmission.student && (
-                          <p className="text-sm text-slate-500">{selectedSubmission.student.email}</p>
+                          <p className="text-sm text-muted-foreground">{selectedSubmission.student.email}</p>
                         )}
                       </div>
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm text-slate-500">
+                    <p className="text-sm text-muted-foreground">
                       Derguar me{' '}
                       {format(new Date(selectedSubmission.submittedAt), 'dd MMMM yyyy, HH:mm', {
                         locale: sq,
@@ -375,16 +375,16 @@ export default function AssignmentSubmissionsPage() {
                     )}
 
                     {selectedSubmission.fileUrl && (
-                      <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-lg">
-                        <FileIcon className="h-8 w-8 text-slate-400" />
+                      <div className="flex items-center gap-3 p-4 bg-muted/50 rounded-lg">
+                        <FileIcon className="h-8 w-8 text-muted-foreground" />
                         <div className="flex-1">
-                          <p className="font-medium text-slate-900">Skedar i ngarkuar</p>
+                          <p className="font-medium text-foreground">Skedar i ngarkuar</p>
                         </div>
                         <a
                           href={resolveFileUrl(selectedSubmission.fileUrl)}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                          className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
                         >
                           <ExternalLink className="h-4 w-4" />
                           Shiko
@@ -393,15 +393,15 @@ export default function AssignmentSubmissionsPage() {
                     )}
 
                     {selectedSubmission.linkUrl && (
-                      <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-lg">
-                        <LinkIcon className="h-8 w-8 text-slate-400" />
+                      <div className="flex items-center gap-3 p-4 bg-muted/50 rounded-lg">
+                        <LinkIcon className="h-8 w-8 text-muted-foreground" />
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium text-slate-900 mb-1">Link</p>
+                          <p className="font-medium text-foreground mb-1">Link</p>
                           <a
                             href={selectedSubmission.linkUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-indigo-600 hover:text-indigo-700 truncate block"
+                            className="text-primary hover:text-primary truncate block"
                           >
                             {selectedSubmission.linkUrl}
                           </a>
@@ -410,7 +410,7 @@ export default function AssignmentSubmissionsPage() {
                           href={selectedSubmission.linkUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex-shrink-0"
+                          className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors flex-shrink-0"
                         >
                           <ExternalLink className="h-4 w-4" />
                           Hap
@@ -421,16 +421,16 @@ export default function AssignmentSubmissionsPage() {
                 </Card>
 
                 {/* Grading Form */}
-                <Card className="border-indigo-200">
+                <Card className="border-primary/30">
                   <CardHeader>
                     <CardTitle className="text-lg flex items-center gap-2">
-                      <Award className="h-5 w-5 text-indigo-600" />
+                      <Award className="h-5 w-5 text-primary" />
                       Vleresimi
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     {error && (
-                      <div className="flex items-center gap-2 p-3 bg-red-50 text-red-700 rounded-lg">
+                      <div className="flex items-center gap-2 p-3 bg-destructive/10 text-destructive rounded-lg">
                         <AlertCircle className="h-4 w-4" />
                         {error}
                       </div>
@@ -454,7 +454,7 @@ export default function AssignmentSubmissionsPage() {
                         />
                       </div>
                       <div className="flex items-end">
-                        <div className="text-3xl font-bold text-slate-400">
+                        <div className="text-3xl font-bold text-muted-foreground">
                           /{assignment.maxScore}
                         </div>
                       </div>
@@ -473,9 +473,9 @@ export default function AssignmentSubmissionsPage() {
                       />
                     </div>
 
-                    <div className="flex items-center justify-between pt-4 border-t border-slate-200">
+                    <div className="flex items-center justify-between pt-4 border-t border-border">
                       {selectedSubmission.gradedAt && (
-                        <p className="text-sm text-slate-500">
+                        <p className="text-sm text-muted-foreground">
                           Vleresuar me pare me{' '}
                           {format(new Date(selectedSubmission.gradedAt), 'dd MMM yyyy, HH:mm', {
                             locale: sq,
@@ -507,8 +507,8 @@ export default function AssignmentSubmissionsPage() {
           ) : (
             <div className="h-full flex items-center justify-center">
               <div className="text-center">
-                <User className="h-12 w-12 text-slate-300 mx-auto mb-4" />
-                <p className="text-slate-500">Zgjidhni nje dergese per te pare detajet</p>
+                <User className="h-12 w-12 text-muted-foreground/60 mx-auto mb-4" />
+                <p className="text-muted-foreground">Zgjidhni nje dergese per te pare detajet</p>
               </div>
             </div>
           )}

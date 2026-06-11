@@ -31,6 +31,8 @@ import { coursesApi, categoriesApi, type Course, type Module, type Lesson, type 
 import { quizzesApi, type QuizWithQuestions } from '@/lib/api/quizzes';
 import { uploadsApi, VIDEO_MAX_BYTES, PDF_MAX_BYTES } from '@/lib/api/uploads';
 import { AIQuizGenerator } from '@/components/instructor/AIQuizGenerator';
+import { AssignmentEditor } from '@/components/instructor/AssignmentEditor';
+import { assignmentsApi } from '@/lib/api/assignments';
 import { VideoPlayer } from '@/components/course-player/VideoPlayer';
 import dynamic from 'next/dynamic';
 
@@ -105,26 +107,26 @@ function SortableModule({
       ref={setNodeRef}
       style={style}
       className={cn(
-        'bg-white rounded-lg border border-slate-200 overflow-hidden',
+        'bg-card rounded-lg border border-border overflow-hidden',
         isDragging && 'opacity-50'
       )}
     >
-      <div className="flex items-center gap-2 p-3 bg-slate-50 border-b border-slate-200">
-        <button {...attributes} {...listeners} className="cursor-grab hover:text-indigo-600">
-          <GripVertical className="h-5 w-5 text-slate-400" />
+      <div className="flex items-center gap-2 p-3 bg-muted/50 border-b border-border">
+        <button {...attributes} {...listeners} className="cursor-grab hover:text-primary">
+          <GripVertical className="h-5 w-5 text-muted-foreground" />
         </button>
         <button onClick={onToggle} className="flex-1 flex items-center gap-2 text-left">
           {isExpanded ? (
-            <ChevronDown className="h-4 w-4 text-slate-500" />
+            <ChevronDown className="h-4 w-4 text-muted-foreground" />
           ) : (
-            <ChevronRight className="h-4 w-4 text-slate-500" />
+            <ChevronRight className="h-4 w-4 text-muted-foreground" />
           )}
-          <span className="font-medium text-slate-900">{module.title}</span>
-          <span className="text-sm text-slate-500">({module.lessons.length} mesime)</span>
+          <span className="font-medium text-foreground">{module.title}</span>
+          <span className="text-sm text-muted-foreground">({module.lessons.length} mesime)</span>
         </button>
         <button
           onClick={onDeleteModule}
-          className="p-1 text-slate-400 hover:text-red-600 transition-colors"
+          className="p-1 text-muted-foreground hover:text-destructive transition-colors"
         >
           <Trash2 className="h-4 w-4" />
         </button>
@@ -147,7 +149,7 @@ function SortableModule({
 
           <button
             onClick={onAddLesson}
-            className="w-full mt-2 p-2 flex items-center justify-center gap-2 text-sm text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+            className="w-full mt-2 p-2 flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
           >
             <Plus className="h-4 w-4" />
             Shto Mesim
@@ -182,18 +184,18 @@ function SortableLesson({ lesson, isSelected, onSelect }: SortableLessonProps) {
       style={style}
       className={cn(
         'flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors',
-        isSelected ? 'bg-indigo-50 border border-indigo-200' : 'hover:bg-slate-50',
+        isSelected ? 'bg-primary/10 border border-primary/30' : 'hover:bg-muted/50',
         isDragging && 'opacity-50'
       )}
       onClick={onSelect}
     >
       <button {...attributes} {...listeners} className="cursor-grab" onClick={(e) => e.stopPropagation()}>
-        <GripVertical className="h-4 w-4 text-slate-400" />
+        <GripVertical className="h-4 w-4 text-muted-foreground" />
       </button>
-      <Icon className="h-4 w-4 text-slate-500" />
-      <span className="flex-1 text-sm text-slate-700 truncate">{lesson.title}</span>
+      <Icon className="h-4 w-4 text-muted-foreground" />
+      <span className="flex-1 text-sm text-foreground truncate">{lesson.title}</span>
       {lesson.duration && (
-        <span className="text-xs text-slate-400">{Math.ceil(lesson.duration / 60)}min</span>
+        <span className="text-xs text-muted-foreground">{Math.ceil(lesson.duration / 60)}min</span>
       )}
       <div
         className={cn(
@@ -402,16 +404,16 @@ export default function CourseBuilderPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
   if (!course) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="min-h-screen flex items-center justify-center bg-muted/50">
         <div className="text-center">
-          <p className="text-slate-600 mb-4">Kursi nuk u gjet ose nuk keni akses</p>
+          <p className="text-muted-foreground mb-4">Kursi nuk u gjet ose nuk keni akses</p>
           <Button onClick={() => router.push('/instructor/courses')}>Kthehu te Kurset</Button>
         </div>
       </div>
@@ -419,17 +421,17 @@ export default function CourseBuilderPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-muted/50">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white border-b border-slate-200">
+      <header className="sticky top-0 z-50 bg-card border-b border-border">
         <div className="flex items-center justify-between px-6 py-3">
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="sm" onClick={() => router.push('/instructor/courses')}>
               <ArrowLeft className="h-4 w-4 mr-2" />
               Kurset
             </Button>
-            <div className="h-6 w-px bg-slate-200" />
-            <h1 className="font-semibold text-slate-900">{course?.title || 'Kurs i Ri'}</h1>
+            <div className="h-6 w-px bg-muted" />
+            <h1 className="font-semibold text-foreground">{course?.title || 'Kurs i Ri'}</h1>
             {course && (
               <Badge variant={STATUS_BADGES[course.status].variant}>
                 {STATUS_BADGES[course.status].label}
@@ -438,7 +440,7 @@ export default function CourseBuilderPage() {
           </div>
           <div className="flex items-center gap-3">
             {isSaving && (
-              <span className="text-sm text-slate-500 flex items-center gap-2">
+              <span className="text-sm text-muted-foreground flex items-center gap-2">
                 <Loader2 className="h-4 w-4 animate-spin" />
                 Duke ruajtur...
               </span>
@@ -455,9 +457,9 @@ export default function CourseBuilderPage() {
       {/* Main Content */}
       <div className="flex">
         {/* Left Panel - Modules & Lessons */}
-        <div className="w-[60%] p-6 border-r border-slate-200 min-h-[calc(100vh-57px)]">
+        <div className="w-[60%] p-6 border-r border-border min-h-[calc(100vh-57px)]">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-slate-900">Permbajtja e Kursit</h2>
+            <h2 className="text-lg font-semibold text-foreground">Permbajtja e Kursit</h2>
           </div>
 
           <DndContext collisionDetection={closestCenter} onDragEnd={handleModuleDragEnd}>
@@ -498,7 +500,7 @@ export default function CourseBuilderPage() {
         </div>
 
         {/* Right Panel - Settings or Lesson Editor */}
-        <div className="w-[40%] p-6 min-h-[calc(100vh-57px)] bg-white">
+        <div className="w-[40%] p-6 min-h-[calc(100vh-57px)] bg-card">
           {selectedLesson ? (
             <LessonEditor
               key={selectedLesson.id}
@@ -565,6 +567,8 @@ function LessonEditor({ lesson, siblingLessons, onSave, onDelete, onClose }: Les
   const [existingQuiz, setExistingQuiz] = useState<QuizWithQuestions | null>(null);
   const [isLoadingQuiz, setIsLoadingQuiz] = useState(false);
   const [isDeletingQuiz, setIsDeletingQuiz] = useState(false);
+  const [isAssignmentEditorOpen, setIsAssignmentEditorOpen] = useState(false);
+  const [hasAssignment, setHasAssignment] = useState(false);
 
   // Local working copy — nothing is persisted until "Ruaj" is pressed.
   const [draft, setDraft] = useState<LessonDraft>(() => toDraft(lesson));
@@ -595,6 +599,11 @@ function LessonEditor({ lesson, siblingLessons, onSave, onDelete, onClose }: Les
   useEffect(() => {
     if (lesson.type === 'QUIZ') {
       loadExistingQuiz();
+    } else if (lesson.type === 'ASSIGNMENT') {
+      assignmentsApi
+        .getForEdit(lesson.id)
+        .then((res) => setHasAssignment(!!res.data))
+        .catch(() => setHasAssignment(false));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lesson.id]);
@@ -671,7 +680,7 @@ function LessonEditor({ lesson, siblingLessons, onSave, onDelete, onClose }: Les
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-slate-900">Edito Mesimin</h2>
+        <h2 className="text-lg font-semibold text-foreground">Edito Mesimin</h2>
         <Button variant="ghost" size="sm" onClick={onClose}>
           Mbyll
         </Button>
@@ -701,8 +710,8 @@ function LessonEditor({ lesson, siblingLessons, onSave, onDelete, onClose }: Les
                 className={cn(
                   'flex items-center gap-2 rounded-lg border p-3 transition-colors',
                   draft.type === value
-                    ? 'border-indigo-600 bg-indigo-50 text-indigo-600'
-                    : 'border-slate-200 text-slate-600 hover:border-slate-300'
+                    ? 'border-primary bg-primary/10 text-primary'
+                    : 'border-border text-muted-foreground hover:border-input'
                 )}
               >
                 <Icon className="h-4 w-4" />
@@ -720,8 +729,8 @@ function LessonEditor({ lesson, siblingLessons, onSave, onDelete, onClose }: Les
                 className={cn(
                   'flex flex-1 items-center justify-center gap-2 rounded-lg border p-2.5 text-sm font-medium transition-colors',
                   videoMode === 'link'
-                    ? 'border-indigo-600 bg-indigo-50 text-indigo-600'
-                    : 'border-slate-200 text-slate-600 hover:border-slate-300'
+                    ? 'border-primary bg-primary/10 text-primary'
+                    : 'border-border text-muted-foreground hover:border-input'
                 )}
               >
                 <Link2 className="h-4 w-4" />
@@ -732,8 +741,8 @@ function LessonEditor({ lesson, siblingLessons, onSave, onDelete, onClose }: Les
                 className={cn(
                   'flex flex-1 items-center justify-center gap-2 rounded-lg border p-2.5 text-sm font-medium transition-colors',
                   videoMode === 'upload'
-                    ? 'border-indigo-600 bg-indigo-50 text-indigo-600'
-                    : 'border-slate-200 text-slate-600 hover:border-slate-300'
+                    ? 'border-primary bg-primary/10 text-primary'
+                    : 'border-border text-muted-foreground hover:border-input'
                 )}
               >
                 <Upload className="h-4 w-4" />
@@ -758,22 +767,22 @@ function LessonEditor({ lesson, siblingLessons, onSave, onDelete, onClose }: Les
             ) : (
               <div className="space-y-2">
                 <Label>Ngarko skedar video</Label>
-                <label className="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-slate-200 p-6 transition-colors hover:border-indigo-300">
+                <label className="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-border p-6 transition-colors hover:border-primary/40">
                   {isUploading ? (
                     <>
-                      <Loader2 className="h-6 w-6 animate-spin text-indigo-600" />
-                      <span className="mt-2 text-sm text-slate-500">Duke ngarkuar...</span>
+                      <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                      <span className="mt-2 text-sm text-muted-foreground">Duke ngarkuar...</span>
                     </>
                   ) : draft.videoType === 'UPLOAD' && draft.videoUrl ? (
                     <>
-                      <Video className="h-6 w-6 text-green-600" />
-                      <span className="mt-2 text-sm font-medium text-slate-700">Video u ngarkua</span>
-                      <span className="text-xs text-slate-400">Kliko per ta zevendesuar</span>
+                      <Video className="h-6 w-6 text-success" />
+                      <span className="mt-2 text-sm font-medium text-foreground">Video u ngarkua</span>
+                      <span className="text-xs text-muted-foreground">Kliko per ta zevendesuar</span>
                     </>
                   ) : (
                     <>
-                      <Upload className="h-6 w-6 text-slate-400" />
-                      <span className="mt-2 text-sm text-slate-600">Kliko per te ngarkuar video</span>
+                      <Upload className="h-6 w-6 text-muted-foreground" />
+                      <span className="mt-2 text-sm text-muted-foreground">Kliko per te ngarkuar video</span>
                     </>
                   )}
                   <input
@@ -787,7 +796,7 @@ function LessonEditor({ lesson, siblingLessons, onSave, onDelete, onClose }: Les
                     }}
                   />
                 </label>
-                <p className="text-xs text-slate-400">Madhesia maksimale: 50MB</p>
+                <p className="text-xs text-muted-foreground">Madhesia maksimale: 50MB</p>
               </div>
             )}
 
@@ -830,8 +839,8 @@ function LessonEditor({ lesson, siblingLessons, onSave, onDelete, onClose }: Les
                 className={cn(
                   'flex flex-1 items-center justify-center gap-2 rounded-lg border p-2.5 text-sm font-medium transition-colors',
                   textMode === 'text'
-                    ? 'border-indigo-600 bg-indigo-50 text-indigo-600'
-                    : 'border-slate-200 text-slate-600 hover:border-slate-300'
+                    ? 'border-primary bg-primary/10 text-primary'
+                    : 'border-border text-muted-foreground hover:border-input'
                 )}
               >
                 <FileText className="h-4 w-4" />
@@ -842,8 +851,8 @@ function LessonEditor({ lesson, siblingLessons, onSave, onDelete, onClose }: Les
                 className={cn(
                   'flex flex-1 items-center justify-center gap-2 rounded-lg border p-2.5 text-sm font-medium transition-colors',
                   textMode === 'pdf'
-                    ? 'border-indigo-600 bg-indigo-50 text-indigo-600'
-                    : 'border-slate-200 text-slate-600 hover:border-slate-300'
+                    ? 'border-primary bg-primary/10 text-primary'
+                    : 'border-border text-muted-foreground hover:border-input'
                 )}
               >
                 <Upload className="h-4 w-4" />
@@ -863,29 +872,29 @@ function LessonEditor({ lesson, siblingLessons, onSave, onDelete, onClose }: Les
               <div className="space-y-2">
                 <Label>Skedar PDF</Label>
                 {draft.pdfUrl ? (
-                  <div className="flex items-center justify-between rounded-lg border border-slate-200 p-3">
+                  <div className="flex items-center justify-between rounded-lg border border-border p-3">
                     <div className="flex items-center gap-2">
-                      <FileText className="h-5 w-5 text-indigo-600" />
-                      <span className="text-sm text-slate-700">PDF i ngarkuar</span>
+                      <FileText className="h-5 w-5 text-primary" />
+                      <span className="text-sm text-foreground">PDF i ngarkuar</span>
                     </div>
                     <button
                       onClick={() => update({ pdfUrl: null })}
-                      className="text-slate-400 transition-colors hover:text-red-600"
+                      className="text-muted-foreground transition-colors hover:text-destructive"
                     >
                       <X className="h-4 w-4" />
                     </button>
                   </div>
                 ) : (
-                  <label className="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-slate-200 p-6 transition-colors hover:border-indigo-300">
+                  <label className="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-border p-6 transition-colors hover:border-primary/40">
                     {isUploading ? (
                       <>
-                        <Loader2 className="h-6 w-6 animate-spin text-indigo-600" />
-                        <span className="mt-2 text-sm text-slate-500">Duke ngarkuar...</span>
+                        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                        <span className="mt-2 text-sm text-muted-foreground">Duke ngarkuar...</span>
                       </>
                     ) : (
                       <>
-                        <Upload className="h-6 w-6 text-slate-400" />
-                        <span className="mt-2 text-sm text-slate-600">Kliko per te ngarkuar PDF</span>
+                        <Upload className="h-6 w-6 text-muted-foreground" />
+                        <span className="mt-2 text-sm text-muted-foreground">Kliko per te ngarkuar PDF</span>
                       </>
                     )}
                     <input
@@ -900,7 +909,7 @@ function LessonEditor({ lesson, siblingLessons, onSave, onDelete, onClose }: Les
                     />
                   </label>
                 )}
-                <p className="text-xs text-slate-400">Madhesia maksimale: 10MB</p>
+                <p className="text-xs text-muted-foreground">Madhesia maksimale: 10MB</p>
               </div>
             )}
 
@@ -911,17 +920,17 @@ function LessonEditor({ lesson, siblingLessons, onSave, onDelete, onClose }: Les
         {draft.type === 'QUIZ' && (
           <div className="space-y-4">
             {isLoadingQuiz ? (
-              <div className="p-4 bg-slate-50 rounded-lg flex items-center justify-center gap-2 text-slate-600">
+              <div className="p-4 bg-muted/50 rounded-lg flex items-center justify-center gap-2 text-muted-foreground">
                 <Loader2 className="h-4 w-4 animate-spin" />
                 Duke ngarkuar kuizin...
               </div>
             ) : existingQuiz ? (
-              <div className="border border-slate-200 rounded-lg overflow-hidden">
-                <div className="p-4 bg-slate-50 border-b border-slate-200">
+              <div className="border border-border rounded-lg overflow-hidden">
+                <div className="p-4 bg-muted/50 border-b border-border">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h4 className="font-medium text-slate-900">{existingQuiz.title}</h4>
-                      <p className="text-sm text-slate-500">
+                      <h4 className="font-medium text-foreground">{existingQuiz.title}</h4>
+                      <p className="text-sm text-muted-foreground">
                         {existingQuiz.questions.length} pyetje • {existingQuiz.passingScore}% per te kaluar
                       </p>
                     </div>
@@ -935,18 +944,18 @@ function LessonEditor({ lesson, siblingLessons, onSave, onDelete, onClose }: Les
                 </div>
                 <div className="p-3 space-y-2">
                   {existingQuiz.questions.slice(0, 3).map((q, i) => (
-                    <div key={q.id} className="text-sm text-slate-600 flex gap-2">
-                      <span className="text-slate-400">{i + 1}.</span>
+                    <div key={q.id} className="text-sm text-muted-foreground flex gap-2">
+                      <span className="text-muted-foreground">{i + 1}.</span>
                       <span className="line-clamp-1">{q.questionText}</span>
                     </div>
                   ))}
                   {existingQuiz.questions.length > 3 && (
-                    <p className="text-sm text-slate-400">
+                    <p className="text-sm text-muted-foreground">
                       + {existingQuiz.questions.length - 3} pyetje te tjera
                     </p>
                   )}
                 </div>
-                <div className="p-3 border-t border-slate-200 flex gap-2">
+                <div className="p-3 border-t border-border flex gap-2">
                   <Button
                     variant="outline"
                     size="sm"
@@ -971,10 +980,10 @@ function LessonEditor({ lesson, siblingLessons, onSave, onDelete, onClose }: Les
                 </div>
               </div>
             ) : (
-              <div className="p-6 border-2 border-dashed border-slate-200 rounded-lg text-center">
-                <Sparkles className="h-8 w-8 text-indigo-600 mx-auto mb-3" />
-                <h4 className="font-medium text-slate-900 mb-1">Gjenero Kuiz me AI</h4>
-                <p className="text-sm text-slate-500 mb-4">
+              <div className="p-6 border-2 border-dashed border-border rounded-lg text-center">
+                <Sparkles className="h-8 w-8 text-primary mx-auto mb-3" />
+                <h4 className="font-medium text-foreground mb-1">Gjenero Kuiz me AI</h4>
+                <p className="text-sm text-muted-foreground mb-4">
                   Krijoni automatikisht pyetje nga permbajtja e mesimit
                 </p>
                 <Button onClick={() => setIsQuizGeneratorOpen(true)}>
@@ -998,8 +1007,45 @@ function LessonEditor({ lesson, siblingLessons, onSave, onDelete, onClose }: Les
         )}
 
         {draft.type === 'ASSIGNMENT' && (
-          <div className="p-4 bg-slate-50 rounded-lg text-center text-sm text-slate-600">
-            Detyre Builder do te jete i disponueshem se shpejti.
+          <div className="space-y-4">
+            {hasAssignment ? (
+              <div className="rounded-lg border border-border overflow-hidden">
+                <div className="flex items-center justify-between gap-3 p-4">
+                  <div className="flex items-center gap-3">
+                    <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                      <ClipboardList className="h-5 w-5" />
+                    </span>
+                    <div>
+                      <h4 className="font-medium text-foreground">Detyra eshte konfiguruar</h4>
+                      <p className="text-sm text-muted-foreground">Studentet mund ta dorezojne kete detyre.</p>
+                    </div>
+                  </div>
+                  <Button variant="outline" size="sm" onClick={() => setIsAssignmentEditorOpen(true)}>
+                    Menaxho
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="rounded-lg border-2 border-dashed border-border p-6 text-center">
+                <ClipboardList className="mx-auto mb-3 h-8 w-8 text-primary" />
+                <h4 className="mb-1 font-medium text-foreground">Krijo nje Detyre</h4>
+                <p className="mb-4 text-sm text-muted-foreground">
+                  Shto udhezime, afat dhe pike per kete mesim.
+                </p>
+                <Button onClick={() => setIsAssignmentEditorOpen(true)}>
+                  <ClipboardList className="mr-2 h-4 w-4" />
+                  Konfiguro Detyren
+                </Button>
+              </div>
+            )}
+
+            <AssignmentEditor
+              lessonId={lesson.id}
+              lessonTitle={draft.title}
+              isOpen={isAssignmentEditorOpen}
+              onClose={() => setIsAssignmentEditorOpen(false)}
+              onSaved={(a) => setHasAssignment(!!a)}
+            />
           </div>
         )}
 
@@ -1009,9 +1055,9 @@ function LessonEditor({ lesson, siblingLessons, onSave, onDelete, onClose }: Les
               type="checkbox"
               checked={draft.isPreview}
               onChange={(e) => update({ isPreview: e.target.checked })}
-              className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+              className="rounded border-input text-primary focus:ring-ring"
             />
-            <span className="text-sm text-slate-700">Preview i lire</span>
+            <span className="text-sm text-foreground">Preview i lire</span>
           </label>
 
           <label className="flex items-center gap-2 cursor-pointer">
@@ -1019,14 +1065,14 @@ function LessonEditor({ lesson, siblingLessons, onSave, onDelete, onClose }: Les
               type="checkbox"
               checked={draft.isPublished}
               onChange={(e) => update({ isPublished: e.target.checked })}
-              className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+              className="rounded border-input text-primary focus:ring-ring"
             />
-            <span className="text-sm text-slate-700">Publikuar</span>
+            <span className="text-sm text-foreground">Publikuar</span>
           </label>
         </div>
 
         {/* Save bar — sticks to the bottom of the editor panel */}
-        <div className="sticky bottom-0 -mx-6 mt-2 border-t border-slate-200 bg-white px-6 py-4">
+        <div className="sticky bottom-0 -mx-6 mt-2 border-t border-border bg-card px-6 py-4">
           <div className="flex items-center gap-3">
             <Button className="flex-1" onClick={handleSave} disabled={!dirty || isSaving}>
               {isSaving ? (
@@ -1036,7 +1082,7 @@ function LessonEditor({ lesson, siblingLessons, onSave, onDelete, onClose }: Les
             </Button>
           </div>
           {dirty && (
-            <p className="mt-2 text-center text-xs text-amber-600">
+            <p className="mt-2 text-center text-xs text-warning">
               Keni ndryshime te paruajtura
             </p>
           )}
@@ -1100,7 +1146,7 @@ function CourseSettings({ course, categories, onSave }: CourseSettingsProps) {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-lg font-semibold text-slate-900">Konfigurimet e Kursit</h2>
+      <h2 className="text-lg font-semibold text-foreground">Konfigurimet e Kursit</h2>
 
       <div className="space-y-4">
         <div className="space-y-2">
@@ -1117,7 +1163,7 @@ function CourseSettings({ course, categories, onSave }: CourseSettingsProps) {
             value={draft.description}
             onChange={(e) => update({ description: e.target.value })}
             rows={4}
-            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+            className="w-full rounded-md border border-input bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
           />
         </div>
 
@@ -1126,7 +1172,7 @@ function CourseSettings({ course, categories, onSave }: CourseSettingsProps) {
           <select
             value={draft.categoryId || ''}
             onChange={(e) => update({ categoryId: e.target.value || undefined })}
-            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+            className="w-full rounded-md border border-input bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
           >
             <option value="">Zgjidh Kategorine</option>
             {categories.map((cat) => (
@@ -1142,7 +1188,7 @@ function CourseSettings({ course, categories, onSave }: CourseSettingsProps) {
           <select
             value={draft.level}
             onChange={(e) => update({ level: e.target.value as Course['level'] })}
-            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+            className="w-full rounded-md border border-input bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
           >
             <option value="BEGINNER">Fillestar</option>
             <option value="INTERMEDIATE">Mesatar</option>
@@ -1175,13 +1221,13 @@ function CourseSettings({ course, categories, onSave }: CourseSettingsProps) {
         </div>
       </div>
 
-      <div className="sticky bottom-0 -mx-6 border-t border-slate-200 bg-white px-6 py-4">
+      <div className="sticky bottom-0 -mx-6 border-t border-border bg-card px-6 py-4">
         <Button className="w-full" onClick={handleSave} disabled={!dirty || isSaving}>
           {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
           {dirty ? 'Ruaj Ndryshimet' : 'Te Gjitha te Ruajtura'}
         </Button>
         {dirty && (
-          <p className="mt-2 text-center text-xs text-amber-600">
+          <p className="mt-2 text-center text-xs text-warning">
             Keni ndryshime te paruajtura
           </p>
         )}

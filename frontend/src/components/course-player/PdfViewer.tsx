@@ -56,9 +56,9 @@ export function PdfViewer({ pdfUrl, isCompleted, onComplete }: PdfViewerProps) {
   };
 
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-100 bg-white">
+    <div className="overflow-hidden rounded-xl border border-border bg-card">
       {/* Toolbar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 bg-slate-50 px-4 py-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-muted/50 px-4 py-3">
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
@@ -68,7 +68,7 @@ export function PdfViewer({ pdfUrl, isCompleted, onComplete }: PdfViewerProps) {
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <span className="text-sm text-slate-600">
+          <span className="text-sm text-muted-foreground">
             Faqja {error ? '—' : pageNumber} nga {error ? '—' : numPages || '…'}
           </span>
           <Button
@@ -91,13 +91,13 @@ export function PdfViewer({ pdfUrl, isCompleted, onComplete }: PdfViewerProps) {
       {/* Document */}
       <div
         ref={containerRef}
-        className="flex max-h-[70vh] justify-center overflow-auto bg-slate-100 p-6"
+        className="flex max-h-[70vh] justify-center overflow-auto bg-muted p-6"
       >
         {error ? (
           <div className="flex flex-col items-center py-16 text-center">
-            <FileText className="mb-3 h-12 w-12 text-slate-300" />
-            <p className="font-medium text-slate-900">PDF-ja nuk u shfaq dot</p>
-            <p className="mt-1 text-sm text-slate-500">
+            <FileText className="mb-3 h-12 w-12 text-muted-foreground/50" />
+            <p className="font-medium text-foreground">PDF-ja nuk u shfaq dot</p>
+            <p className="mt-1 text-sm text-muted-foreground">
               Provo ta shkarkosh per ta hapur.
             </p>
             <a href={src} download target="_blank" rel="noopener noreferrer" className="mt-4">
@@ -116,7 +116,7 @@ export function PdfViewer({ pdfUrl, isCompleted, onComplete }: PdfViewerProps) {
             }}
             onLoadError={() => setError(true)}
             loading={
-              <div className="flex items-center gap-2 py-16 text-slate-500">
+              <div className="flex items-center gap-2 py-16 text-muted-foreground">
                 <Loader2 className="h-5 w-5 animate-spin" />
                 Duke ngarkuar PDF...
               </div>
@@ -135,9 +135,9 @@ export function PdfViewer({ pdfUrl, isCompleted, onComplete }: PdfViewerProps) {
 
       {/* Complete */}
       {onComplete && (
-        <div className="border-t border-slate-100 p-4">
+        <div className="border-t border-border p-4">
           {completed ? (
-            <div className="flex items-center gap-2 text-green-600">
+            <div className="flex items-center gap-2 text-success">
               <CheckCircle className="h-5 w-5" />
               <span className="font-medium">Mesimi u perfundua</span>
             </div>

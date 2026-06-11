@@ -58,9 +58,9 @@ export function CourseNavigation({ modules, currentLessonId, onLessonClick }: Co
   };
 
   return (
-    <nav className="h-full overflow-y-auto bg-white border-r border-slate-200">
+    <nav className="h-full overflow-y-auto bg-card border-r border-border">
       <div className="p-4">
-        <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">
+        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">
           Permbajtja e Kursit
         </h2>
         <div className="space-y-2">
@@ -98,8 +98,8 @@ function ModuleItem({ module, isExpanded, currentLessonId, onToggle, onLessonCli
         className={cn(
           'w-full flex items-center gap-2 p-3 text-left transition-colors',
           module.isLocked
-            ? 'bg-slate-50 text-slate-400 cursor-not-allowed'
-            : 'bg-slate-50 hover:bg-slate-100 text-slate-900'
+            ? 'bg-muted/50 text-muted-foreground cursor-not-allowed'
+            : 'bg-muted/50 hover:bg-muted text-foreground'
         )}
         disabled={module.isLocked}
       >
@@ -112,19 +112,19 @@ function ModuleItem({ module, isExpanded, currentLessonId, onToggle, onLessonCli
         )}
         <div className="flex-1 min-w-0">
           <p className="font-medium text-sm truncate">{module.title}</p>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-muted-foreground">
             {module.completedLessons}/{module.totalLessons} mesime
           </p>
         </div>
         {isCompleted && (
-          <div className="h-5 w-5 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+          <div className="h-5 w-5 rounded-full bg-success flex items-center justify-center flex-shrink-0">
             <Check className="h-3 w-3 text-white" />
           </div>
         )}
       </button>
 
       {isExpanded && !module.isLocked && (
-        <div className="bg-white border-l-2 border-slate-100 ml-4">
+        <div className="bg-card border-l-2 border-border ml-4">
           {module.lessons.map((lesson) => (
             <LessonItem
               key={lesson.id}
@@ -155,23 +155,23 @@ function LessonItem({ lesson, isCurrent, onClick }: LessonItemProps) {
       disabled={lesson.isLocked}
       className={cn(
         'w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors',
-        isCurrent && 'bg-indigo-50 border-l-2 border-indigo-600 -ml-[2px]',
-        !isCurrent && !lesson.isLocked && 'hover:bg-slate-50',
+        isCurrent && 'bg-primary/10 border-l-2 border-primary -ml-[2px]',
+        !isCurrent && !lesson.isLocked && 'hover:bg-muted/50',
         lesson.isLocked && 'opacity-50 cursor-not-allowed'
       )}
       title={lesson.isLocked ? 'Perfundo mesimin e meparshem' : undefined}
     >
       {lesson.isCompleted ? (
-        <div className="h-5 w-5 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+        <div className="h-5 w-5 rounded-full bg-success flex items-center justify-center flex-shrink-0">
           <Check className="h-3 w-3 text-white" />
         </div>
       ) : lesson.isLocked ? (
-        <Lock className="h-5 w-5 text-slate-400 flex-shrink-0" />
+        <Lock className="h-5 w-5 text-muted-foreground flex-shrink-0" />
       ) : (
         <Icon
           className={cn(
             'h-5 w-5 flex-shrink-0',
-            isCurrent ? 'text-indigo-600' : 'text-slate-400'
+            isCurrent ? 'text-primary' : 'text-muted-foreground'
           )}
         />
       )}
@@ -179,13 +179,13 @@ function LessonItem({ lesson, isCurrent, onClick }: LessonItemProps) {
         <p
           className={cn(
             'text-sm truncate',
-            isCurrent ? 'text-indigo-900 font-medium' : 'text-slate-700'
+            isCurrent ? 'text-primary font-medium' : 'text-foreground'
           )}
         >
           {lesson.title}
         </p>
         {lesson.duration && (
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-muted-foreground">
             {Math.floor(lesson.duration / 60)}:{String(lesson.duration % 60).padStart(2, '0')}
           </p>
         )}

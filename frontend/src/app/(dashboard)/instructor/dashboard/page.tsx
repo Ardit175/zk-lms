@@ -119,8 +119,8 @@ export default function InstructorDashboard() {
       <DashboardLayout role="INSTRUCTOR">
         <div className="space-y-8">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">Paneli i Instruktorit</h1>
-            <p className="mt-1 text-slate-600">Menaxho kurset dhe studentet e tu</p>
+            <h1 className="font-display text-3xl font-bold tracking-tight text-foreground">Paneli i Instruktorit</h1>
+            <p className="mt-1 text-muted-foreground">Menaxho kurset dhe studentet e tu</p>
           </div>
           <StatGridSkeleton count={4} />
           <Card>
@@ -140,9 +140,9 @@ export default function InstructorDashboard() {
     return (
       <DashboardLayout role="INSTRUCTOR">
         <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
-          <AlertCircle className="h-12 w-12 text-red-400 mb-4" />
-          <h2 className="text-lg font-semibold text-slate-900">Ngarkimi deshtoi</h2>
-          <p className="text-slate-500 mt-1">Nuk u arrit te ngarkohen te dhenat e panelit.</p>
+          <AlertCircle className="h-12 w-12 text-destructive/70 mb-4" />
+          <h2 className="text-lg font-semibold text-foreground">Ngarkimi deshtoi</h2>
+          <p className="text-muted-foreground mt-1">Nuk u arrit te ngarkohen te dhenat e panelit.</p>
           <Button className="mt-4" onClick={loadData}>
             Provo Perseri
           </Button>
@@ -156,8 +156,8 @@ export default function InstructorDashboard() {
       <div className="space-y-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">Paneli i Instruktorit</h1>
-            <p className="text-slate-500 mt-1">Menaxho kurset dhe studentet e tu</p>
+            <h1 className="font-display text-3xl font-bold tracking-tight text-foreground">Paneli i Instruktorit</h1>
+            <p className="text-muted-foreground mt-1">Menaxho kurset dhe studentet e tu</p>
           </div>
           <Button onClick={() => router.push('/instructor/courses')}>
             <Plus className="h-4 w-4 mr-2" />
@@ -199,9 +199,9 @@ export default function InstructorDashboard() {
           <CardContent>
             {courses.length === 0 ? (
               <div className="text-center py-8">
-                <BookOpen className="h-12 w-12 text-slate-300 mx-auto mb-3" />
-                <p className="font-medium text-slate-900">Asnje kurs ende</p>
-                <p className="text-sm text-slate-500 mt-1">
+                <BookOpen className="h-12 w-12 text-muted-foreground/50 mx-auto mb-3" />
+                <p className="font-medium text-foreground">Asnje kurs ende</p>
+                <p className="text-sm text-muted-foreground mt-1">
                   Krijo kursin tend te pare per te filluar.
                 </p>
                 <Button className="mt-4" onClick={() => router.push('/instructor/courses')}>
@@ -214,11 +214,11 @@ export default function InstructorDashboard() {
                 {courses.slice(0, 5).map((course) => (
                   <div
                     key={course.id}
-                    className="flex items-center justify-between p-4 rounded-lg border border-slate-200 hover:border-indigo-300 transition-colors"
+                    className="flex items-center justify-between p-4 rounded-lg border border-border hover:border-primary/40 transition-colors"
                   >
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-slate-900 truncate">{course.title}</p>
-                      <p className="text-sm text-slate-500">
+                      <p className="font-medium text-foreground truncate">{course.title}</p>
+                      <p className="text-sm text-muted-foreground">
                         {(course._count?.enrollments ?? course.enrollmentCount ?? 0)} studente
                         {(course.averageRating ?? 0) > 0 &&
                           ` • ${course.averageRating?.toFixed(1)} vleresim`}
@@ -251,8 +251,8 @@ export default function InstructorDashboard() {
             </CardHeader>
             <CardContent>
               {pendingWork.length === 0 ? (
-                <div className="text-center py-8 text-slate-500">
-                  <FileText className="h-10 w-10 mx-auto mb-3 text-slate-300" />
+                <div className="text-center py-8 text-muted-foreground">
+                  <FileText className="h-10 w-10 mx-auto mb-3 text-muted-foreground/50" />
                   <p>Asnje detyre per t&apos;u vleresuar</p>
                 </div>
               ) : (
@@ -263,15 +263,15 @@ export default function InstructorDashboard() {
                       onClick={() =>
                         router.push(`/instructor/courses/${work.courseId}/assignments`)
                       }
-                      className="w-full flex items-center justify-between p-3 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors text-left"
+                      className="w-full flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors text-left"
                     >
                       <div>
-                        <p className="text-sm font-medium text-slate-900">{work.courseTitle}</p>
-                        <p className="text-xs text-slate-500">
+                        <p className="text-sm font-medium text-foreground">{work.courseTitle}</p>
+                        <p className="text-xs text-muted-foreground">
                           {work.ungradedCount} dorezime pa vleresuar
                         </p>
                       </div>
-                      <ChevronRight className="h-4 w-4 text-slate-400" />
+                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
                     </button>
                   ))}
                 </div>
@@ -289,8 +289,8 @@ export default function InstructorDashboard() {
             </CardHeader>
             <CardContent>
               {upcomingSessions.length === 0 ? (
-                <div className="text-center py-8 text-slate-500">
-                  <Video className="h-10 w-10 mx-auto mb-3 text-slate-300" />
+                <div className="text-center py-8 text-muted-foreground">
+                  <Video className="h-10 w-10 mx-auto mb-3 text-muted-foreground/50" />
                   <p>Asnje sesion i planifikuar</p>
                 </div>
               ) : (
@@ -302,13 +302,13 @@ export default function InstructorDashboard() {
                       className={cn(
                         'w-full flex items-center justify-between p-3 rounded-lg text-left transition-colors',
                         session.status === 'LIVE'
-                          ? 'bg-red-50 border border-red-200 hover:bg-red-100'
-                          : 'bg-slate-50 hover:bg-slate-100'
+                          ? 'bg-destructive/10 border border-destructive/30 hover:bg-destructive/20'
+                          : 'bg-muted/50 hover:bg-muted'
                       )}
                     >
                       <div>
-                        <p className="text-sm font-medium text-slate-900">{session.title}</p>
-                        <p className="text-xs text-slate-500 flex items-center gap-1">
+                        <p className="text-sm font-medium text-foreground">{session.title}</p>
+                        <p className="text-xs text-muted-foreground flex items-center gap-1">
                           <Calendar className="h-3 w-3" />
                           {format(new Date(session.scheduledAt), 'dd MMM yyyy, HH:mm', {
                             locale: sq,
@@ -318,7 +318,7 @@ export default function InstructorDashboard() {
                       {session.status === 'LIVE' ? (
                         <Badge variant="destructive">LIVE</Badge>
                       ) : (
-                        <ChevronRight className="h-4 w-4 text-slate-400" />
+                        <ChevronRight className="h-4 w-4 text-muted-foreground" />
                       )}
                     </button>
                   ))}

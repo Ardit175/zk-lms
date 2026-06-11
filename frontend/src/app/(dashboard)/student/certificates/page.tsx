@@ -90,20 +90,20 @@ export default function StudentCertificatesPage() {
     <DashboardLayout role="STUDENT">
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Certifikatat e Mia</h1>
-          <p className="text-slate-500 mt-1">
+          <h1 className="text-2xl font-bold text-foreground">Certifikatat e Mia</h1>
+          <p className="text-muted-foreground mt-1">
             Shkarkoni dhe ndani certifikatat tuaja
           </p>
         </div>
 
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : certificates.length === 0 ? (
           <Card>
-            <CardContent className="flex flex-col items-center justify-center py-12 text-slate-500">
-              <Award className="h-12 w-12 mb-4 text-slate-300" />
+            <CardContent className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+              <Award className="h-12 w-12 mb-4 text-muted-foreground/60" />
               <p className="text-lg font-medium">Asnje certifikate ende</p>
               <p className="text-sm mt-1">
                 Perfundoni nje kurs per te marre certifikaten tuaj te pare
@@ -132,13 +132,13 @@ export default function StudentCertificatesPage() {
                   </div>
                 </div>
                 <CardContent className="p-4">
-                  <h3 className="font-semibold text-slate-900 line-clamp-2 mb-2">
+                  <h3 className="font-semibold text-foreground line-clamp-2 mb-2">
                     {certificate.course.title}
                   </h3>
-                  <p className="text-sm text-slate-500 mb-1">
+                  <p className="text-sm text-muted-foreground mb-1">
                     Instruktor: {certificate.course.instructorName}
                   </p>
-                  <p className="text-sm text-slate-500 mb-4">
+                  <p className="text-sm text-muted-foreground mb-4">
                     Leshuar me{' '}
                     {format(new Date(certificate.issuedAt), 'dd MMMM yyyy', { locale: sq })}
                   </p>
@@ -186,13 +186,13 @@ export default function StudentCertificatesPage() {
                 />
                 <Button onClick={handleCopyLink} variant="outline">
                   {copied ? (
-                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <CheckCircle className="h-4 w-4 text-success" />
                   ) : (
                     <Copy className="h-4 w-4" />
                   )}
                 </Button>
               </div>
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-muted-foreground">
                 Kushdo me kete link mund te verifikoje autenticitetin e certifikates suaj.
               </p>
               <Button

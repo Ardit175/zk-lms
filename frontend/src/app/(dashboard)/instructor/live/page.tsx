@@ -108,8 +108,8 @@ export default function InstructorLiveSessionsPage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">Sesionet Live</h1>
-            <p className="text-slate-500 mt-1">Menaxhoni sesionet tuaja live</p>
+            <h1 className="text-2xl font-bold text-foreground">Sesionet Live</h1>
+            <p className="text-muted-foreground mt-1">Menaxhoni sesionet tuaja live</p>
           </div>
           <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
             <DialogTrigger asChild>
@@ -189,12 +189,12 @@ export default function InstructorLiveSessionsPage() {
 
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : sessions.length === 0 ? (
           <Card>
-            <CardContent className="flex flex-col items-center justify-center py-12 text-slate-500">
-              <Video className="h-12 w-12 mb-4 text-slate-300" />
+            <CardContent className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+              <Video className="h-12 w-12 mb-4 text-muted-foreground/60" />
               <p className="text-lg font-medium">Asnje sesion live</p>
               <p className="text-sm mt-1">Krijoni sesionin tuaj te pare live</p>
               <Button className="mt-4" onClick={() => setIsCreateOpen(true)}>
@@ -208,7 +208,7 @@ export default function InstructorLiveSessionsPage() {
             {/* Live Now */}
             {liveSessions.length > 0 && (
               <div>
-                <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+                <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
                   <span className="relative flex h-3 w-3">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
                     <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500" />
@@ -226,7 +226,7 @@ export default function InstructorLiveSessionsPage() {
             {/* Scheduled */}
             {scheduledSessions.length > 0 && (
               <div>
-                <h2 className="text-lg font-semibold text-slate-900 mb-4">Te Planifikuara</h2>
+                <h2 className="text-lg font-semibold text-foreground mb-4">Te Planifikuara</h2>
                 <div className="grid gap-4">
                   {scheduledSessions.map((session) => (
                     <SessionCard key={session.id} session={session} onNavigate={() => router.push(`/instructor/live/${session.id}`)} />
@@ -238,7 +238,7 @@ export default function InstructorLiveSessionsPage() {
             {/* Ended */}
             {endedSessions.length > 0 && (
               <div>
-                <h2 className="text-lg font-semibold text-slate-900 mb-4">Te Perfunduara</h2>
+                <h2 className="text-lg font-semibold text-foreground mb-4">Te Perfunduara</h2>
                 <div className="grid gap-4">
                   {endedSessions.map((session) => (
                     <SessionCard key={session.id} session={session} onNavigate={() => router.push(`/instructor/live/${session.id}`)} />
@@ -257,8 +257,8 @@ function SessionCard({ session, onNavigate }: { session: LiveSession; onNavigate
   return (
     <Card
       className={cn(
-        'cursor-pointer hover:border-indigo-300 transition-colors',
-        session.status === 'LIVE' && 'border-red-300 bg-red-50/50'
+        'cursor-pointer hover:border-primary/40 transition-colors',
+        session.status === 'LIVE' && 'border-red-300 bg-destructive/10'
       )}
       onClick={onNavigate}
     >
@@ -266,7 +266,7 @@ function SessionCard({ session, onNavigate }: { session: LiveSession; onNavigate
         <div className="flex items-center justify-between">
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
-              <h3 className="font-semibold text-slate-900">{session.title}</h3>
+              <h3 className="font-semibold text-foreground">{session.title}</h3>
               <Badge
                 variant={
                   session.status === 'LIVE'
@@ -279,8 +279,8 @@ function SessionCard({ session, onNavigate }: { session: LiveSession; onNavigate
                 {session.status === 'LIVE' ? 'LIVE' : session.status === 'SCHEDULED' ? 'Planifikuar' : 'Perfunduar'}
               </Badge>
             </div>
-            <p className="text-sm text-slate-500">{session.course.title}</p>
-            <div className="flex items-center gap-4 mt-3 text-sm text-slate-500">
+            <p className="text-sm text-muted-foreground">{session.course.title}</p>
+            <div className="flex items-center gap-4 mt-3 text-sm text-muted-foreground">
               <span className="flex items-center gap-1">
                 <Calendar className="h-4 w-4" />
                 {format(new Date(session.scheduledAt), 'dd MMM yyyy', { locale: sq })}

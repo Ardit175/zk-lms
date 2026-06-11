@@ -1,9 +1,11 @@
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
+from app.config import get_settings
 from app.routers import extraction, quiz
 
 logging.basicConfig(
@@ -26,6 +28,20 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan,
 )
+
+# ── Internal auth ─────────────────────────────────────────────────────────────
+# The AI service is only meant to be called by the backend. When AI_SERVICE_TOKEN
+# is configured, every /api/* request must carry a matching `X-Internal-Token`
+# header; otherwise it is rejected with 401. If the token is unset (local dev),
+# the check is skipped so nothing breaks until both services are configured.
+@app.middleware("http")
+async def require_internal_token(request: Request, call_next):
+    token = get_settings().ai_service_token
+    if token and request.url.path.startswith("/api/"):
+        if request.headers.get("x-internal-token") != token:
+            return JSONResponse(status_code=401, content={"detail": "Unauthorized"})
+    return await call_next(request)
+
 
 # ── CORS ──────────────────────────────────────────────────────────────────────
 app.add_middleware(

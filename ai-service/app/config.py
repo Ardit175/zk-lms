@@ -12,6 +12,10 @@ class Settings(BaseSettings):
     backend_url: str = "http://localhost:4000"
     port: int = 8000
 
+    # Shared secret the backend must send as `X-Internal-Token`. When empty the
+    # check is disabled (local dev); set it on both services to lock the API.
+    ai_service_token: str = ""
+
     class Config:
         env_file = ".env"
         case_sensitive = False

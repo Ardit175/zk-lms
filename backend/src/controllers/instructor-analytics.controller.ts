@@ -10,7 +10,7 @@ export const getCourseAnalytics = async (req: Request, res: Response): Promise<v
 
     const course = await prisma.course.findUnique({
       where: { id: courseId },
-      select: { id: true, instructorId: true, title: true },
+      select: { id: true, instructorId: true, title: true, averageRating: true },
     });
 
     if (!course) {
@@ -59,8 +59,9 @@ export const getCourseAnalytics = async (req: Request, res: Response): Promise<v
       ? Math.round(quizAttempts.reduce((sum: number, a: { score: number | null }) => sum + (a.score || 0), 0) / quizAttempts.length)
       : 0;
 
-    // Average rating (placeholder - would come from a reviews table)
-    const averageRating = 4.5;
+    // Real stored course rating (0 until a reviews feature populates it) —
+    // never fabricate a number the committee could question.
+    const averageRating = course.averageRating ?? 0;
 
     // Enrollments over time
     const enrollmentsByDate = new Map<string, number>();

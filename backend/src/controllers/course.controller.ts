@@ -361,6 +361,28 @@ export const getCourseById = async (req: Request, res: Response): Promise<void> 
 export const getModules = async (req: Request, res: Response): Promise<void> => {
   try {
     const courseId = getParam(req.params.id);
+    const userId = req.user!.id;
+    const userRole = req.user!.role;
+
+    // This endpoint returns full authoring content (unpublished lessons, video
+    // and PDF URLs), so it must be restricted to the course owner or an admin.
+    // Students read course content through the enrollment progress endpoint,
+    // which gates on an active enrollment. Without this check any authenticated
+    // user could read any course — including drafts — by guessing its id.
+    const course = await prisma.course.findUnique({
+      where: { id: courseId },
+      select: { instructorId: true },
+    });
+
+    if (!course) {
+      res.status(404).json(ApiResponse.error('Course not found'));
+      return;
+    }
+
+    if (userRole !== 'ADMIN' && course.instructorId !== userId) {
+      res.status(403).json(ApiResponse.error('Not authorized to view this course'));
+      return;
+    }
 
     const modules = await prisma.module.findMany({
       where: { courseId },

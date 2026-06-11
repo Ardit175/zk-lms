@@ -29,6 +29,11 @@ export const config = {
   // a "//api/..." path, which FastAPI/Starlette serves as 404.
   aiServiceUrl: (process.env.AI_SERVICE_URL || 'http://localhost:8000').replace(/\/+$/, ''),
 
+  // Shared secret sent as `X-Internal-Token` on every call to the AI service.
+  // When empty (local dev), no header is sent and the AI service does not
+  // enforce one — so this stays opt-in until configured on both services.
+  aiServiceToken: process.env.AI_SERVICE_TOKEN || '',
+
   corsOrigin: process.env.CORS_ORIGIN || 'http://localhost:3000',
 
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000',

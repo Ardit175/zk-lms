@@ -10,7 +10,10 @@ async function forwardJson(path: string, body: unknown, res: Response): Promise<
   try {
     const response = await fetch(`${config.aiServiceUrl}${path}`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(config.aiServiceToken ? { 'X-Internal-Token': config.aiServiceToken } : {}),
+      },
       body: JSON.stringify(body),
       signal: controller.signal,
     });
@@ -46,6 +49,7 @@ async function forwardFile(
 
     const response = await fetch(`${config.aiServiceUrl}${path}`, {
       method: 'POST',
+      headers: config.aiServiceToken ? { 'X-Internal-Token': config.aiServiceToken } : undefined,
       body: form,
       signal: controller.signal,
     });

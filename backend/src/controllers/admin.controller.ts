@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { prisma } from '../services/prisma';
 import { ApiResponse } from '../utils/ApiResponse';
 import { notificationService } from '../services/notification.service';
-import { cacheGet, cacheSet, cacheKeys, TTL } from '../lib/cache';
+import { cacheGet, cacheSet, cacheKeys, TTL, invalidateCourseCaches } from '../lib/cache';
 
 export const getStats = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -454,6 +454,10 @@ export const reviewCourse = async (req: Request, res: Response): Promise<void> =
         data: { status: 'PUBLISHED' },
       });
 
+      // A newly published course must appear immediately in the public catalog
+      // and admin stats, so drop the cached course lists / stats.
+      await invalidateCourseCaches();
+
       await notificationService.notifyCourseApproved(
         course.instructorId,
         courseId,
@@ -471,6 +475,8 @@ export const reviewCourse = async (req: Request, res: Response): Promise<void> =
         where: { id: courseId },
         data: { status: 'DRAFT' },
       });
+
+      await invalidateCourseCaches();
 
       await notificationService.notifyCourseRejected(
         course.instructorId,

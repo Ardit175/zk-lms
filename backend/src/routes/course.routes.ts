@@ -79,7 +79,9 @@ router.patch(
 );
 
 // ─── MODULE ROUTES ───────────────────────────────────────────────────────────
-router.get('/:id/modules', requireAuth, getModules);
+// Authoring view of modules/lessons — owner instructor or admin only. The
+// controller additionally verifies course ownership.
+router.get('/:id/modules', requireAuth, requireRole('INSTRUCTOR', 'ADMIN'), getModules);
 
 router.post(
   '/:id/modules',

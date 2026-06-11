@@ -2,7 +2,163 @@ import { Request, Response } from 'express';
 import { prisma } from '../services/prisma';
 import { ApiResponse } from '../utils/ApiResponse';
 import { notificationService } from '../services/notification.service';
-import { SubmitAssignmentInput, GradeSubmissionInput } from '../validators/assignment.validator';
+import {
+  SubmitAssignmentInput,
+  GradeSubmissionInput,
+  CreateAssignmentInput,
+  UpdateAssignmentInput,
+} from '../validators/assignment.validator';
+
+/** Resolve the owning instructor of the course a lesson belongs to. */
+async function getLessonOwner(lessonId: string): Promise<string | null> {
+  const lesson = await prisma.lesson.findUnique({
+    where: { id: lessonId },
+    select: { module: { select: { course: { select: { instructorId: true } } } } },
+  });
+  return lesson?.module.course.instructorId ?? null;
+}
+
+// ─── INSTRUCTOR: ASSIGNMENT AUTHORING ─────────────────────────────────────────
+
+export const createAssignment = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const instructorId = req.user!.id;
+    const { lessonId, title, description, instructions, dueDate, maxScore, submissionType } =
+      req.body as CreateAssignmentInput;
+
+    const ownerId = await getLessonOwner(lessonId);
+    if (ownerId === null) {
+      res.status(404).json(ApiResponse.error('Mesimi nuk u gjet'));
+      return;
+    }
+    if (ownerId !== instructorId) {
+      res.status(403).json(ApiResponse.error('Nuk keni akses ne kete mesim'));
+      return;
+    }
+
+    // A lesson holds at most one assignment (lessonId is unique).
+    const existing = await prisma.assignment.findUnique({ where: { lessonId } });
+    if (existing) {
+      res.status(400).json(ApiResponse.error('Ky mesim ka tashme nje detyre'));
+      return;
+    }
+
+    const assignment = await prisma.assignment.create({
+      data: {
+        lessonId,
+        title,
+        description,
+        instructions,
+        dueDate: dueDate ? new Date(dueDate) : null,
+        maxScore,
+        submissionType,
+      },
+    });
+
+    res.status(201).json(ApiResponse.success(assignment));
+  } catch (error) {
+    console.error('CreateAssignment error:', error);
+    res.status(500).json(ApiResponse.error('Deshtoi te krijonte detyren'));
+  }
+};
+
+export const updateAssignment = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const assignmentId = req.params.id as string;
+    const instructorId = req.user!.id;
+    const data = req.body as UpdateAssignmentInput;
+
+    const assignment = await prisma.assignment.findUnique({
+      where: { id: assignmentId },
+      include: { lesson: { include: { module: { include: { course: { select: { instructorId: true } } } } } } },
+    });
+
+    if (!assignment) {
+      res.status(404).json(ApiResponse.error('Detyra nuk u gjet'));
+      return;
+    }
+    if (assignment.lesson.module.course.instructorId !== instructorId) {
+      res.status(403).json(ApiResponse.error('Nuk keni akses ne kete detyre'));
+      return;
+    }
+
+    const updated = await prisma.assignment.update({
+      where: { id: assignmentId },
+      data: {
+        ...(data.title !== undefined && { title: data.title }),
+        ...(data.description !== undefined && { description: data.description }),
+        ...(data.instructions !== undefined && { instructions: data.instructions }),
+        ...(data.dueDate !== undefined && { dueDate: data.dueDate ? new Date(data.dueDate) : null }),
+        ...(data.maxScore !== undefined && { maxScore: data.maxScore }),
+        ...(data.submissionType !== undefined && { submissionType: data.submissionType }),
+      },
+    });
+
+    res.json(ApiResponse.success(updated));
+  } catch (error) {
+    console.error('UpdateAssignment error:', error);
+    res.status(500).json(ApiResponse.error('Deshtoi te perditesonte detyren'));
+  }
+};
+
+export const deleteAssignment = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const assignmentId = req.params.id as string;
+    const instructorId = req.user!.id;
+
+    const assignment = await prisma.assignment.findUnique({
+      where: { id: assignmentId },
+      include: { lesson: { include: { module: { include: { course: { select: { instructorId: true } } } } } } },
+    });
+
+    if (!assignment) {
+      res.status(404).json(ApiResponse.error('Detyra nuk u gjet'));
+      return;
+    }
+    if (assignment.lesson.module.course.instructorId !== instructorId) {
+      res.status(403).json(ApiResponse.error('Nuk keni akses ne kete detyre'));
+      return;
+    }
+
+    // Remove submissions first (no cascade defined on Assignment → Submission).
+    await prisma.assignmentSubmission.deleteMany({ where: { assignmentId } });
+    await prisma.assignment.delete({ where: { id: assignmentId } });
+
+    res.json(ApiResponse.success({ message: 'Detyra u fshi me sukses' }));
+  } catch (error) {
+    console.error('DeleteAssignment error:', error);
+    res.status(500).json(ApiResponse.error('Deshtoi te fshinte detyren'));
+  }
+};
+
+/** Instructor-side fetch of a lesson's assignment for editing (owner only). */
+export const getAssignmentForEdit = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const lessonId = req.params.lessonId as string;
+    const instructorId = req.user!.id;
+
+    const assignment = await prisma.assignment.findUnique({
+      where: { lessonId },
+      include: { lesson: { include: { module: { include: { course: { select: { instructorId: true } } } } } } },
+    });
+
+    if (!assignment) {
+      // Not an error — the lesson simply has no assignment yet.
+      res.json(ApiResponse.success(null));
+      return;
+    }
+    if (assignment.lesson.module.course.instructorId !== instructorId) {
+      res.status(403).json(ApiResponse.error('Nuk keni akses ne kete detyre'));
+      return;
+    }
+
+    const { lesson: _lesson, ...rest } = assignment;
+    res.json(ApiResponse.success(rest));
+  } catch (error) {
+    console.error('GetAssignmentForEdit error:', error);
+    res.status(500).json(ApiResponse.error('Deshtoi te merrte detyren'));
+  }
+};
 
 export const submitAssignment = async (req: Request, res: Response): Promise<void> => {
   try {

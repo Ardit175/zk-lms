@@ -1,5 +1,16 @@
 import { prisma } from '../services/prisma';
 
+// Safety guard: this suite truncates every table after each test. Refuse to run
+// against anything that doesn't clearly look like a disposable test database, so
+// pointing DATABASE_URL at staging/production can never wipe real data.
+const dbUrl = process.env.DATABASE_URL || '';
+if (process.env.NODE_ENV !== 'test' || !/test/i.test(dbUrl)) {
+  throw new Error(
+    'Refusing to run tests: NODE_ENV must be "test" and DATABASE_URL must reference a test database ' +
+      '(its name/URL should contain "test"). This prevents the cleanup hooks from wiping real data.'
+  );
+}
+
 beforeAll(async () => {
   // Ensure database connection is established
   await prisma.$connect();

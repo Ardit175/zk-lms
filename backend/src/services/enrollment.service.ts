@@ -8,12 +8,19 @@ export async function calculateProgress(
   // The previous version divided by `lessonProgress.length`, which only counts
   // lessons the student has interacted with — meaning the first completion
   // always yielded 100% and prematurely marked the course as completed.
+  // Only published lessons in published modules count toward completion —
+  // otherwise an instructor's draft lesson would make the course impossible to
+  // finish (and the certificate unreachable) for already-enrolled students.
   const [totalLessons, completedLessons] = await Promise.all([
     prisma.lesson.count({
-      where: { module: { courseId } },
+      where: { isPublished: true, module: { courseId, isPublished: true } },
     }),
     prisma.lessonProgress.count({
-      where: { enrollmentId, isCompleted: true },
+      where: {
+        enrollmentId,
+        isCompleted: true,
+        lesson: { isPublished: true, module: { isPublished: true } },
+      },
     }),
   ]);
 
@@ -55,10 +62,11 @@ export async function checkAndCompleteEnrollment(
 
 export async function getDetailedProgress(enrollmentId: string, courseId: string) {
   const modules = await prisma.module.findMany({
-    where: { courseId },
+    where: { courseId, isPublished: true },
     orderBy: { orderIndex: 'asc' },
     include: {
       lessons: {
+        where: { isPublished: true },
         orderBy: { orderIndex: 'asc' },
         select: {
           id: true,
@@ -138,8 +146,11 @@ export async function getDetailedProgress(enrollmentId: string, courseId: string
     };
   });
 
-  const totalLessons = modules.reduce((sum: number, m: ModuleRow) => sum + m.lessons.length, 0);
-  const completedLessons = lessonProgress.filter((lp: LessonProgressRow) => lp.isCompleted).length;
+  // Derive totals from the published modules/lessons we actually fetched so the
+  // percentage stays consistent with calculateProgress (no counting of progress
+  // rows that belong to now-unpublished lessons).
+  const totalLessons = modulesWithProgress.reduce((sum, m) => sum + m.totalLessons, 0);
+  const completedLessons = modulesWithProgress.reduce((sum, m) => sum + m.completedLessons, 0);
   const overallProgress = totalLessons > 0
     ? Math.round((completedLessons / totalLessons) * 100)
     : 0;

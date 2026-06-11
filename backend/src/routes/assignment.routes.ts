@@ -6,10 +6,19 @@ import {
   gradeSubmission,
   getCourseAssignments,
   getAssignmentByLesson,
+  createAssignment,
+  updateAssignment,
+  deleteAssignment,
+  getAssignmentForEdit,
 } from '../controllers/assignment.controller';
 import { requireAuth, requireRole } from '../middleware/auth';
 import { validate } from '../middleware/validate';
-import { submitAssignmentSchema, gradeSubmissionSchema } from '../validators/assignment.validator';
+import {
+  submitAssignmentSchema,
+  gradeSubmissionSchema,
+  createAssignmentSchema,
+  updateAssignmentSchema,
+} from '../validators/assignment.validator';
 
 const router = Router();
 
@@ -37,6 +46,36 @@ router.get(
 );
 
 // Instructor endpoints
+router.post(
+  '/',
+  requireAuth,
+  requireRole('INSTRUCTOR'),
+  validate(createAssignmentSchema),
+  createAssignment
+);
+
+router.get(
+  '/instructor/lesson/:lessonId',
+  requireAuth,
+  requireRole('INSTRUCTOR'),
+  getAssignmentForEdit
+);
+
+router.put(
+  '/:id',
+  requireAuth,
+  requireRole('INSTRUCTOR'),
+  validate(updateAssignmentSchema),
+  updateAssignment
+);
+
+router.delete(
+  '/:id',
+  requireAuth,
+  requireRole('INSTRUCTOR'),
+  deleteAssignment
+);
+
 router.get(
   '/course/:courseId',
   requireAuth,

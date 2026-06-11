@@ -223,8 +223,19 @@ export const submitAttempt = async (req: Request, res: Response): Promise<void> 
 
       if (question.type === 'SHORT_ANSWER') {
         studentAnswer = answer?.textAnswer || null;
-        correctAnswer = question.options[0]?.optionText || null;
-        isCorrect = false;
+        // The ideal answer is stored as a (correct) reference option when the
+        // quiz is created. Auto-grade by a forgiving normalized comparison:
+        // lowercase, collapse whitespace, strip surrounding punctuation. If no
+        // reference answer exists, the question can't be auto-graded and scores 0.
+        const reference =
+          question.options.find((o: { isCorrect: boolean; optionText: string }) => o.isCorrect)?.optionText ||
+          question.options[0]?.optionText ||
+          null;
+        correctAnswer = reference;
+        const normalize = (s: string) =>
+          s.toLowerCase().trim().replace(/\s+/g, ' ').replace(/^[\s.,;:!?"']+|[\s.,;:!?"']+$/g, '');
+        isCorrect =
+          !!reference && !!studentAnswer && normalize(studentAnswer) === normalize(reference);
       } else {
         const selectedOption = question.options.find(
           (o: { id: string; isCorrect: boolean; optionText: string }) => o.id === answer?.selectedOptionId

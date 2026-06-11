@@ -46,6 +46,9 @@ app.use(
   '/uploads',
   (_req: Request, res: Response, next: NextFunction) => {
     res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    // Prevent the browser from MIME-sniffing an uploaded file into executable
+    // content (defense-in-depth alongside the server-derived safe extensions).
+    res.setHeader('X-Content-Type-Options', 'nosniff');
     next();
   },
   express.static(path.join(process.cwd(), 'uploads'))

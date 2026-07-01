@@ -59,7 +59,7 @@ app.get('/health', (_req: Request, res: Response) => {
 });
 
 app.get('/', (_req: Request, res: Response) => {
-  res.json(ApiResponse.success({ message: 'ZK-LMS API v1.0' }));
+  res.json(ApiResponse.success({ message: 'EduAI API v1.0' }));
 });
 
 app.use('/api', routes);

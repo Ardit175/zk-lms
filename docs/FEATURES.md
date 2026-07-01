@@ -1,4 +1,4 @@
-# ZK-LMS — Feature Catalogue by Role
+# EduAI — Feature Catalogue by Role
 
 The platform exposes three distinct experiences, each protected by route-level role guards
 (`/admin/**`, `/instructor/**`, `/student/**`). The features below are organised by the role

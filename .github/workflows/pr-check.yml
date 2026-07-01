@@ -19,7 +19,7 @@ jobs:
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: zklms_test
+          POSTGRES_DB: eduai_test
         ports:
           - 5432:5432
         options: >-
@@ -50,7 +50,7 @@ jobs:
       - name: Run migrations
         working-directory: backend
         env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/zklms_test
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/eduai_test
         run: npx prisma migrate deploy
 
       - name: Run backend tests
@@ -58,7 +58,7 @@ jobs:
         working-directory: backend
         continue-on-error: true
         env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/zklms_test
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/eduai_test
           JWT_SECRET: test-jwt-secret-for-ci
           JWT_EXPIRES_IN: 7d
           NODE_ENV: test

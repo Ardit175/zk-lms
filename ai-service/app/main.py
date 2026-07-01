@@ -17,14 +17,14 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    logger.info("ZK-LMS AI Service starting up...")
+    logger.info("EduAI AI Service starting up...")
     yield
-    logger.info("ZK-LMS AI Service shutting down...")
+    logger.info("EduAI AI Service shutting down...")
 
 
 app = FastAPI(
-    title="ZK-LMS AI Service",
-    description="AI-powered content generation for the ZK-LMS Learning Management System",
+    title="EduAI AI Service",
+    description="AI-powered content generation for the EduAI Learning Management System",
     version="1.0.0",
     lifespan=lifespan,
 )
@@ -63,4 +63,4 @@ app.include_router(extraction.router)
 # ── Health check ──────────────────────────────────────────────────────────────
 @app.get("/health", tags=["Health"])
 async def health_check() -> dict:
-    return {"status": "ok", "service": "zk-lms-ai-service"}
+    return {"status": "ok", "service": "edu-ai-ai-service"}

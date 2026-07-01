@@ -43,9 +43,9 @@ export const useAuthStore = create<AuthState>()(
           const response = await authApi.login({ email, password });
           if (response.success && response.data) {
             const { user, token } = response.data;
-            localStorage.setItem('zklms-token', token);
-            Cookies.set('zklms-token', token, { expires: 7 });
-            Cookies.set('zklms-user', JSON.stringify({ role: user.role }), { expires: 7 });
+            localStorage.setItem('eduai-token', token);
+            Cookies.set('eduai-token', token, { expires: 7 });
+            Cookies.set('eduai-user', JSON.stringify({ role: user.role }), { expires: 7 });
             set({
               user,
               token,
@@ -73,9 +73,9 @@ export const useAuthStore = create<AuthState>()(
           const response = await authApi.register(data);
           if (response.success && response.data) {
             const { user, token } = response.data;
-            localStorage.setItem('zklms-token', token);
-            Cookies.set('zklms-token', token, { expires: 7 });
-            Cookies.set('zklms-user', JSON.stringify({ role: user.role }), { expires: 7 });
+            localStorage.setItem('eduai-token', token);
+            Cookies.set('eduai-token', token, { expires: 7 });
+            Cookies.set('eduai-user', JSON.stringify({ role: user.role }), { expires: 7 });
             set({
               user,
               token,
@@ -98,9 +98,9 @@ export const useAuthStore = create<AuthState>()(
       },
 
       logout: () => {
-        localStorage.removeItem('zklms-token');
-        Cookies.remove('zklms-token');
-        Cookies.remove('zklms-user');
+        localStorage.removeItem('eduai-token');
+        Cookies.remove('eduai-token');
+        Cookies.remove('eduai-user');
         set({
           user: null,
           token: null,
@@ -111,7 +111,7 @@ export const useAuthStore = create<AuthState>()(
       },
 
       initialize: async () => {
-        const token = localStorage.getItem('zklms-token');
+        const token = localStorage.getItem('eduai-token');
         if (!token) {
           set({ isLoading: false, isAuthenticated: false });
           return;
@@ -137,7 +137,7 @@ export const useAuthStore = create<AuthState>()(
       clearError: () => set({ error: null }),
     }),
     {
-      name: 'zklms-auth',
+      name: 'eduai-auth',
       partialize: (state) => ({
         user: state.user,
         token: state.token,

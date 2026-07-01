@@ -16,7 +16,7 @@ dotenv.config();
 
 const pool = new Pool({
   connectionString:
-    process.env.DATABASE_URL || 'postgresql://postgres:password@localhost:5432/zklms',
+    process.env.DATABASE_URL || 'postgresql://postgres:password@localhost:5432/eduai',
 });
 const prisma = new PrismaClient({ adapter: new PrismaPg(pool) });
 

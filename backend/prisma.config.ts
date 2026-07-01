@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const databaseUrl = process.env.DATABASE_URL || 'postgresql://postgres:password@localhost:5432/zklms';
+const databaseUrl = process.env.DATABASE_URL || 'postgresql://postgres:password@localhost:5432/eduai';
 
 export default defineConfig({
   earlyAccess: true,

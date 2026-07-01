@@ -1,4 +1,4 @@
-# ZK-LMS — Promptet e Plota per Claude Code
+# EduAI — Promptet e Plota per Claude Code
 # Vazhdo ne kete rradhe, nje prompt ne nje kohe
 
 ---
@@ -8,9 +8,9 @@
 ### Prompt 1.1 — Database Seed
 ```
 Create /backend/prisma/seed.ts with realistic test data:
-- 1 Admin: admin@zklms.com / Admin123!
-- 2 Instructors: instructor1@zklms.com, instructor2@zklms.com / Instructor123!
-- 3 Students: student1@zklms.com, student2@zklms.com, student3@zklms.com / Student123!
+- 1 Admin: admin@eduai.com / Admin123!
+- 2 Instructors: instructor1@eduai.com, instructor2@eduai.com / Instructor123!
+- 3 Students: student1@eduai.com, student2@eduai.com, student3@eduai.com / Student123!
 - 2 Categories: "Web Development", "Data Science"
 - 2 Courses (1 per instructor): each with 2 modules, each module with 3 lessons (mix of VIDEO/TEXT/QUIZ types)
 - Enroll student1 and student2 in course 1 with some LessonProgress records
@@ -562,7 +562,7 @@ Create /backend/src/services/pdf.service.ts:
 
 Certificate HTML template design:
 - A4 landscape orientation
-- Professional design with ZK-LMS branding
+- Professional design with EduAI branding
 - Indigo/slate color scheme
 - Large decorative border
 - Student name in large elegant font (center)
@@ -766,8 +766,8 @@ Build a professional landing page at / (public):
 
 Hero section:
 - Large headline: "Learn Without Limits" 
-- Subheadline describing ZK-LMS
-- Two CTAs: "Start Learning" (→ /register) and "Teach on ZK-LMS" (→ /register?role=instructor)
+- Subheadline describing EduAI
+- Two CTAs: "Start Learning" (→ /register) and "Teach on EduAI" (→ /register?role=instructor)
 - Hero image/illustration: abstract learning/education themed SVG
 
 Features section (3 columns):

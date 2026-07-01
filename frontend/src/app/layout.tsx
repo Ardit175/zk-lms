@@ -21,25 +21,25 @@ const spaceGrotesk = Space_Grotesk({
 
 export const metadata: Metadata = {
   title: {
-    default: "ZK-LMS - Platforma Moderne e Mesimit",
-    template: "%s | ZK-LMS",
+    default: "EduAI - Platforma Moderne e Mesimit",
+    template: "%s | EduAI",
   },
   description: "Platforma moderne e menaxhimit te mesimit me inteligjence artificiale, sesione live, dhe certifikata te verifikueshme.",
   keywords: ["LMS", "mesim online", "kurse", "certifikata", "AI", "kuize"],
-  authors: [{ name: "ZK-LMS Team" }],
-  creator: "ZK-LMS",
+  authors: [{ name: "EduAI Team" }],
+  creator: "EduAI",
   publisher: "Universiteti i Tiranes",
   openGraph: {
     type: "website",
     locale: "sq_AL",
-    url: "https://zk-lms.com",
-    siteName: "ZK-LMS",
-    title: "ZK-LMS - Platforma Moderne e Mesimit",
+    url: "https://edu-ai.com",
+    siteName: "EduAI",
+    title: "EduAI - Platforma Moderne e Mesimit",
     description: "Platforma moderne e menaxhimit te mesimit me inteligjence artificiale.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "ZK-LMS - Platforma Moderne e Mesimit",
+    title: "EduAI - Platforma Moderne e Mesimit",
     description: "Platforma moderne e menaxhimit te mesimit me inteligjence artificiale.",
   },
   robots: {

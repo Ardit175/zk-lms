@@ -17,8 +17,8 @@ export function middleware(request: NextRequest) {
   }
 
   // Check for auth token in cookies (set by client)
-  const token = request.cookies.get('zklms-token')?.value;
-  const userCookie = request.cookies.get('zklms-user')?.value;
+  const token = request.cookies.get('eduai-token')?.value;
+  const userCookie = request.cookies.get('eduai-user')?.value;
 
   // If no token and trying to access protected route, redirect to login
   if (!token && (pathname.startsWith('/admin') || pathname.startsWith('/instructor') || pathname.startsWith('/student'))) {

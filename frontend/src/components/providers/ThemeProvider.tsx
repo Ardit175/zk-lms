@@ -18,7 +18,7 @@ interface ThemeContextValue {
   setTheme: (theme: Theme) => void;
 }
 
-const STORAGE_KEY = 'zklms-theme';
+const STORAGE_KEY = 'eduai-theme';
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 

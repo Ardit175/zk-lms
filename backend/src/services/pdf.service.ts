@@ -334,7 +334,7 @@ function generateCertificateHTML(data: CertificateData): string {
         <div class="header">
           <div class="logo">
             <div class="logo-icon">Z</div>
-            <span class="logo-text">ZK-LMS</span>
+            <span class="logo-text">EduAI</span>
           </div>
           <h1 class="title">Certifikate</h1>
           <p class="subtitle">Perfundimi me Sukses</p>

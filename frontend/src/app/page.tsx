@@ -129,7 +129,7 @@ export default function HomePage() {
             <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-chart-5 text-white shadow-sm shadow-primary/30">
               <GraduationCap className="h-5 w-5" />
             </span>
-            <span className="font-display text-xl font-bold text-foreground">ZK-LMS</span>
+            <span className="font-display text-xl font-bold text-foreground">EduAI</span>
           </Link>
           <nav className="flex items-center gap-2 sm:gap-3">
             <Link href="/courses" className="hidden sm:block">
@@ -427,7 +427,7 @@ export default function HomePage() {
                 <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-chart-5 text-white">
                   <GraduationCap className="h-5 w-5" />
                 </span>
-                <span className="font-display text-xl font-bold text-foreground">ZK-LMS</span>
+                <span className="font-display text-xl font-bold text-foreground">EduAI</span>
               </Link>
               <p className="max-w-md text-sm leading-relaxed">
                 Platforma moderne e menaxhimit te mesimit me inteligjence artificiale,
@@ -447,7 +447,7 @@ export default function HomePage() {
               <ul className="space-y-2 text-sm">
                 <li className="flex items-center gap-2">
                   <Mail className="h-4 w-4" />
-                  <span>info@zk-lms.com</span>
+                  <span>info@edu-ai.com</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <GraduationCap className="h-4 w-4" />
@@ -458,7 +458,7 @@ export default function HomePage() {
           </div>
           <div className="mt-12 border-t border-border pt-8 text-center text-sm">
             <p>
-              &copy; 2026 ZK-LMS. Projekt Diplome — Fakulteti i Shkencave te Natyres,
+              &copy; 2026 EduAI. Projekt Diplome — Fakulteti i Shkencave te Natyres,
               Departamenti i Informatikes.
             </p>
           </div>

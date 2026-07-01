@@ -1,14 +1,14 @@
-# ZK-LMS — System Architecture
+# EduAI — System Architecture
 
 This document describes the runtime topology, service responsibilities, persistence layer,
-authentication lifecycle, and AI content pipeline of the ZK-LMS platform.
+authentication lifecycle, and AI content pipeline of the EduAI platform.
 
 ---
 
 ## 1. Monorepo Structure
 
 ```
-zk-lms/
+edu-ai/
 ├── frontend/                 Next.js 14 (App Router) · TypeScript · shadcn/ui · Tailwind
 │   ├── app/                  Route segments grouped by role (/admin, /instructor, /student)
 │   ├── components/           Reusable UI (shadcn primitives + composite components)

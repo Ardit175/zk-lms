@@ -13,7 +13,7 @@ export const api = axios.create({
 
 api.interceptors.request.use((config) => {
   if (typeof window !== 'undefined') {
-    const token = localStorage.getItem('zklms-token');
+    const token = localStorage.getItem('eduai-token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -35,8 +35,8 @@ api.interceptors.response.use(
 
     if (status === 401) {
       if (typeof window !== 'undefined') {
-        localStorage.removeItem('zklms-token');
-        localStorage.removeItem('zklms-user');
+        localStorage.removeItem('eduai-token');
+        localStorage.removeItem('eduai-user');
         const path = window.location.pathname;
         if (!path.includes('/login') && !path.includes('/register')) {
           toast.error('Sesioni juaj skadoi. Ju lutem hyni perseri.');

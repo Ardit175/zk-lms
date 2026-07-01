@@ -1,4 +1,4 @@
-# ZK-LMS — Sistem Menaxhimi Mesimi (Diploma Project)
+# EduAI — Sistem Menaxhimi Mesimi (Diploma Project)
 
 ## Konteksti i Projektit
 
@@ -12,7 +12,7 @@ Relaconi i plote i diplomes ndodhet ne `/docs/relacion_tema2_LMS_FINAL.docx`.
 ## Struktura e Monorepos
 
 ```
-zk-lms/
+edu-ai/
 ├── /frontend          → Next.js 14 (App Router) + TypeScript + shadcn/ui + Tailwind CSS
 ├── /backend           → Node.js + Express + TypeScript + Prisma ORM + PostgreSQL 16
 ├── /ai-service        → Python 3.11 + FastAPI + LangChain + OpenAI SDK
@@ -526,7 +526,7 @@ Express Backend (:4000)
 
 ```bash
 # /backend/.env
-DATABASE_URL="postgresql://postgres:password@localhost:5432/zklms"
+DATABASE_URL="postgresql://postgres:password@localhost:5432/eduai"
 JWT_SECRET="your-super-secret-jwt-key"
 JWT_EXPIRES_IN="7d"
 REDIS_URL="redis://localhost:6379"

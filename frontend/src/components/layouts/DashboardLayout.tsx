@@ -15,7 +15,7 @@ interface DashboardLayoutProps {
   role: Role;
 }
 
-const COLLAPSE_KEY = 'zklms-sidebar-collapsed';
+const COLLAPSE_KEY = 'eduai-sidebar-collapsed';
 
 export function DashboardLayout({ children, role }: DashboardLayoutProps) {
   const [collapsed, setCollapsed] = useState(false);

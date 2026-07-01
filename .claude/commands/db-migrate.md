@@ -42,8 +42,8 @@ npx prisma db seed
 
 ## Seed File Standard (`/backend/prisma/seed.ts`)
 Seed-i duhet te krijoje GJITHMONE:
-- 1 Admin user: `admin@zklms.com` / `Admin123!`
-- 2 Instructor users: `instructor1@zklms.com`, `instructor2@zklms.com`
-- 3 Student users: `student1@zklms.com`, `student2@zklms.com`, `student3@zklms.com`
+- 1 Admin user: `admin@eduai.com` / `Admin123!`
+- 2 Instructor users: `instructor1@eduai.com`, `instructor2@eduai.com`
+- 3 Student users: `student1@eduai.com`, `student2@eduai.com`, `student3@eduai.com`
 - 2-3 kurse demo me module dhe lessons
 - Disa enrollments dhe progress records per te testuar dashboard-et

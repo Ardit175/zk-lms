@@ -13,7 +13,7 @@ import { redirect } from 'next/navigation';
 // Importo komponente shadcn/ui te nevojshme
 
 export const metadata: Metadata = {
-  title: '[Page Title] | ZK-LMS',
+  title: '[Page Title] | EduAI',
 };
 
 export default async function [PageName]Page() {

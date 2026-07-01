@@ -53,7 +53,7 @@ export default function VerifyCertificatePage() {
           <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center text-white font-bold text-xl">
             Z
           </div>
-          <span className="text-2xl font-semibold text-foreground">ZK-LMS</span>
+          <span className="text-2xl font-semibold text-foreground">EduAI</span>
         </div>
 
         {isLoading ? (
@@ -139,7 +139,7 @@ export default function VerifyCertificatePage() {
               </div>
 
               <p className="text-center text-sm text-muted-foreground mt-6">
-                Ky verifikim u krye nga platforma ZK-LMS
+                Ky verifikim u krye nga platforma EduAI
               </p>
             </CardContent>
           </Card>

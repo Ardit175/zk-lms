@@ -17,7 +17,7 @@ async def test_health_check():
     assert response.status_code == 200
     data = response.json()
     assert data["status"] == "ok"
-    assert data["service"] == "zk-lms-ai-service"
+    assert data["service"] == "edu-ai-ai-service"
 
 
 @pytest.mark.anyio

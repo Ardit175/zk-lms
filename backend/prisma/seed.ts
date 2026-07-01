@@ -6,7 +6,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const connectionString = process.env.DATABASE_URL || 'postgresql://postgres:password@localhost:5432/zklms';
+const connectionString = process.env.DATABASE_URL || 'postgresql://postgres:password@localhost:5432/eduai';
 const pool = new Pool({ connectionString });
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
@@ -53,7 +53,7 @@ async function main() {
   // ─── ADMIN ─────────────────────────────────────────────────────────────────
   const admin = await prisma.user.create({
     data: {
-      email: 'admin@zklms.com',
+      email: 'admin@eduai.com',
       passwordHash: defaultPassword,
       firstName: 'Admin',
       lastName: 'User',
@@ -67,7 +67,7 @@ async function main() {
   // ─── INSTRUCTORS ───────────────────────────────────────────────────────────
   const instructor1 = await prisma.user.create({
     data: {
-      email: 'john.doe@zklms.com',
+      email: 'john.doe@eduai.com',
       passwordHash: defaultPassword,
       firstName: 'John',
       lastName: 'Doe',
@@ -92,7 +92,7 @@ async function main() {
 
   const instructor2 = await prisma.user.create({
     data: {
-      email: 'jane.smith@zklms.com',
+      email: 'jane.smith@eduai.com',
       passwordHash: defaultPassword,
       firstName: 'Jane',
       lastName: 'Smith',
@@ -857,9 +857,9 @@ plt.pie(sizes, labels=labels)
   console.log('\n✅ Database seeded successfully!\n');
   console.log('Demo credentials (password: password123):');
   console.log('─────────────────────────────────────────');
-  console.log('Admin:      admin@zklms.com');
-  console.log('Instructor: john.doe@zklms.com');
-  console.log('Instructor: jane.smith@zklms.com');
+  console.log('Admin:      admin@eduai.com');
+  console.log('Instructor: john.doe@eduai.com');
+  console.log('Instructor: jane.smith@eduai.com');
   console.log('Student:    alice@student.com');
   console.log('Student:    bob@student.com');
   console.log('Student:    charlie@student.com');

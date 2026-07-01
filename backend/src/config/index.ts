@@ -18,7 +18,7 @@ export const config = {
   port: parseInt(process.env.PORT || '4000', 10),
   nodeEnv,
 
-  databaseUrl: required('DATABASE_URL', 'postgresql://postgres:password@localhost:5432/zklms'),
+  databaseUrl: required('DATABASE_URL', 'postgresql://postgres:password@localhost:5432/eduai'),
 
   jwtSecret: required('JWT_SECRET', 'dev-secret-change-in-production'),
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '7d',

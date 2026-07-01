@@ -37,8 +37,8 @@ function SidebarBody({
 
   const handleLogout = () => {
     logout();
-    Cookies.remove('zklms-token');
-    Cookies.remove('zklms-user');
+    Cookies.remove('eduai-token');
+    Cookies.remove('eduai-user');
     router.push('/login');
   };
 
@@ -50,7 +50,7 @@ function SidebarBody({
           <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-chart-5 text-white shadow-sm shadow-primary/30">
             <GraduationCap className="h-5 w-5" />
           </span>
-          {!collapsed && <span className="font-display text-lg font-bold text-sidebar-foreground">ZK-LMS</span>}
+          {!collapsed && <span className="font-display text-lg font-bold text-sidebar-foreground">EduAI</span>}
         </Link>
       </div>
 

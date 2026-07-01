@@ -4,11 +4,11 @@ services:
   # ── PostgreSQL 16 ────────────────────────────────────────────────────────────
   postgres:
     image: postgres:16
-    container_name: zklms-postgres
+    container_name: eduai-postgres
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
-      POSTGRES_DB: zklms
+      POSTGRES_DB: eduai
     ports:
       - "5432:5432"
     volumes:
@@ -23,7 +23,7 @@ services:
   # ── Redis 7 ──────────────────────────────────────────────────────────────────
   redis:
     image: redis:7-alpine
-    container_name: zklms-redis
+    container_name: eduai-redis
     ports:
       - "6379:6379"
     volumes:
@@ -35,11 +35,11 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: zklms-backend
+    container_name: eduai-backend
     ports:
       - "4000:4000"
     environment:
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-password}@postgres:5432/zklms
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-password}@postgres:5432/eduai
       REDIS_URL: redis://redis:6379
       AI_SERVICE_URL: http://ai-service:8000
       JWT_SECRET: ${JWT_SECRET:-dev-secret-change-in-production}
@@ -61,7 +61,7 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: zklms-frontend
+    container_name: eduai-frontend
     ports:
       - "3000:3000"
     environment:
@@ -82,7 +82,7 @@ services:
     build:
       context: ./ai-service
       dockerfile: Dockerfile
-    container_name: zklms-ai-service
+    container_name: eduai-ai-service
     ports:
       - "8000:8000"
     environment:

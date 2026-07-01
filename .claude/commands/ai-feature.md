@@ -62,7 +62,7 @@ from routers.[feature] import router as [feature]_router
 app.include_router([feature]_router, prefix="/api")
 ```
 
-## Features te Para-Definuara per ZK-LMS
+## Features te Para-Definuara per EduAI
 
 ### Quiz Generator
 - Input: tekst/permbajtje kursi, numri pyetjeve, tipi (MULTIPLE_CHOICE/TRUE_FALSE/SHORT_ANSWER)

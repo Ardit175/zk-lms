@@ -1,4 +1,4 @@
-# ZK-LMS — REST API Reference
+# EduAI — REST API Reference
 
 **Base URL (Express backend):** `http://localhost:4000/api`
 **Base URL (AI service):** `http://localhost:8000`

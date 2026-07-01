@@ -138,7 +138,7 @@ export default function PublicCoursesPage() {
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-chart-5 text-white shadow-sm shadow-primary/30">
               <GraduationCap className="h-5 w-5" />
             </div>
-            <span className="text-xl font-bold text-foreground">ZK-LMS</span>
+            <span className="text-xl font-bold text-foreground">EduAI</span>
           </Link>
           <nav className="flex items-center gap-3">
             {isAuthenticated ? (
@@ -322,7 +322,7 @@ export default function PublicCoursesPage() {
       <footer className="border-t border-border bg-card py-12 text-muted-foreground">
         <div className="container mx-auto px-4 text-center text-sm">
           <p>
-            &copy; 2026 ZK-LMS · Projekt Diplome · Universiteti i Tiranes
+            &copy; 2026 EduAI · Projekt Diplome · Universiteti i Tiranes
           </p>
         </div>
       </footer>
